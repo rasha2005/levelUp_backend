@@ -25,6 +25,6 @@ model User {
 model Otp {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   otp       String
-  email     String
+  email     String   @unique
   createdAt DateTime @default(now())
 }
