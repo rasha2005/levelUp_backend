@@ -45,6 +45,16 @@ class userController {
             next(err);
         }
     }
+
+    async verifyLogin(req:Request ,  res: Response, next: NextFunction) {
+        try{
+            const {email , password} = req.body;
+            const response = await this.useCase.verifyLogin(email , password);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
 }
 
 export default userController;

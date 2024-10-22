@@ -24,6 +24,8 @@ router.post('/signup' , (req , res , next) => {controller.createUser(req , res ,
 
 router.post('/verifyOtp' , (req , res , next) => {controller.verifyUserOtp(req , res , next)});
 
+router.post('/login' , (req , res , next) => {controller.verifyLogin(req ,res , next)})
+
 
 export default router;
 

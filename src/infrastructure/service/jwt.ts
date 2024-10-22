@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import Ijwt from "../../interface/services/Ijwt";
 import User from "../../entity/User";
+import Instructor from "../../entity/Instructor";
 
 class Jwt implements Ijwt {
 
-    otpToken(user: User): string {
-        const payload = { user };
+    otpToken(info: User | Instructor): string {
+        const payload = { info };
         const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '365d' });
         return token;
     }

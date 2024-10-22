@@ -36,21 +36,37 @@ class userUseCase {
    async saveUser(userOtp:string , token:string) {
     console.log("hereee")
     const decodedToken = this.jwtToken.verifyToken(token);
-    console.log("decodedToken",decodedToken.user.email);
-    const otp = await this.iuserRepository.findOtp(decodedToken.user.email);
+    console.log("decodedToken",decodedToken.info.email);
+    const otp = await this.iuserRepository.findOtp(decodedToken.info.email);
     console.log("ss", userOtp);
     console.log("user otp" , otp?.otp);
-    const password = decodedToken.user.password;
+    const password = decodedToken.info.password;
     const hashedPassword =  await this.hashPassword.hash(password)
     console.log("hashedPassword" , hashedPassword);
     if(userOtp == otp?.otp){
-        const res =  await this.iuserRepository.insertUser(decodedToken.user , hashedPassword);
+        const res =  await this.iuserRepository.insertUser(decodedToken.info , hashedPassword);
         if(res) {
             return {success:true , message:"user saved successfully"};
         }
     }
     return {success : false , message:"Invalid otp"}
    }
+
+   async verifyLogin(email:string , userPassword:string) {
+     const user = await this.iuserRepository.findByEmail(email);
+     if(user) {
+        const password =  await this.hashPassword.compare(userPassword , user.password);
+        if(password) {
+            return {success:true , message:"user matched succesfully"};
+        }else{
+            return {success:false , message:"Invadil password"};
+        }
+     }else{
+        return {sucess:false , message:"Invalid email"}; 
+     }
+   }
+
+
 }
 
 export default userUseCase

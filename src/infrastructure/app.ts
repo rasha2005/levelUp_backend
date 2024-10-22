@@ -4,6 +4,9 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoute from '../infrastructure/route/userRoute'
+import instructorRoute from '../infrastructure/route/instructorRoute'
+import adminRoute from '../infrastructure/route/adminRoute'
+
 
 dotenv.config();
 
@@ -22,6 +25,9 @@ app.use(cors({
 app.use(cookieParser());
 
 app.use('/api/user',userRoute);
+app.use('/api/instructor',instructorRoute);
+app.use('/api/admin',adminRoute);
+
 
 app.listen(PORT , () => {
     console.log(`server is running on http://localhost:${PORT}` )

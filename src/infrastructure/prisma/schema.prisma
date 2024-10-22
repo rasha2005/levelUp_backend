@@ -28,3 +28,18 @@ model Otp {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+model Instructor {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String   
+  email     String   @unique
+  mobile    String  
+  password  String  
+  isApproved Boolean  @default(false)    
+}
+
+model Admin {
+   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+   email     String   @unique
+   password  String  
+}
