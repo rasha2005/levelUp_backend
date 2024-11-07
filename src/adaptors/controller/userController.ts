@@ -55,6 +55,39 @@ class userController {
             next(err);
         }
     }
+
+    async home(req:Request ,  res: Response, next: NextFunction) {
+        try {
+            const response = await this.useCase.getCateogries();
+            return res.status(300).json({response});
+
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async profile(req:Request ,  res: Response, next: NextFunction ){
+        try {
+
+            const token = req.cookies.authToken;
+            const response = await this.useCase.getUserDetails(token);
+            return res.status(200).json({response});
+
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async updateUser(req:Request ,  res: Response, next: NextFunction ) {
+        try{
+            const {id , name , email , mobile} = req.body;
+            const response = await this.useCase.updateUserDetails(id , name , email , mobile);
+            return res.status(200).json({response});
+
+        }catch(err) {
+           next(err);
+        }
+    }
 }
 
 export default userController;

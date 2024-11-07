@@ -11,11 +11,7 @@ class instructorController {
 
             const response = await this.useCase.findInsrtuctor(instructor);
             
-            if(response.success === true) {
-                return res.status(200).json({ success: true ,token:response.token});
-            }else{
-                return res.status(200).json({success:false , message:"user found"})
-            }
+            res.status(200).json({response});
             
         } catch(err) {
             next(err);

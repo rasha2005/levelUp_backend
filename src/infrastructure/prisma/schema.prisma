@@ -43,3 +43,9 @@ model Admin {
    email     String   @unique
    password  String  
 }
+
+model Category {
+   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+   catName   String   @unique
+   
+}   

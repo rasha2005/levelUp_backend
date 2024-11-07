@@ -36,7 +36,7 @@ class instructorRepository implements IinstructorRepository {
         return otp;
     }
 
-    async insertInstructor(insructor: Instructor , hashedPassword:string): Promise<Instructor | null> {
+    async insertInstructor(insructor: Instructor , hashedPassword:string): Promise<any> {
         console.log("keee")
         const {name , email , mobile } = insructor;
         const savedInstructor = await prisma.instructor.create({
