@@ -4,12 +4,14 @@ import adminUseCase from '../../usecase/adminUseCase';
 import hashPassword from '../service/hashPassword';
 import adminRepository from '../repository/adminRepository';
 import Jwt from '../service/jwt';
+import sendEmailOtp from '../service/sendEmailOtp';
 
 const passwordHash = new hashPassword();
 const AdminRepository = new adminRepository();
 const jwt = new Jwt();
+const sendEmail = new sendEmailOtp();
 
-const useCase = new adminUseCase(passwordHash , AdminRepository , jwt)
+const useCase = new adminUseCase(passwordHash , AdminRepository , jwt , sendEmail)
 const controller = new adminController(useCase);
 
 const router = express.Router();
@@ -31,4 +33,12 @@ router.post('/editCategory' , (req,res,next) => {controller.editCategory(req, re
 router.delete('/deleteCategory' ,(req,res,next) => {controller.deleteCategory(req, res, next)} );
 
 router.post('/blockUser' , (req,res,next) => {controller.blockUser(req, res, next)});
+
+router.get('/getInstructorById' , (req ,res, next) => {controller.getInstructorById(req, res, next)});
+
+router.post('/approveInstructor' , (req ,res, next) => {controller.approveInstructor(req, res, next)});
+
+router.post('/cancelApprovel' ,(req ,res, next) => {controller.cancelApproveInstructor(req, res, next)} )
+
+router.get('/getUser' , (req ,res, next) => {controller.getUserById(req, res, next)});
 export default router;

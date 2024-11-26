@@ -1,6 +1,7 @@
 import Admin from "../../entity/Admin";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
+import Slot from "../../entity/Slot";
 import User from "../../entity/User";
 import IadminRepository from "../../interface/repository/IadminRepository";
 import { PrismaClient } from "@prisma/client";
@@ -123,6 +124,78 @@ class adminRepository implements IadminRepository {
 
         return null
         
+    }
+
+    async getInstructorId(id: any): Promise<Instructor | null> {
+        const data = await prisma.instructor.findUnique({
+            where:{
+                id:id
+            }
+        })
+        if(data) {
+            return data
+        }
+        return null
+    }
+
+     async updateInstructorApprovel(id:any): Promise<Instructor | null> {
+        const data = await prisma.instructor.update({
+            where:{
+                id:id
+            },
+            data:{
+                isApproved:true
+            }
+        })
+        if(data) {
+            return data
+        }
+        return null
+    }
+
+    async cancelApprovel(id: any): Promise<Instructor | null> {
+        const data = await prisma.instructor.update({
+            where:{
+                id:id
+            },
+            data:{
+                isApproved:false
+            }
+        })
+        if(data) {
+            return data
+        }
+        return null
+    }
+
+
+    async getUserId(id: any): Promise<User | null> {
+        const data = await prisma.user.findUnique({
+            where:{
+                id:id
+            }
+        })
+        if(data) {
+            return data
+        }
+        return null
+    }
+
+    async findSlotsByDate(date: any): Promise<any> {
+        const dateOnly = date.toISOString().split('T')[0]
+        const data = await prisma.slot.findMany({
+            where: {
+                startTime: {
+                    gte: new Date(dateOnly + "T00:00:00.000Z"), 
+                    lt: new Date(dateOnly + "T23:59:59.999Z"),  
+                },
+            },
+            include:{user:true}
+        })
+       if(data) {
+        return data
+       }
+       return null
     }
 }
 

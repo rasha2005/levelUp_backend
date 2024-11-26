@@ -1,9 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient  , Prisma} from "@prisma/client";
 import User from "../../entity/User";
 import IuserRepository from "../../interface/repository/IuserRepository";
 import Otp from "../../entity/Otp";
 import hashPassword from "../service/hashPassword";
 import Category from "../../entity/Category";
+import Instructor from "../../entity/Instructor";
+import Slot from "../../entity/Slot";
+import { Events } from "../../entity/Session";
 
 const prisma  = new PrismaClient();
 
@@ -27,6 +30,19 @@ class userRepository implements IuserRepository {
       console.log("repo" , userOtp)
       return userOtp;
    }
+
+   async updateOtpByEmail(email: string , otp:string): Promise<Otp | null> {
+    const otpData = await prisma.otp.update({
+        where:{email},
+        data:{
+            otp:otp
+        }
+    })
+    if( otpData ) {
+        return otpData
+    };
+    return null;
+}
     
    async findOtp(email: string): Promise<Otp | null> {
     console.log("fjfjkjfkdl")
@@ -62,14 +78,13 @@ class userRepository implements IuserRepository {
        
    }
 
-   async editUserDetails(id:any ,name: string, email: string, mobile: string): Promise<User | null> {
+   async editUserDetails(id:any ,name: string,  mobile: string): Promise<User | null> {
        const updatedUser = await prisma.user.update({
         where:{
           id:id
         },
         data:{
           name:name,
-          email:email,
           mobile:mobile
         }
        })
@@ -92,6 +107,209 @@ class userRepository implements IuserRepository {
           return (user) ? user : null
              
          }
+
+        async getInstructor(page: number, limit: number , search:any , category:any): Promise<{ instructor: Instructor[] | null; total: number; }> {
+          const skip = (page - 1) * limit;
+          console.log("cat" ,category);
+
+          const whereClause = {
+            AND: [
+              search
+                ? {
+                    OR: [
+                      { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
+                      // { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+                    ],
+                  }
+                : {}, 
+              category
+                ? { category: { equals: category} }
+                : {}, 
+            ],
+          };
+          const instructors = await prisma.instructor.findMany({
+            where: whereClause,
+            skip,
+            take: limit,
+          });
+
+          const total = await prisma.instructor.count({
+            where: whereClause,
+          });
+      
+          return { instructor: instructors, total };
+         }
+
+         async changePassword(email: string, password: string): Promise<User | null> {
+             const user = await prisma.user.update({
+              where:{
+                email:email,
+              },
+              data:{
+                password:password
+              }
+             })
+             if(user) {
+              return user;
+             }
+             return null;
+         }
+
+         async getInstructorId(id: any): Promise<Instructor | null> {
+          const data = await prisma.instructor.findUnique({
+              where:{
+                  id:id
+              },
+              include: {
+                scheduledSession: {
+                  include: {
+                    events: true, 
+                  },
+                },
+              },
+          })
+          console.log("data" , data);
+
+          if(data) {
+            return data
+          }
+          return null
+      }
+
+     async createSlot(details: any): Promise<Slot | null> {
+          const slot = await prisma.slot.create({
+            data:{
+              title:details.title,
+              startTime:details.start,
+              endTime:details.end,
+              userId:details.userId,
+              instructorId:details.instructorId
+            }
+          })
+          if(slot) {
+            return slot
+          }
+          return null
+      }
+
+      async updateEventStatus(id: any): Promise<Events | null> {
+          const updatedData = await prisma.event.update({
+            where:{
+              id:id
+            },
+            data:{
+              status:"booked"
+            }
+          })
+          if(updatedData) {
+            return updatedData;
+          }
+          return null
+      }
+
+      async createInstructorWallet(id: any , amount:number , type:any): Promise<boolean> {
+        const existingWallet = await prisma.wallet.findUnique({
+          where: { instructorId: id },
+      });
+
+      if (existingWallet) {
+          
+          await prisma.wallet.update({
+              where: { instructorId: id },
+              data: {
+                  balance: existingWallet.balance + amount, 
+              },
+          });
+
+          
+          await prisma.transaction.create({
+              data: {
+                  amount: amount,
+                  type: type, // 'credit' or 'debit'
+                  walletId: existingWallet.id,
+              },
+          });
+          return true;
+      } else {
+          // Create a new wallet
+          const newWallet = await prisma.wallet.create({
+              data: {
+                  instructorId: id,
+                  balance: amount, // Initialize with the calculated amount
+              },
+          });
+
+          // Create a transaction for the new wallet
+          await prisma.transaction.create({
+              data: {
+                  amount: amount,
+                  type: type, // 'credit' or 'debit'
+                  walletId: newWallet.id,
+              },
+          });
+          return true;
+      }
+      
+          return false
+      }
+
+      async findSlots(id: string): Promise<User | null> {
+          const userSlot = await prisma.user.findUnique({
+            where:{
+              id:id
+            },
+            include: {slots:true},
+          })
+
+          console.log("sle" , userSlot);
+
+         if(userSlot) {
+          return userSlot
+          }
+         
+
+         return null
+      }
+
+      async updateImg(id: any, img: string): Promise<string | null> {
+        if(img) {
+
+          const data = await prisma.user.update({
+            where:{
+              id:id
+            },
+            data:{
+              img:img
+            }
+          })
+          if(data) {
+            return data.img
+          }
+        }else{
+          const data = await prisma.user.findUnique({
+            where:{
+              id:id
+            }
+          })
+          if(data) {
+            return data.img
+          }
+        }
+          
+        return null
+      }
+
+    async getImgById(id: any): Promise<string | null> {
+        const data = await prisma.user.findUnique({
+          where:{
+            id:id
+          }
+        })
+        if(data) {
+          return data.img
+        }
+        return null
+    }
 }
 
 export default  userRepository

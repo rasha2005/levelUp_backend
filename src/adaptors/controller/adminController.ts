@@ -93,6 +93,48 @@ class adminController {
             next(err);
         }
     }
+
+    async getInstructorById(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const id = req.query.id
+            const response = await this.useCase.getInstructorDetaild(id);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async approveInstructor(req:Request ,res:Response ,next:NextFunction) {
+        try{
+            const id = req.body.id
+            const response = await this.useCase.instructorApprovel(id);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async cancelApproveInstructor(req:Request ,res:Response ,next:NextFunction) {
+        try{
+            const id = req.body.id
+            const response = await this.useCase.instructorApprovelCancel(id);
+            return res.status(200).json({response});
+
+        }catch(err) {
+            next(err);
+        } 
+    }
+
+    async getUserById(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const id = req.query.id
+            const response = await this.useCase.getUserDetaild(id);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
 }
 
 export default adminController;

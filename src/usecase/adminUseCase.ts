@@ -1,12 +1,14 @@
 import IadminRepository from "../interface/repository/IadminRepository";
 import IhashPassword from "../interface/services/IhashPassword";
 import Ijwt from "../interface/services/Ijwt";
+import IsendEmailOtp from "../interface/services/IsendEmailOtp";
 
 class adminUseCase {
     constructor(
         private _hashPassword:IhashPassword,
         private _adminRepository:IadminRepository,
-        private _jwt:Ijwt
+        private _jwt:Ijwt,
+        private _email:IsendEmailOtp
     ){}
 
     async insertAdmin(email:string , password:string) {
@@ -108,6 +110,54 @@ class adminUseCase {
             return {success:false , message:"something went wrong"};
         }
     
+    }
+
+    async getInstructorDetaild(id:any) {
+        const instructor = await this._adminRepository.getInstructorId(id);
+        if(instructor) {
+            return {success:true , message:"instructor found successfully" , instructor};
+        }else{
+            return {success:false , message:"instructor not found"};
+        }
+    }
+
+    async instructorApprovel(id:any) {
+        const instructor = await this._adminRepository.updateInstructorApprovel(id);
+        if(instructor) {
+            return {success:true , message:"approved successfully"}
+        }else{
+            return {success:false , message:"something went wrong!"};
+        }
+    }
+    async instructorApprovelCancel(id:any) {
+        const instructor = await this._adminRepository.cancelApprovel(id);
+        if(instructor) {
+            return {success:true , message:"approval cancelled successfully"}
+        }else{
+            return {success:false , message:"something went wrong!"};
+        }
+    }
+
+    async getUserDetaild(id:any) {
+        const instructor = await this._adminRepository.getUserId(id);
+        if(instructor) {
+            return {success:true , message:"instructor found successfully" , instructor};
+        }else{
+            return {success:false , message:"instructor not found"};
+        }
+    }
+
+    async reminder() {
+        const date = new Date();
+        console.log("date" , date);
+        const user = await this._adminRepository.findSlotsByDate(date);
+        console.log("user" , user)
+        if(user){
+            for(let i of user){
+                console.log("i" , i);
+                await this._email.sendReminder(i.user?.email , i.user?.name)
+            }
+        }
     }
 }
 

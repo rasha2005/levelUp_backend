@@ -20,6 +20,7 @@ class instructorUseCase {
         const {email} = instructor
 
         const res = await this._instructorRespository.findByEmail(email);
+        console.log("res" , res);
         if(res) {
             return {status:200 , success:false , message:"user found" };
         }else{
@@ -79,6 +80,198 @@ class instructorUseCase {
         }
     
     }
+
+    async getCataData() {
+        const res = await this._instructorRespository.getCategoryList();
+       
+        if(res) {
+            return {success:true , message:"category fetched successfully" , res}
+        }else{
+            return {success:false , message:"category not found"};
+        }
+    }
+
+    async updateInstructor(token:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string) {
+        const decodedToken = this._jwt.verifyToken(token);
+        if(decodedToken){
+            const res = await this._instructorRespository.updateInstructorDetials(decodedToken.email ,description , experienceCategory ,experienceCertificate , resume);
+            if(res) {
+                return {success:true , message:"updated successfully" , res}
+            }else{
+                return {success:false , message:"something went wrong"};
+            }
+        }
+    }
+
+    async getInstructorDetails(token:string) {
+        const decodedToken = this._jwt.verifyToken(token);
+
+            if(decodedToken){
+                
+                const res = await this._instructorRespository.getInstructorByEmail(decodedToken.email );
+                if(res) {
+                    return {success:true , message:"updated successfully" , res}
+                }else{
+                    return {success:false , message:"something went wrong"};
+                }
+            }
+    }
+
+    async editInstructorDetails(token:string , name:string , mobile:string) {
+        const decodedToken = this._jwt.verifyToken(token);
+
+        if(decodedToken){
+            const res = await this._instructorRespository.editInstructorByEmail(decodedToken.email ,name , mobile);
+            if(res) {
+                return {success:true , message:"updated successfully" , res}
+            }else{
+                return {success:false , message:"something went wrong"};
+            }
+
+    }
+}
+
+    async updateImg(token:string , img:string ) {
+        const decodedToken = this._jwt.verifyToken(token);
+
+
+        if(decodedToken){
+            const res = await this._instructorRespository.updateProfileByEmail(decodedToken.email ,img);
+            if(res) {
+                return {success:true , message:"updated successfully" , res}
+            }else{
+                return {success:false , message:"something went wrong"};
+            }
+
+    }
+}
+
+async resendOtpByEmail(token:string) {
+    const decodedToken = this._jwt.verifyToken(token);
+    console.log("decc" , decodedToken);
+    if(decodedToken) {
+        const otp = this._generateOtp.createOtp();
+        console.log("otpppppp",otp);
+        await this._sendEmailOtp.sendEmail(decodedToken.info.email , otp);
+        const otpData = await this._instructorRespository.findOtpByEmail(decodedToken.info.email);
+        if(otpData) {
+            const updatedOtp = await this._instructorRespository.updateOtpByEmail(decodedToken.info.email , otp);
+            console.log("update" , updatedOtp);
+            return {success:true , message:"otp resend successfully" , updatedOtp};
+        }else{
+            const savedOtp = await this._instructorRespository.saveOtp(decodedToken.info , otp);
+            console.log("sav",savedOtp);
+            return {success:true , message:"otp resend successfully" , savedOtp};
+        }
+       
+    }
+    return {success:false , message:"something went wrong"};
+}
+
+
+  async changeInstructorPassword(token:string , current:string , confirm:string) {
+    const decodedToken = this._jwt.verifyToken(token);
+    if(decodedToken) {
+        const instructor = await this._instructorRespository.findByEmail(decodedToken.email);
+        if(instructor) {
+            const isPasswordMatched = await this._hashPassword.compare(current , instructor.password);
+            if(isPasswordMatched) {
+                const hashedPassword = await this._hashPassword.hash(confirm);
+                const updatedInstructor = await this._instructorRespository.changePassword(decodedToken.email , hashedPassword); 
+                if(updatedInstructor) {
+                    return {success:true , message:'password updated successfully' , updatedInstructor};
+                }else{
+                    return{success:false , message:'something went wrong'}
+                }
+            }else{
+                return {success:false , message:'Incorrect password'}
+            }
+        }else{
+            return {success:false , message:"something went wrong"};
+        }
+    }
+}
+
+    async scheduleSessionById(title:string , start:string , end:string , price: string , token:string) {
+    const decodedToken = this._jwt.verifyToken(token);
+    console.log("decode" , decodedToken);
+    if(decodedToken) {
+        const session = await this._instructorRespository.scheduleSession(decodedToken.id , title , start , end , price);
+        console.log("session" , session);
+        if(session) {
+            return {success:true , message:"session scheduled successfully" , session};
+        }else{
+            return {success:false , message:"something went wrong"};
+        }
+    }else{
+        return {success:true , message:"something went wrong"};
+    }
+    
+}
+
+    async getEventsData(token:string) {
+        const decodedToken = this._jwt.verifyToken(token);
+        if(decodedToken) {
+            const events = await this._instructorRespository.getEventsById(decodedToken.id);
+           if(events) {
+            return {success:true , message:"events retrived successfully" , events};
+           }else{
+            return {success:false , message:"something went wrong"};
+           }
+        }else{
+            return {success:false , message:"something went wrong"};
+        }
+    }
+
+    async deleteEventData(id:any , token:string) {
+        const decodedToken = this._jwt.verifyToken(token);
+        if(decodedToken) {
+            const isDeleted = await this._instructorRespository.deleteEventById(id , decodedToken.id);
+            if(isDeleted) {
+                return {success:true , message:'event deleted successfully'};
+            }else{
+                return {success:false , message:"something went wrong"}
+            }
+        }else{
+            return {success:false , message:"something went wrong"}
+        }
+    }
+    async getSlots(id:any) {
+        const decodedToken = this._jwt.verifyToken(id);
+        const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
+        if(slot) {
+         return {success:true , message:"events retrived successfully" , slot};
+        }else{
+         return {success:false , message:"something went wrong"};
+        }
+    }
+
+    async getWalletDetails(token:any) {
+        const decodedToken = this._jwt.verifyToken(token);
+        console.log("dee" , decodedToken);
+
+        const slot = await this._instructorRespository.findWallet(decodedToken?.id);
+        console.log("wal" , slot)
+        if(slot) {
+            return {success:true , message:"slots found successfully" , slot}
+        }else{
+            return {success:false , message:"not found"}
+        }
+        
+    }
+
+    async getInstructorImg(token:any) {
+        const decodedToken = this._jwt.verifyToken(token);
+        console.log("dee" , decodedToken);
+
+        const image = await this._instructorRespository.getImgById(decodedToken?.id);
+        if(image) {
+            return {success:true , message:"image fetched successfully" , image};
+        }else{
+            return {success:false , message:"something went wrong"}
+        }
+    }
+
 }
 
 export default instructorUseCase;

@@ -13,13 +13,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventStatus {
+  open
+  booked
+}
+
+enum WalletType {
+  credit
+  debit
+}
+
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   
-  email     String   @unique
-  mobile    String  
-  password  String  
-  isBlocked Boolean  @default(false)    
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  img       String?
+  name      String
+  email     String  @unique
+  mobile    String
+  password  String
+  isBlocked Boolean @default(false)
+  slots     Slot[]  @relation("UserSlots")
 }
 
 model Otp {
@@ -30,22 +42,75 @@ model Otp {
 }
 
 model Instructor {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String   
-  email     String   @unique
-  mobile    String  
-  password  String  
-  isApproved Boolean  @default(false)    
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  img              String?
+  name             String
+  email            String            @unique
+  mobile           String
+  password         String
+  isApproved       Boolean           @default(false)
+  description      String?
+  category         String?
+  experience       String?
+  resume           String?
+  scheduledSession ScheduledSession?
+  wallet           Wallet?
+ 
 }
 
 model Admin {
-   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-   email     String   @unique
-   password  String  
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  email    String @unique
+  password String
 }
 
 model Category {
-   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-   catName   String   @unique
-   
-}   
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  catName String @unique
+}
+
+model ScheduledSession {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  instructorId String     @unique // Ensures only one document per instructor
+  instructor   Instructor @relation(fields: [instructorId], references: [id])
+  events       Event[]
+}
+
+model Event {
+  id                 String           @id @default(auto()) @map("_id") @db.ObjectId
+  title              String
+  start              DateTime
+  end                DateTime
+  price              String
+  status             EventStatus      @default(open)
+  scheduledSessionId String           @db.ObjectId // Foreign key to ScheduledSession
+  scheduledSession   ScheduledSession @relation(fields: [scheduledSessionId], references: [id])
+}
+
+model Slot {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  startTime    DateTime
+  endTime      DateTime
+  userId       String   @db.ObjectId // Foreign key to User model
+  instructorId String   @db.ObjectId
+  user         User    @relation("UserSlots", fields: [userId], references: [id]) 
+ 
+}
+
+model Wallet {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  balance      Float         @default(0.0)
+  instructor   Instructor    @relation(fields: [instructorId], references: [id])
+  instructorId String        @unique @db.ObjectId
+  transactions Transaction[] // Relation to the Transaction model
+}
+
+model Transaction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  amount    Float
+  type      WalletType   @default(credit)
+  wallet    Wallet   @relation(fields: [walletId], references: [id])
+  walletId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+}

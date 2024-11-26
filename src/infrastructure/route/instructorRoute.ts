@@ -25,4 +25,30 @@ router.post('/verifyOtp' , (req , res , next) => {controller.verifyInstructorOtp
 
 router.post('/login' , (req , res , next) => {controller.verifyLogin(req , res , next)});
 
+router.get('/getCategory' , (req , res , next) => {controller.getCatList(req , res , next)});
+
+router.post('/updateinstructor' , (req ,res, next) => {controller.updateInstructor(req , res , next)});
+
+router.get('/getInstructor' , (req ,res, next) => {controller.getInstructorById(req , res , next)});
+
+router.post('/editDetails' ,(req ,res, next) => {controller.editInstructorById(req , res , next)});
+
+router.post('/updateImg' , (req ,res, next) => {controller.updateProfileImg(req , res , next)});
+
+router.post('/resendOtp' , (req ,res, next) => {controller.resendInstructorOtp(req , res , next)});
+
+router.post('/changePassword' ,  (req ,res, next) => {controller.changePassword(req , res , next)});
+
+router.post('/updateSession' , (req ,res, next) => {controller.scheduleSession(req , res , next)});
+
+router.get('/getEvents' , (req ,res, next) => {controller.getEvents(req , res , next)});
+
+router.delete('/deleteEventData' , (req ,res, next) => {controller.deleteEvent(req , res , next)});
+
+router.get('/getSlot' ,  (req ,res, next) => {controller.getSlot(req , res , next)});
+
+router.get('/getWallet'  ,(req ,res, next) => {controller.getWallet(req , res , next)});
+
+router.get('/getImg' , (req ,res, next) => {controller.getImg(req , res , next)});
+
 export default router;
