@@ -252,6 +252,30 @@ class userController {
         }
     }
 
+    async verifyRoom(req:Request , res:Response , next:NextFunction) {
+        try {
+            const roomId =  req.query.roomId;
+            const userId = req.query.userId
+            console.log('uu' , roomId , userId);
+            const response = await this.useCase.verifyRoomId(roomId , userId);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async rating(req:Request , res:Response , next:NextFunction) {
+        try{
+            const {rating , id} = req.body;
+            const response = await this.useCase.updateRating(rating , id);
+            return res.status(200).json({response});
+
+
+        }catch(err) {
+            next(err);
+        }
+    }
+
 }
 
 

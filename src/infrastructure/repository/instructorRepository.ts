@@ -278,6 +278,19 @@ class instructorRepository implements IinstructorRepository {
         }
         return null
     }
+
+    async verifyRoomById(roomId: any): Promise<Slot | null> {
+        const data = await prisma.slot.findFirst({
+            where:{
+                roomId:roomId
+            }
+        })
+        if(data) {
+            return data
+        }
+
+        return null
+    }
 }
 
 export default instructorRepository

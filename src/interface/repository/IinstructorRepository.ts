@@ -23,6 +23,7 @@ interface IinstructorRepository {
     getSlotList(id:any): Promise<Slot[] | null>
     findWallet(token:any): Promise<any>
     getImgById(id:any): Promise<string | null>
+    verifyRoomById(roomId:any): Promise<Slot | null>
 }
 
 export default IinstructorRepository;

@@ -24,6 +24,8 @@ interface IuserRepository {
     findSlots(id:string): Promise<User | null>
     updateImg(id:any , img:string): Promise<string | null>
     getImgById(id:any): Promise<string | null>
+    verifyRoomById(roomId:any): Promise<Slot | null>
+    updateSlotById(rating:any , slotid:any): Promise<Slot | null>
 }
 
 export default IuserRepository;

@@ -51,4 +51,6 @@ router.get('/getWallet'  ,(req ,res, next) => {controller.getWallet(req , res , 
 
 router.get('/getImg' , (req ,res, next) => {controller.getImg(req , res , next)});
 
+router.get('/verifyRoom' , (req ,res, next) => {controller.verifyRoom(req , res , next)});
+
 export default router;

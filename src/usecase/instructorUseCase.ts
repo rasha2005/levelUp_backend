@@ -211,13 +211,10 @@ async resendOtpByEmail(token:string) {
 
     async getEventsData(token:string) {
         const decodedToken = this._jwt.verifyToken(token);
+        const instructor = await this._instructorRespository.getInstructorByEmail(decodedToken?.email)
         if(decodedToken) {
             const events = await this._instructorRespository.getEventsById(decodedToken.id);
-           if(events) {
-            return {success:true , message:"events retrived successfully" , events};
-           }else{
-            return {success:false , message:"something went wrong"};
-           }
+            return {success:true , message:"events retrived successfully" , events , instructor };
         }else{
             return {success:false , message:"something went wrong"};
         }
@@ -269,6 +266,15 @@ async resendOtpByEmail(token:string) {
             return {success:true , message:"image fetched successfully" , image};
         }else{
             return {success:false , message:"something went wrong"}
+        }
+    }
+
+    async verifyroomId(roomId:any , instructorId:any) {
+        const slot = await this._instructorRespository.verifyRoomById(roomId);
+        if(slot?.instructorId == instructorId) {
+            return {success:true}
+        }else{
+            return {success:false}
         }
     }
 

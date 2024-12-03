@@ -182,6 +182,7 @@ class userRepository implements IuserRepository {
               title:details.title,
               startTime:details.start,
               endTime:details.end,
+              roomId:details.roomId,
               userId:details.userId,
               instructorId:details.instructorId
             }
@@ -254,6 +255,7 @@ class userRepository implements IuserRepository {
       }
 
       async findSlots(id: string): Promise<User | null> {
+        console.log("kkkktt");
           const userSlot = await prisma.user.findUnique({
             where:{
               id:id
@@ -308,6 +310,51 @@ class userRepository implements IuserRepository {
         if(data) {
           return data.img
         }
+        return null
+    }
+
+    async verifyRoomById(roomId: any): Promise<Slot | null> {
+        const slot = await prisma.slot.findFirst({
+          where:{
+            roomId:roomId
+          }
+        })
+        if(slot) {
+          return slot
+        }
+        return null
+    }
+
+    async updateSlotById(rating: any, slotid: any): Promise<Slot | null> {
+
+     
+        const data = await prisma.slot.update({
+          where:{
+            id:slotid
+          },
+          data:{
+            isRated:true
+          }
+        })
+        console.log("data" , rating);
+
+        if(data) {
+          const instructor = await prisma.instructor.update({
+            where:{
+              id:data.instructorId
+            },
+            data: {
+              rating: {
+                increment:rating
+              }
+            }
+          })
+          console.log("ins" , instructor)
+          return data;
+        }
+
+
+
         return null
     }
 }

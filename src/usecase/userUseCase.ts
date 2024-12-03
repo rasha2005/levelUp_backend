@@ -237,6 +237,29 @@ class userUseCase {
             return {success:false , message:"something went wrong"}
         }
     } 
+
+    async verifyRoomId(roomId:any , userId:any) {
+        const data = await this._iuserRepository.verifyRoomById(roomId);
+        console.log("data" , data);
+        if(data) {
+            if(data.userId == userId) {
+                return {success:true };
+            }else{
+                return {success:false}
+            }
+        }
+        return {success:false}
+    }
+
+    async updateRating(rating:any , slotId:any) {
+        const data = await this._iuserRepository.updateSlotById(rating , slotId);
+        if(data) {
+            return {success:true };
+        }else{
+            return {success:false}
+        }
+        
+    }
    
 }
 

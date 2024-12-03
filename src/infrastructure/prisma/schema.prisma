@@ -49,6 +49,7 @@ model Instructor {
   mobile           String
   password         String
   isApproved       Boolean           @default(false)
+  rating           Int?              @default(0)
   description      String?
   category         String?
   experience       String?
@@ -92,6 +93,8 @@ model Slot {
   title        String
   startTime    DateTime
   endTime      DateTime
+  isRated      Boolean @default(false)
+  roomId       String
   userId       String   @db.ObjectId // Foreign key to User model
   instructorId String   @db.ObjectId
   user         User    @relation("UserSlots", fields: [userId], references: [id]) 

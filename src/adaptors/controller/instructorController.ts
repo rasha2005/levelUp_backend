@@ -150,6 +150,7 @@ class instructorController {
 
    async getEvents(req:Request , res:Response , next:NextFunction) {
     try{
+        
         const token = req.cookies.authToken;
         const response = await this.useCase.getEventsData(token);
         return res.status(200).json({response})
@@ -199,6 +200,18 @@ class instructorController {
         return res.status(200).json({response});
     }catch(err) {
         next(err);
+    }
+   }
+
+   async verifyRoom(req:Request , res:Response , next:NextFunction) {
+    try{
+        const roomId =  req.query.roomId;
+        const userId = req.query.instructorId
+        console.log('uu' , roomId , userId);
+        const response = await this.useCase.verifyroomId(roomId , userId);
+        return res.status(200).json({response});
+    }catch(err) {
+        next(err)
     }
    }
 }
