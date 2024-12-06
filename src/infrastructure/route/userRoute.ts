@@ -40,6 +40,7 @@ router.post('/setImg' , (req , res, next) => {controller.setImg(req ,res , next)
 router.get('/getImg' , (req , res, next) => {controller.getImg(req ,res , next)});
 router.get('/verifyRoom' ,(req , res, next) => {controller.verifyRoom(req ,res , next)});
 router.post('/rating' , (req , res, next) => {controller.rating(req ,res , next)});
+router.post('/googleAuth' , (req , res, next) => {controller.googleAuth(req ,res , next)}) 
 
 
 

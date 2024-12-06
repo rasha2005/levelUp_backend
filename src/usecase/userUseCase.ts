@@ -70,7 +70,7 @@ class userUseCase {
      if(user?.isBlocked) {
         return {success:false , message:"you have been blocked"};
      }
-     if(user) {
+     if(user && user.password) {
         const password =  await this._hashPassword.compare(userPassword , user.password);
         const token = this._jwtToken.authToken(user.id,user.email ,"User")
         if(password) {
@@ -148,8 +148,8 @@ class userUseCase {
         const decodedToken = this._jwtToken.verifyToken(token);
         if(decodedToken) {
             const user = await this._iuserRepository.findByEmail(decodedToken.email);
-            if(user) {
-                const isPasswordMatched = await this._hashPassword.compare(current , user.password)
+            if(user && user.password) {
+                const isPasswordMatched = await this._hashPassword.compare(current , user?.password)
                 if(isPasswordMatched) {
                     const hashedPassword = await this._hashPassword.hash(confirm);
                     const updatedUser = await this._iuserRepository.changePassword(user.email ,hashedPassword);
@@ -261,6 +261,19 @@ class userUseCase {
         
     }
    
+    async googleCallback(email:any , name:any , img:any) {
+        const user = await this._iuserRepository.createUserByGoogle(email , name , img);
+        console.log("user",user);
+        if(user) {
+            const token = await this._jwtToken.authToken(user.id , user.email , "User");
+            if(token) {
+                return {success:true , message:"authentication successfull" , user , authToken:token};
+            }else{
+                return {succes:false , message:"something went wrong"};
+            }
+        }
+        return {success:false , message:"something went wrong"};
+    }
 }
 
 export default userUseCase

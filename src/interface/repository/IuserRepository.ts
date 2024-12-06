@@ -26,6 +26,7 @@ interface IuserRepository {
     getImgById(id:any): Promise<string | null>
     verifyRoomById(roomId:any): Promise<Slot | null>
     updateSlotById(rating:any , slotid:any): Promise<Slot | null>
+    createUserByGoogle(email:any , name:any , img:any ): Promise<User | null>
 }
 
 export default IuserRepository;

@@ -357,6 +357,29 @@ class userRepository implements IuserRepository {
 
         return null
     }
+
+    async createUserByGoogle(email: any, name: any, img: any): Promise<User | null> {
+        const data = await prisma.user.findUnique({
+          where:{
+            email:email
+          }
+        })
+        if(data) {
+          return data
+        }else{
+          const userData = await prisma.user.create({
+            data:{
+              name:name,
+              email:email,
+              img:img,
+              isGoogleAuth:true
+            }
+          })
+
+          return userData;
+        }
+      return null
+    }
 }
 
 export default  userRepository

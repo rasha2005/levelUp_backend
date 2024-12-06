@@ -276,6 +276,16 @@ class userController {
         }
     }
 
+    async googleAuth(req:Request , res:Response , next:NextFunction) {
+        try{
+            const {email , name , img} = req.body;
+            const response = await this.useCase.googleCallback(email , name , img);
+            return res.status(200).json({response});
+        }catch(err) {
+            console.log(err);
+        }
+    }
+
 }
 
 

@@ -3,8 +3,8 @@ interface User {
     img?:string | null,
     name:string,
     email:string,
-    mobile:string,
-    password:string,
+    mobile?:string | null,
+    password?:string | null,
     isBlocked:Boolean
 }
 
