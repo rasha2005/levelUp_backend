@@ -6,6 +6,7 @@ import generateOtp from '../service/generateOtp';
 import sendEmailOtp from '../service/sendEmailOtp';
 import Jwt from '../service/jwt';
 import hashPassword from '../service/hashPassword';
+import instructorAuth from '../middleware/instructorAuth';
 
 const router = express.Router();
 
@@ -25,15 +26,15 @@ router.post('/verifyOtp' , (req , res , next) => {controller.verifyInstructorOtp
 
 router.post('/login' , (req , res , next) => {controller.verifyLogin(req , res , next)});
 
-router.get('/getCategory' , (req , res , next) => {controller.getCatList(req , res , next)});
+router.get('/getCategory' , instructorAuth, (req , res , next) => {controller.getCatList(req , res , next)});
 
-router.post('/updateinstructor' , (req ,res, next) => {controller.updateInstructor(req , res , next)});
+router.post('/updateinstructor' ,  instructorAuth,(req ,res, next) => {controller.updateInstructor(req , res , next)});
 
-router.get('/getInstructor' , (req ,res, next) => {controller.getInstructorById(req , res , next)});
+router.get('/getInstructor' ,  instructorAuth,(req ,res, next) => {controller.getInstructorById(req , res , next)});
 
-router.post('/editDetails' ,(req ,res, next) => {controller.editInstructorById(req , res , next)});
+router.post('/editDetails' , instructorAuth,(req ,res, next) => {controller.editInstructorById(req , res , next)});
 
-router.post('/updateImg' , (req ,res, next) => {controller.updateProfileImg(req , res , next)});
+router.post('/updateImg' ,  instructorAuth,(req ,res, next) => {controller.updateProfileImg(req , res , next)});
 
 router.post('/resendOtp' , (req ,res, next) => {controller.resendInstructorOtp(req , res , next)});
 
@@ -47,7 +48,7 @@ router.delete('/deleteEventData' , (req ,res, next) => {controller.deleteEvent(r
 
 router.get('/getSlot' ,  (req ,res, next) => {controller.getSlot(req , res , next)});
 
-router.get('/getWallet'  ,(req ,res, next) => {controller.getWallet(req , res , next)});
+router.get('/getWallet' ,(req ,res, next) => {controller.getWallet(req , res , next)});
 
 router.get('/getImg' , (req ,res, next) => {controller.getImg(req , res , next)});
 

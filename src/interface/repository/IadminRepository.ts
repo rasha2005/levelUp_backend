@@ -1,3 +1,4 @@
+
 import Admin from "../../entity/Admin";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
@@ -20,6 +21,8 @@ interface IadminRepository {
     cancelApprovel(id:any):Promise<Instructor | null >
     getUserId(id:any):Promise<User | null>
     findSlotsByDate(date:any):Promise<any>
+    findWallet(): Promise<Admin | null>
+    getTransactionDetails(): Promise<any>
 }
 
 export default IadminRepository;

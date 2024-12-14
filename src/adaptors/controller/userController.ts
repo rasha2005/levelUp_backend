@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction, request } from "express";
 import userUseCase from "../../usecase/userUseCase";
 import dotenv from 'dotenv';
 import Stripe from "stripe";
@@ -44,7 +44,7 @@ class userController {
 
             const response = await this.useCase.saveUser(userOtp , token);
             if(response) {
-                console.log("kkkkk");
+                console.log("kkkkk",response);
                 return res.status(200).json(response);
             }
 
@@ -57,6 +57,13 @@ class userController {
         try{
             const {email , password} = req.body;
             const response = await this.useCase.verifyLogin(email , password);
+            console.log("kkkkk",response);
+            res.cookie("refreshToken", response.refreshToken, {
+                httpOnly: true,
+                secure: true, // Use only in HTTPS
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+              });
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -142,9 +149,11 @@ class userController {
         try{
           
             const id = req.query.id;
+            const token = req.query.token
+            console.log("token",token);
           
             console.log("idd" , id);
-            const response = await this.useCase.getInstructorDetail(id);
+            const response = await this.useCase.getInstructorDetail(id,token);
             console.log("response" , response);
             return res.status(200).json({response})
         }catch(err) {
@@ -222,6 +231,7 @@ class userController {
     async getSlots(req:Request , res:Response , next:NextFunction) {
         try{
             const token =  req.query.token;
+            console.log("token",token);
             const response = await this.useCase.getSlotDetails(token);
             return res.status(200).json({response});
         }catch(err){
@@ -280,9 +290,46 @@ class userController {
         try{
             const {email , name , img} = req.body;
             const response = await this.useCase.googleCallback(email , name , img);
+            console.log('res' , response);
+            res.cookie("123", response.authToken, {
+                sameSite:"lax",
+                maxAge:15 * 60 * 1000, // 15 min
+              });
+            
             return res.status(200).json({response});
         }catch(err) {
-            console.log(err);
+            next(err);
+        }
+    }
+
+    async addReview(req:Request , res:Response , next:NextFunction) {
+        try{
+            const {instructorId , value} = req.body;
+            const token = req.cookies.authToken;
+            const response = await this.useCase.addInstructorReview(instructorId , value , token);
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async refreshToken(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const refreshToken = req.cookies.refreshToken;
+            const response = await this.useCase.verifyRefreshToken(refreshToken);
+            console.log("respo" , response);
+            if(response.success) {
+                res.cookie("authToken", response.authToken, {
+                    httpOnly: true,
+                    secure: true, 
+                    sameSite: "strict",
+                    maxAge: 7 * 24 * 60 * 60 * 1000, 
+                  });
+            }
+            return res.status(200).json({response});
+        }catch(err) {
+            next(err);
         }
     }
 

@@ -41,4 +41,8 @@ router.post('/approveInstructor' , (req ,res, next) => {controller.approveInstru
 router.post('/cancelApprovel' ,(req ,res, next) => {controller.cancelApproveInstructor(req, res, next)} )
 
 router.get('/getUser' , (req ,res, next) => {controller.getUserById(req, res, next)});
+
+router .get('/fetchDetails' , (req ,res, next) => {controller.getDetails(req, res, next)});
+
+router.get('/fetchTransaction' ,  (req ,res, next) => {controller.fetchTransaction(req, res, next)})
 export default router;

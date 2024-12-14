@@ -4,7 +4,7 @@ import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
 import User from "../../entity/User";
 import IadminRepository from "../../interface/repository/IadminRepository";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Wallet } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -196,6 +196,37 @@ class adminRepository implements IadminRepository {
         return data
        }
        return null
+    }
+
+    async findWallet(): Promise<Admin | null> {
+        const admin = await prisma.admin.findFirst();
+        return admin
+    }
+
+    async getTransactionDetails(): Promise<any> {
+        const details = await prisma.instructor.findMany({
+            select: {
+                id: true, // Select instructor's id
+                name: true, // Select instructor's name
+                wallet: {
+                  select: {
+                    id: true, // Select wallet id
+                    balance: true, // Select wallet's balance (if applicable)
+                    transactions: {
+                      select: {
+                        id: true, // Select transaction id
+                        amount: true, // Select transaction amount
+                        createdAt: true, // Select the creation date of the transaction
+                      },
+                    },
+                  },
+                },
+              },
+        });
+        console.log("dee" , details)
+       
+
+        return details
     }
 }
 

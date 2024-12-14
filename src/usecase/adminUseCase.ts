@@ -159,6 +159,24 @@ class adminUseCase {
             }
         }
     }
+
+    async fetchDetail() {
+        const wallet = await this._adminRepository.findWallet();
+        if(wallet){
+            return {success:true  , wallet};
+        }else{
+            return {success:false };
+        }
+    }
+
+    async getTransaction() {
+        const transaction = await this._adminRepository.getTransactionDetails();
+        if(transaction){
+            return {success:true  , transaction};
+        }else{
+            return {success:false };
+        }
+    }
 }
 
 export default adminUseCase;

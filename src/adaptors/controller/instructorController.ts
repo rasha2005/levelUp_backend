@@ -11,7 +11,7 @@ class instructorController {
 
             const response = await this.useCase.findInsrtuctor(instructor);
             console.log("ressss" , response)
-            
+           
             return res.status(200).json({response});
             
         } catch(err) {
@@ -27,6 +27,13 @@ class instructorController {
 
             const response = await this.useCase.saveInstructor(instructorOtp , token);
             console.log("qqqqqq");
+            res.cookie("refreshToken", response.refreshToken, {
+                httpOnly: true,
+                secure: true, // Use only in HTTPS
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+              });
+            
             return res.status(200).json({response})
         }catch(err){
             next(err);
@@ -37,6 +44,13 @@ class instructorController {
         try{
             const {email , password} = req.body;
             const response = await this.useCase.verifyLogin(email , password);
+            res.cookie("refreshToken", response.refreshToken, {
+                httpOnly: true,
+                secure: true, // Use only in HTTPS
+                sameSite: "strict",
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+              });
+            
             return res.status(200).json({response});
 
         }catch(err) {

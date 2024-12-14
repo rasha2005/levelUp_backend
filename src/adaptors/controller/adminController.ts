@@ -135,6 +135,24 @@ class adminController {
         }
     }
 
+    async getDetails(req:Request ,res:Response ,next:NextFunction)  {
+        try{
+            const response = await this.useCase.fetchDetail();
+            res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async fetchTransaction(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const response = await this.useCase.getTransaction();
+            res.status(200).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
 }
 
 export default adminController;

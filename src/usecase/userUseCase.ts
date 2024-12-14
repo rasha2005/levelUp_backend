@@ -53,10 +53,12 @@ class userUseCase {
         const res =  await this._iuserRepository.insertUser(decodedToken?.info , hashedPassword);
         console.log("usesdlksmr" , res.user.id);
         const authToken = this._jwtToken.authToken( res.user.id ,res.user.email, "User");
+        const refreshToken = this._jwtToken.refreshToken(res.user.id ,res.user.email, "User")
         console.log("authToken" , authToken);
+        
 
         if(res) {
-            return {success:true , message:"user saved successfully" , authToken:authToken};
+            return {success:true , message:"user saved successfully" , authToken:authToken ,refreshToken };
         }
     }
     return {success : false , message:"Invalid otp"}
@@ -73,8 +75,11 @@ class userUseCase {
      if(user && user.password) {
         const password =  await this._hashPassword.compare(userPassword , user.password);
         const token = this._jwtToken.authToken(user.id,user.email ,"User")
+        const refreshToken = this._jwtToken.refreshToken(user.id,user.email ,"User")
+        
+      
         if(password) {
-            return {success:true , message:"user matched succesfully" ,authToken:token};
+            return {success:true , message:"user matched succesfully" ,authToken:token , refreshToken};
         }else{
             return {success:false , message:"Invadil password"};
         }
@@ -167,11 +172,14 @@ class userUseCase {
         }
     }
 
-    async getInstructorDetail(id:any ) {
-        
+    async getInstructorDetail(id:any , token:any) {
+        const decodedToken = this._jwtToken.verifyToken(token);
         const instructor = await this._iuserRepository.getInstructorId(id);
+
         if(instructor) {
-            return {success:true , message:"instructor found successfully" , instructor } ;
+            const review = await this._iuserRepository.getReviewById(id)
+            const isReview = await this._iuserRepository.reviewExist(id , decodedToken?.id)
+            return {success:true , message:"instructor found successfully" , instructor  , review , isReview} ;
         }else{
             return {success:false , message:"instructor not found"};
         }
@@ -195,9 +203,11 @@ class userUseCase {
         const slot = await this._iuserRepository.createSlot(session.metadata);
         const updatedStatus = await this._iuserRepository.updateEventStatus(id);
         const priceNumber = parseFloat(price);
+        let percent = price * 0.15
         let amount =  priceNumber - (price * 0.15)
         let type = "credit"
-        const wallet = await this._iuserRepository.createInstructorWallet(instructorId , amount , type );
+        const wallet = await this._iuserRepository.createInstructorWallet(instructorId , amount , type ,percent);
+        
     }
 
     async getSlotDetails(token:any) {
@@ -273,6 +283,35 @@ class userUseCase {
             }
         }
         return {success:false , message:"something went wrong"};
+    }
+
+    async addInstructorReview(instructorId:any , value:string , token:string){
+        const decodedToken = this._jwtToken.verifyToken(token);
+        if(decodedToken) {
+            const res = await this._iuserRepository.addReview(instructorId , value , decodedToken.id);
+            if(res) {
+                return {success:true , message:"review added successfully"};
+            }else{
+                return {success:false , message:"something went wrong"}
+            }
+        }
+    }
+
+    async verifyRefreshToken(refreshToken:string){
+        const verifiedToken = this._jwtToken.verifyToken(refreshToken);
+        console.log("verifyRefreshToken" ,verifiedToken);
+            if(verifiedToken) {
+                const authToken = this._jwtToken.authToken(verifiedToken.id , verifiedToken.email , verifiedToken.role);
+                if(authToken) {
+                    return {success:true , authToken};
+                }else{
+                    return {success:false}
+                }
+            }else{
+                return {success:false}
+            }
+
+        
     }
 }
 

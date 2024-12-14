@@ -7,6 +7,7 @@ import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
 import { Events } from "../../entity/Session";
+import Review from "../../entity/Review";
 
 const prisma  = new PrismaClient();
 
@@ -176,6 +177,37 @@ class userRepository implements IuserRepository {
           return null
       }
 
+      async getReviewById(id: any): Promise<Review[] | null> {
+          const review  = await prisma.review.findMany({
+            where:{
+              instructorId:id
+            },
+            orderBy:{
+              createdAt:'desc'
+            },
+            take:4,
+            include:({user:true})
+          })
+          console.log("review" , review)
+          if(review) {
+            return review
+          }
+          return null
+      }
+
+      async reviewExist(instructorId: any, userId: any): Promise<boolean> {
+          const data = await prisma.review.findFirst({
+            where:{
+              instructorId:instructorId,
+              userId:userId
+            }
+          })
+          if(data) {
+            return true
+          }
+          return false
+      }
+
      async createSlot(details: any): Promise<Slot | null> {
           const slot = await prisma.slot.create({
             data:{
@@ -208,7 +240,22 @@ class userRepository implements IuserRepository {
           return null
       }
 
-      async createInstructorWallet(id: any , amount:number , type:any): Promise<boolean> {
+      async createInstructorWallet(id: any , amount:number , type:any , percent:any): Promise<boolean> {
+        
+        const admin = await prisma.admin.findFirst();
+        console.log("precent" , percent)
+        console.log("adminn" , admin)
+         await prisma.admin.update({
+          where:{
+            id:admin?.id
+          },
+          data:{
+           walletBalance: admin?.walletBalance + percent
+          }
+        })
+
+
+
         const existingWallet = await prisma.wallet.findUnique({
           where: { instructorId: id },
       });
@@ -260,7 +307,13 @@ class userRepository implements IuserRepository {
             where:{
               id:id
             },
-            include: {slots:true},
+            include: {
+              slots: {
+                  orderBy: {
+                      createdAt: 'desc',
+                  },
+              },
+          },
           })
 
           console.log("sle" , userSlot);
@@ -380,6 +433,24 @@ class userRepository implements IuserRepository {
         }
       return null
     }
+
+    async addReview(instructorId: any, value: string, userId: string): Promise<boolean> {
+      console.log("ins" , instructorId)
+      const data = await prisma.review.create({
+        data:{
+          value:value,
+          instructorId:instructorId,
+          userId:userId,
+            
+          }
+        })
+        console.log("jj" , data);
+        if(data) {
+          return true
+        }
+        return false
+      }
+
 }
 
 export default  userRepository
