@@ -31,6 +31,7 @@ app.use(
     origin: process.env.BASE_URL, 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
