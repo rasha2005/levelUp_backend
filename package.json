@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node ./src/infrastructure/app.ts",
+    "product": "node ./dist/infrastructure/app.js",
+    "build":"npx tsc",
     "dev": "nodemon",
     "prisma": "prisma generate"
   },
