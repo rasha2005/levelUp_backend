@@ -8,7 +8,7 @@ class chatUseCase {
     ){}
 
     async accessChatRoom(id:any , token:string) {
-        console.log("ooo" , id , token);
+        
         const decode = await this._ichatJwt.verifyToken(token)
         if(decode) {
             const tokenId = decode.id;
@@ -22,11 +22,11 @@ class chatUseCase {
 
     }
     async fetchChatRooms(token:string) {
-        console.log("lllllllll")
+        
         const decode = await this._ichatJwt.verifyToken(token);
         if(decode) {
             const chats = await this._ichatRepository.findChatsById(decode.id , decode.role);
-            console.log("chats" , chats);
+            
             if(chats) {
                 return {success:true , message:"chat retrived successfully" , chats ,user:decode.id};
             }else{

@@ -101,9 +101,9 @@ class userUseCase {
    }
 
    async getUserDetails(token:string) {
-    console.log("t" , token);
+    
     const decodedToken = this._jwtToken.verifyToken(token);
-    console.log("dec" , decodedToken);
+    
     const user = await this._iuserRepository.findById(decodedToken?.id);
     if(user){
         return {success:true , message:"user matched succesfully" ,user};
@@ -128,19 +128,19 @@ class userUseCase {
 
    async resendOtpByEmail(token:string) {
     const decodedToken = this._jwtToken.verifyToken(token);
-    console.log("decc" , decodedToken);
+   
     if(decodedToken) {
         const otp = this._generateOtp.createOtp();
-        console.log("otpppppp",otp);
+       
         await this._sendEmailOtp.sendEmail(decodedToken.info.email , otp);
         const otpData = await this._iuserRepository.findOtp(decodedToken.info.email);
         if(otpData) {
             const updatedOtp = await this._iuserRepository.updateOtpByEmail(decodedToken.info.email , otp);
-            console.log("update" , updatedOtp);
+            
             return {success:true , message:"otp resend successfully" , updatedOtp};
         }else{
             const savedOtp = await this._iuserRepository.saveOtp(decodedToken.info , otp);
-            console.log("sav",savedOtp);
+           
             return {success:true , message:"otp resend successfully" , savedOtp};
         }
        
@@ -212,7 +212,7 @@ class userUseCase {
 
     async getSlotDetails(token:any) {
         const decodedToken = this._jwtToken.verifyToken(token);
-        console.log("dee" , decodedToken);
+        
 
         const slot = await this._iuserRepository.findSlots(decodedToken?.id);
         if(slot) {
@@ -225,10 +225,10 @@ class userUseCase {
 
     async updateUserImg(token:string , img:string) {
         const decodedToken = this._jwtToken.verifyToken(token);
-        console.log("dee" , decodedToken);
+       
         
         const image = await this._iuserRepository.updateImg(decodedToken?.id , img);
-        console.log("image" , image)
+        
         if(image) {
             return {success:true , message:"image update successfully" , image};
         }else{
@@ -238,7 +238,7 @@ class userUseCase {
 
     async getUserImg(token:any) {
         const decodedToken = this._jwtToken.verifyToken(token);
-        console.log("dee" , decodedToken);
+        
 
         const image = await this._iuserRepository.getImgById(decodedToken?.id);
         if(image) {
@@ -250,7 +250,7 @@ class userUseCase {
 
     async verifyRoomId(roomId:any , userId:any) {
         const data = await this._iuserRepository.verifyRoomById(roomId);
-        console.log("data" , data);
+        
         if(data) {
             if(data.userId == userId) {
                 return {success:true };
@@ -273,7 +273,7 @@ class userUseCase {
    
     async googleCallback(email:any , name:any , img:any) {
         const user = await this._iuserRepository.createUserByGoogle(email , name , img);
-        console.log("user",user);
+        
         if(user) {
             const token = await this._jwtToken.authToken(user.id , user.email , "User");
             if(token) {
@@ -299,7 +299,7 @@ class userUseCase {
 
     async verifyRefreshToken(refreshToken:string){
         const verifiedToken = this._jwtToken.verifyToken(refreshToken);
-        console.log("verifyRefreshToken" ,verifiedToken);
+        
             if(verifiedToken) {
                 const authToken = this._jwtToken.authToken(verifiedToken.id , verifiedToken.email , verifiedToken.role);
                 if(authToken) {

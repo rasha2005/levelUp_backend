@@ -22,7 +22,7 @@ const userAuth =  async(req: Request, res: Response, next: NextFunction):Promise
     }else{
       verifiedToken = jwtToken.verifyToken(token);
     }
-    console.log("verifiedTokenk",verifiedToken);
+    
     
     if(verifiedToken?.exp){
       if (!verifiedToken || Date.now() >= verifiedToken?.exp * 1000) {
@@ -35,10 +35,10 @@ const userAuth =  async(req: Request, res: Response, next: NextFunction):Promise
 
     
     if(verifiedToken && verifiedToken.email){
-      console.log("lllll");
+     
       const userData = await UserRepository.findByEmail(verifiedToken.email);
       if(userData?.isBlocked){
-        console.log("hehhe");
+       
         res.clearCookie("authToken");
         return res.status(403).send({success: false, message: "user blocked"})
       }

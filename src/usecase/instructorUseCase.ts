@@ -16,21 +16,21 @@ class instructorUseCase {
 
     async findInsrtuctor(instructor:Instructor) {
       
-            console.log("instructor" , instructor);
+            
         const {email} = instructor
 
         const res = await this._instructorRespository.findByEmail(email);
-        console.log("res" , res);
+       
         if(res) {
             return {status:200 , success:false , message:"user found" };
         }else{
             const otp = this._generateOtp.createOtp();
-            console.log("otpppppp",otp);
+            
             await this._sendEmailOtp.sendEmail(email , otp);
             const instructorOtp = await this._instructorRespository.saveOtp(email , otp);
-            console.log("instructorOtp" ,instructorOtp);
+            
             const token = this._jwt.otpToken(instructor);
-            console.log("kkkkkkkkkkt" , token);
+            
             return {status:200 , success:true , instructorOtp , token };
         }
     
@@ -39,21 +39,20 @@ class instructorUseCase {
     async saveInstructor(instructorOtp:string , token:string) {
        
          const decodedToken = this._jwt.verifyToken(token);
-        console.log("jjjjj",decodedToken);
+        
         const otp = await this._instructorRespository.findOtpByEmail(decodedToken?.info.email);
-        console.log("otppp",otp);
+        
         const hashedPassword = await this._hashPassword.hash(decodedToken?.info.password);
-        console.log("hashed" , hashedPassword);
-        console.log("instructorOtp",instructorOtp)
-        console.log("ott" , otp?.otp)
+        
+       
         if(otp?.otp == instructorOtp) {
-            console.log("kkkkk")
+            
             const instructor = await this._instructorRespository.insertInstructor(decodedToken?.info , hashedPassword);
             if(instructor) {
                 const authToken = this._jwt.authToken(instructor.id , instructor.email , "Instructor");
                 const refreshToken = this._jwt.refreshToken(instructor.id , instructor.email , "Instructor");
 
-                console.log("authToken" , authToken);
+               
                 return {success:true , message:"user saved successfully" ,authToken:authToken , refreshToken};
             }
         }
@@ -150,19 +149,19 @@ class instructorUseCase {
 
 async resendOtpByEmail(token:string) {
     const decodedToken = this._jwt.verifyToken(token);
-    console.log("decc" , decodedToken);
+   
     if(decodedToken) {
         const otp = this._generateOtp.createOtp();
-        console.log("otpppppp",otp);
+        
         await this._sendEmailOtp.sendEmail(decodedToken.info.email , otp);
         const otpData = await this._instructorRespository.findOtpByEmail(decodedToken.info.email);
         if(otpData) {
             const updatedOtp = await this._instructorRespository.updateOtpByEmail(decodedToken.info.email , otp);
-            console.log("update" , updatedOtp);
+            
             return {success:true , message:"otp resend successfully" , updatedOtp};
         }else{
             const savedOtp = await this._instructorRespository.saveOtp(decodedToken.info , otp);
-            console.log("sav",savedOtp);
+            
             return {success:true , message:"otp resend successfully" , savedOtp};
         }
        
@@ -196,10 +195,10 @@ async resendOtpByEmail(token:string) {
 
     async scheduleSessionById(title:string , start:string , end:string , price: string , token:string) {
     const decodedToken = this._jwt.verifyToken(token);
-    console.log("decode" , decodedToken);
+    
     if(decodedToken) {
         const session = await this._instructorRespository.scheduleSession(decodedToken.id , title , start , end , price);
-        console.log("session" , session);
+        
         if(session) {
             return {success:true , message:"session scheduled successfully" , session};
         }else{
@@ -238,7 +237,7 @@ async resendOtpByEmail(token:string) {
     async getSlots(id:any) {
         const decodedToken = this._jwt.verifyToken(id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
-        console.log("slot",slot);
+        
         if(slot) {
          return {success:true , message:"events retrived successfully" , slot};
         }else{
@@ -248,11 +247,11 @@ async resendOtpByEmail(token:string) {
 
     async getWalletDetails(token:any) {
         const decodedToken = this._jwt.verifyToken(token);
-        console.log("deett" , decodedToken);
+        
 
         const Wallet = await this._instructorRespository.findWallet(decodedToken?.id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
-        console.log("wal" , slot)
+        
         if(slot) {
             return {success:true , message:"slots found successfully" , slot , Wallet}
         }else{
@@ -263,7 +262,7 @@ async resendOtpByEmail(token:string) {
 
     async getInstructorImg(token:any) {
         const decodedToken = this._jwt.verifyToken(token);
-        console.log("deett" , decodedToken);
+        
 
         const image = await this._instructorRespository.getImgById(decodedToken?.id);
         if(image) {

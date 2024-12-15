@@ -80,7 +80,7 @@ class adminUseCase {
     async editCatData(name:string , id:any) {
     
         const category = await this._adminRepository.editCatData(name , id);
-        console.log("cccc" , category);
+       
         if(category) {
             return {success:true , category};
         }else{
@@ -92,7 +92,7 @@ class adminUseCase {
     async deleteCatData(id:any) {
       
         const category = await this._adminRepository.deleteCatData( id);
-        console.log("cccc" , category);
+        
         if(category) {
             return {success:true,message:"category deleted successfully"};
         }else{
@@ -149,12 +149,12 @@ class adminUseCase {
 
     async reminder() {
         const date = new Date();
-        console.log("date" , date);
+        
         const user = await this._adminRepository.findSlotsByDate(date);
-        console.log("user" , user)
+        
         if(user){
             for(let i of user){
-                console.log("i" , i);
+                
                 await this._email.sendReminder(i.user?.email , i.user?.name)
             }
         }

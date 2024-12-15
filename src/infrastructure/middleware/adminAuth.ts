@@ -16,7 +16,7 @@ const adminAuth =  async(req: Request, res: Response, next: NextFunction):Promis
     try {
       
       const verifiedToken = jwtToken.verifyToken(admintoken);
-      console.log("verifiedToken",verifiedToken);
+      
       if(verifiedToken && verifiedToken.role !== "Admin"){
           return res.status(401).send({success: false, message: "Unauthorized - Invalid Token"})
       }
