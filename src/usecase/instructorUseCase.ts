@@ -251,6 +251,7 @@ async resendOtpByEmail(token:string) {
 
         const Wallet = await this._instructorRespository.findWallet(decodedToken?.id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
+        console.log("this is the slot");
         
         if(slot) {
             return {success:true , message:"slots found successfully" , slot , Wallet}
