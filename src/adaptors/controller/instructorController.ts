@@ -166,6 +166,7 @@ class instructorController {
     try{
         
         const token = req.cookies.authToken;
+        console.log("EventsToken" ,req.cookies.authToken);
         const response = await this.useCase.getEventsData(token);
         return res.status(200).json({response})
 
