@@ -17,6 +17,7 @@ if(!instructorToken) {
           return res.status(401).json({ success: false, message: "Token expired" });
         }
       }
+      next()
   }catch(err) {
     console.log(err); 
     return res.status(401).send({ success: false, message: "Unauthorized - Invalid token" })

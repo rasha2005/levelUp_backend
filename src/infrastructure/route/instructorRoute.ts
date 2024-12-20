@@ -26,7 +26,7 @@ router.post('/verifyOtp' , (req , res , next) => {controller.verifyInstructorOtp
 
 router.post('/login' , (req , res , next) => {controller.verifyLogin(req , res , next)});
 
-router.get('/getCategory' , instructorAuth, (req , res , next) => {controller.getCatList(req , res , next)});
+router.get('/getCategory' , (req , res , next) => {controller.getCatList(req , res , next)});
 
 router.post('/updateinstructor' ,  instructorAuth,(req ,res, next) => {controller.updateInstructor(req , res , next)});
 
