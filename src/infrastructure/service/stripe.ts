@@ -26,7 +26,7 @@ class stripe implements Istripe {
                         quantity:1
                     },
                 ],
-                success_url: 'http://localhost:3000/user/paymentSuccess',
+                success_url: `${process.env.FRONT_URL}/user/paymentSuccess`,
                 cancel_url: `${process.env.FRONT_URL}/user/paymentCancel`,
                 metadata:{
                     title , start , end , price , instructorId , id , roomId ,userId
