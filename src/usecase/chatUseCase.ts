@@ -8,7 +8,7 @@ class chatUseCase {
     ){}
 
     async accessChatRoom(id:any , token:string) {
-        
+        try{
         const decode = await this._ichatJwt.verifyToken(token)
         if(decode) {
             const tokenId = decode.id;
@@ -19,10 +19,13 @@ class chatUseCase {
                 return {success:false , message:"chat not found"}
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
 
     }
     async fetchChatRooms(token:string) {
-        
+        try{
         const decode = await this._ichatJwt.verifyToken(token);
         if(decode) {
             const chats = await this._ichatRepository.findChatsById(decode.id , decode.role);
@@ -33,9 +36,13 @@ class chatUseCase {
                 return {success:false , message:"chat not found"}
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async createNewMessage(content:string , chatId:any , token:string) {
+        try{
         const decode = await this._ichatJwt.verifyToken(token);
         if(decode) {
             const res = await this._ichatRepository.createMessageById(content , chatId , decode.id);
@@ -45,10 +52,14 @@ class chatUseCase {
                 return {success:false , message:"something went wrong"}
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
 
     async fetchMsgs(chatId:any) {
+        try{
         const data = await this._ichatRepository.findMsgById(chatId);
         if(data) {
             const chat = await this._ichatRepository.findChat(chatId);
@@ -56,6 +67,9 @@ class chatUseCase {
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }catch(err:any){
+        throw(err);
+    }
     }
 }
 

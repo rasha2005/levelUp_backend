@@ -16,7 +16,7 @@ class instructorUseCase {
 
     async findInsrtuctor(instructor:Instructor) {
       
-            
+            try {
         const {email} = instructor
 
         const res = await this._instructorRespository.findByEmail(email);
@@ -33,10 +33,14 @@ class instructorUseCase {
             
             return {status:200 , success:true , instructorOtp , token };
         }
+    }catch(err:any) {
+        throw(err)
+    }
     
     }
 
     async saveInstructor(instructorOtp:string , token:string) {
+        try{
        
          const decodedToken = this._jwt.verifyToken(token);
         
@@ -57,12 +61,14 @@ class instructorUseCase {
             }
         }
         return {success:false , message:"Invalid Otp"};
-   
+    }catch(err:any) {
+        throw(err)
+    }
 
     }
 
     async verifyLogin(email:string , instructorpassword:string) {
-      
+      try{
          const instructor = await this._instructorRespository.findByEmail(email);
         if(instructor) {
             const password = await this._hashPassword.compare(instructorpassword , instructor.password);
@@ -79,10 +85,13 @@ class instructorUseCase {
         }else{
             return {success:false , message:"Invalid Email"};
         }
-    
+      }catch(err:any) {
+        throw(err)
+      }
     }
 
     async getCataData() {
+        try{
         const res = await this._instructorRespository.getCategoryList();
        
         if(res) {
@@ -90,9 +99,13 @@ class instructorUseCase {
         }else{
             return {success:false , message:"category not found"};
         }
+    }catch(err:any) {
+        throw(err)
+    }
     }
 
     async updateInstructor(token:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
         if(decodedToken){
             const res = await this._instructorRespository.updateInstructorDetials(decodedToken.email ,description , experienceCategory ,experienceCertificate , resume);
@@ -102,9 +115,13 @@ class instructorUseCase {
                 return {success:false , message:"something went wrong"};
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async getInstructorDetails(token:string) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
 
             if(decodedToken){
@@ -116,9 +133,13 @@ class instructorUseCase {
                     return {success:false , message:"something went wrong"};
                 }
             }
+        }catch(err:any){
+            throw(err)
+        }
     }
 
     async editInstructorDetails(token:string , name:string , mobile:string) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
 
         if(decodedToken){
@@ -130,9 +151,13 @@ class instructorUseCase {
             }
 
     }
+}catch(err:any){
+        throw(err)
+    }
 }
 
     async updateImg(token:string , img:string ) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
 
 
@@ -145,9 +170,13 @@ class instructorUseCase {
             }
 
     }
+        }catch(err:any){
+            throw(err);
+        }
 }
 
 async resendOtpByEmail(token:string) {
+    try{
     const decodedToken = this._jwt.verifyToken(token);
    
     if(decodedToken) {
@@ -167,10 +196,14 @@ async resendOtpByEmail(token:string) {
        
     }
     return {success:false , message:"something went wrong"};
+        }catch(err:any){
+            throw(err)
+        }
 }
 
 
   async changeInstructorPassword(token:string , current:string , confirm:string) {
+    try{
     const decodedToken = this._jwt.verifyToken(token);
     if(decodedToken) {
         const instructor = await this._instructorRespository.findByEmail(decodedToken.email);
@@ -191,9 +224,13 @@ async resendOtpByEmail(token:string) {
             return {success:false , message:"something went wrong"};
         }
     }
+    }catch(err:any){
+        throw(err)
+    }
 }
 
     async scheduleSessionById(title:string , start:string , end:string , price: string , token:string) {
+        try{
     const decodedToken = this._jwt.verifyToken(token);
     
     if(decodedToken) {
@@ -207,10 +244,14 @@ async resendOtpByEmail(token:string) {
     }else{
         return {success:true , message:"something went wrong"};
     }
+    }catch(err:any){
+        throw(err)
+    }
     
 }
 
     async getEventsData(token:string) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
         const instructor = await this._instructorRespository.getInstructorByEmail(decodedToken?.email)
         if(decodedToken) {
@@ -219,9 +260,13 @@ async resendOtpByEmail(token:string) {
         }else{
             return {success:false , message:"something went wrong"};
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async deleteEventData(id:any , token:string) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
         if(decodedToken) {
             const isDeleted = await this._instructorRespository.deleteEventById(id , decodedToken.id);
@@ -233,8 +278,12 @@ async resendOtpByEmail(token:string) {
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
     async getSlots(id:any) {
+        try{
         const decodedToken = this._jwt.verifyToken(id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
         
@@ -243,9 +292,13 @@ async resendOtpByEmail(token:string) {
         }else{
          return {success:false , message:"something went wrong"};
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async getWalletDetails(token:any) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
         
 
@@ -258,10 +311,14 @@ async resendOtpByEmail(token:string) {
         }else{
             return {success:false , message:"not found"}
         }
+    }catch(err:any){
+        throw(err)
+    }
         
     }
 
     async getInstructorImg(token:any) {
+        try{
         const decodedToken = this._jwt.verifyToken(token);
         
 
@@ -271,15 +328,22 @@ async resendOtpByEmail(token:string) {
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async verifyroomId(roomId:any , instructorId:any) {
+        try{
         const slot = await this._instructorRespository.verifyRoomById(roomId);
         if(slot?.instructorId == instructorId) {
             return {success:true}
         }else{
             return {success:false}
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
 }

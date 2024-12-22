@@ -17,7 +17,7 @@ class userUseCase {
     ){}
 
    async findUser(user:User) {
-       
+    try{
         console.log("email",user);
        const res = await this._iuserRepository.findByEmail(user.email);
 
@@ -34,10 +34,15 @@ class userUseCase {
          console.log("token" , token);
          return {status:200 , success:true , userOtp , token };
         }
+    }catch(err:any) {
+        throw(err)
+    }
    
    }
 
    async saveUser(userOtp:string , token:string) {
+    try{
+
     
         console.log("hereee")
     const decodedToken = this._jwtToken.verifyToken(token);
@@ -62,11 +67,16 @@ class userUseCase {
         }
     }
     return {success : false , message:"Invalid otp"}
+}catch(err:any){
+    throw(err);
+}
     
    }
 
+
    async verifyLogin(email:string , userPassword:string) {
-     
+
+    try{
         const user = await this._iuserRepository.findByEmail(email);
      console.log("uerrrrrrrrr" , user);
      if(user?.isBlocked) {
@@ -87,21 +97,28 @@ class userUseCase {
         return {sucess:false , message:"Invalid email"}; 
      }
 
+    }catch(err:any) {
+        throw(err)
+    }
+
    }
 
    async getCateogries() {
-   
+   try{   
         const category = await this._iuserRepository.getCategoryData();
    if(category) {
     return {success:true  ,category};
    }else{
     return {sucess:false , message:"something went wrong"}; 
    }
+}catch(err:any){
+    throw(err)
+}
   
    }
 
    async getUserDetails(token:string) {
-    
+    try{
     const decodedToken = this._jwtToken.verifyToken(token);
     
     const user = await this._iuserRepository.findById(decodedToken?.id);
@@ -110,23 +127,35 @@ class userUseCase {
     }else{
         return {success:false , message:"no user found"};
     }
+    }catch(err:any){
+        throw(err)
+    }
    }
 
    async updateUserDetails(id:any ,name:string , mobile:string) {
+    try{
     const user = await this._iuserRepository.editUserDetails(id , name  , mobile);
     if(user) {
         return {success:true , message:"user updated succesfully" ,user};
     }else{
         return {success:false , message:"no user found"};
     }
+    }catch(err:any){
+        throw(err);
+    }
    }
 
    async getInstructorDetails(page:number , limit:number , search:any , category :any) {
+    try{  
     const {instructor , total} = await this._iuserRepository.getInstructor(page , limit , search , category);
     return {success:true , message:"instructors found" , instructor , total};
+    }catch(err:any){
+        throw(err)
+    }
    }
 
    async resendOtpByEmail(token:string) {
+    try{
     const decodedToken = this._jwtToken.verifyToken(token);
    
     if(decodedToken) {
@@ -147,9 +176,13 @@ class userUseCase {
     }
     console.log("jjj00")
     return {success:false , message:"something went wrong"};
+    }catch(err:any){
+        throw(err)
+    }
 }
 
     async changeUserPassword(token:string , current:string , confirm:string) {
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
         if(decodedToken) {
             const user = await this._iuserRepository.findByEmail(decodedToken.email);
@@ -170,9 +203,14 @@ class userUseCase {
                 return {success:false , message:"something went wrong"};
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
+
     async getInstructorDetail(id:any , token:any) {
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
         const instructor = await this._iuserRepository.getInstructorId(id);
 
@@ -183,9 +221,13 @@ class userUseCase {
         }else{
             return {success:false , message:"instructor not found"};
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async payement(info:any ,token:string) {
+        try{
         console.log("info" , info);
         const decodedToken = this._jwtToken.verifyToken(token);
 
@@ -195,9 +237,13 @@ class userUseCase {
         }else{
             console.log("payement failed")
         }
+        }catch(err:any){
+            throw(err)
+        }
     }
 
     async successPayment(session:any) {
+        try{
         console.log("sessionff" , session.metadata);
         const {instructorId , userId , id , price} = session.metadata;
         const slot = await this._iuserRepository.createSlot(session.metadata);
@@ -207,26 +253,29 @@ class userUseCase {
         let amount =  priceNumber - (price * 0.15)
         let type = "credit"
         const wallet = await this._iuserRepository.createInstructorWallet(instructorId , amount , type ,percent);
+        }catch(err:any){
+            throw(err)
+        }
         
     }
 
     async getSlotDetails(token:any) {
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
-        
-
         const slot = await this._iuserRepository.findSlots(decodedToken?.id);
         if(slot) {
             return {success:true , message:"slots found successfully" , slot}
         }else{
             return {success:false , message:"not found"}
         }
-        
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async updateUserImg(token:string , img:string) {
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
-       
-        
         const image = await this._iuserRepository.updateImg(decodedToken?.id , img);
         
         if(image) {
@@ -234,21 +283,27 @@ class userUseCase {
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async getUserImg(token:any) {
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
-        
-
         const image = await this._iuserRepository.getImgById(decodedToken?.id);
         if(image) {
             return {success:true , message:"image fetched successfully" , image};
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }catch(err:any){
+        throw(err)
+    }
     } 
 
     async verifyRoomId(roomId:any , userId:any) {
+        try{
         const data = await this._iuserRepository.verifyRoomById(roomId);
         
         if(data) {
@@ -259,6 +314,9 @@ class userUseCase {
             }
         }
         return {success:false}
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async updateRating(rating:any , slotId:any) {
@@ -272,6 +330,7 @@ class userUseCase {
     }
    
     async googleCallback(email:any , name:any , img:any) {
+        try{
         const user = await this._iuserRepository.createUserByGoogle(email , name , img);
         
         if(user) {
@@ -283,9 +342,13 @@ class userUseCase {
             }
         }
         return {success:false , message:"something went wrong"};
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async addInstructorReview(instructorId:any , value:string , token:string){
+        try{
         const decodedToken = this._jwtToken.verifyToken(token);
         if(decodedToken) {
             const res = await this._iuserRepository.addReview(instructorId , value , decodedToken.id);
@@ -295,9 +358,13 @@ class userUseCase {
                 return {success:false , message:"something went wrong"}
             }
         }
+    }catch(err:any){
+        throw(err)
+    }
     }
 
     async verifyRefreshToken(refreshToken:string){
+        try{
         const verifiedToken = this._jwtToken.verifyToken(refreshToken);
         
             if(verifiedToken) {
@@ -310,9 +377,12 @@ class userUseCase {
             }else{
                 return {success:false}
             }
-
+        }catch(err:any){
+            throw(err)
+        }
         
     }
+
 }
 
 export default userUseCase
