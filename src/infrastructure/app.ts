@@ -25,6 +25,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 4000
+console.log("process.env.BASE_URL",process.env.BASE_URL)
 
 app.use(
   cors({ 
