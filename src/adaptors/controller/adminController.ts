@@ -32,7 +32,6 @@ class adminController {
 
     async getInstructorData(req:Request ,res:Response ,next:NextFunction) {
         try {
-            console.log("kkkkk");
             const response = await this.useCase.getInstructors();
             return res.status(200).json({response})
         }catch(err) {
@@ -43,7 +42,6 @@ class adminController {
     async createCategory(req:Request ,res:Response ,next:NextFunction) {
         try{
             const {data} = req.body;
-            console.log("data" , req.body);
             const response = await this.useCase.createCat(data);
             return res.status(200).json({response});
         }catch(err) {
@@ -53,7 +51,6 @@ class adminController {
 
     async getCategory(req:Request ,res:Response ,next:NextFunction) {
         try {
-            console.log("jjjjjjj");
             const response = await this.useCase.getCatData();
             return res.status(200).json({response});
 
@@ -64,8 +61,8 @@ class adminController {
 
     async editCategory(req:Request ,res:Response ,next:NextFunction) {
         try{
-            const {catName , id} = req.body;
-            console.log("vvv", catName , id)
+            const catName = req.body.catName;
+            const id = req.body.id as string;
             const response = await this.useCase.editCatData(catName , id);
             return res.status(200).json({response});
 
@@ -76,7 +73,7 @@ class adminController {
 
     async deleteCategory(req:Request ,res:Response ,next:NextFunction) {
         try{
-            const {id} = req.body;
+            const id = req.body.id as string;
             const response = await this.useCase.deleteCatData(id);
             return res.status(200).json({response});
         }catch(err) {
@@ -96,7 +93,7 @@ class adminController {
 
     async getInstructorById(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const id = req.query.id
+            const id = req.query.id as string
             const response = await this.useCase.getInstructorDetaild(id);
             return res.status(200).json({response});
         }catch(err) {
@@ -127,7 +124,7 @@ class adminController {
 
     async getUserById(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const id = req.query.id
+            const id = req.query.id as string
             const response = await this.useCase.getUserDetaild(id);
             return res.status(200).json({response});
         }catch(err) {

@@ -6,7 +6,7 @@ import generateOtp from '../service/generateOtp';
 import sendEmailOtp from '../service/sendEmailOtp';
 import Jwt from '../service/jwt';
 import hashPassword from '../service/hashPassword';
-import instructorAuth from '../middleware/instructorAuth';
+import instructorAuth from '../middleware/auth';
 
 const router = express.Router();
 

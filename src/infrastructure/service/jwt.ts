@@ -14,15 +14,15 @@ class Jwt implements Ijwt {
 
     verifyToken(token: string) : any {
         try {
-            // Verify the token
+           
             const decoded = jwt.verify(token, process.env.SECRET_KEY!) as JwtPayload;
             return decoded;
           } catch (err:any) {
-            // Check if it's an expiration error
+            
             if (err.name === "TokenExpiredError") {
-              // Decode the token to extract the payload for additional checks
+             
               const decoded = jwt.decode(token) as JwtPayload;
-              return decoded; // Return the decoded payload (without verification)
+              return decoded; 
             }
             console.log("JWT verification error:", err);
             return null;
@@ -32,7 +32,7 @@ class Jwt implements Ijwt {
 
     authToken(id:any ,email: string ,role:string): string {
         const payload = {id, email  , role};
-        const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '25m' });
+        const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '1m' });
         return token;
     }
 

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, request } from "express";
+import { Request, Response, NextFunction } from "express";
 import userUseCase from "../../usecase/userUseCase";
 import dotenv from 'dotenv';
 import Stripe from "stripe";
@@ -13,17 +13,14 @@ class userController {
 
     async createUser(req: Request, res: Response, next: NextFunction) {
         try {
-            console.log("its hereee yayayaya")
-            console.log("req.body",req.body.email)
+           
 
             const { email } = req.body;
             const user = req.body
 
             const response = await this.useCase.findUser(user);
 
-            console.log("resdksjakdl" , response);
             if(response.success === true) {
-                console.log("kkkkkk",response.token);
                 return res.status(200).json({ success: true ,token:response.token});
             }else{
                 return res.status(200).json({success:false , message:"user found"})
@@ -39,12 +36,8 @@ class userController {
 
             const {userOtp , token} = req.body;
 
-            console.log("user" , userOtp);
-            console.log("tokenn" , token);
-
             const response = await this.useCase.saveUser(userOtp , token);
             if(response) {
-                console.log("kkkkk",response);
                 return res.status(200).json(response);
             }
 
@@ -60,9 +53,9 @@ class userController {
             console.log("kkkkk",response);
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: true, // Use only in HTTPS
+                secure: true,
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+                maxAge: 7 * 24 * 60 * 60 * 1000,
               });
             return res.status(200).json({response});
         }catch(err) {
@@ -83,8 +76,8 @@ class userController {
     async profile(req:Request ,  res: Response, next: NextFunction ){
         try {
 
-            const token = req.cookies.authToken;
-            const response = await this.useCase.getUserDetails(token);
+            const decodedToken = req.app.locals.decodedToken;
+            const response = await this.useCase.getUserDetails(decodedToken);
             return res.status(200).json({response});
 
         }catch(err) {
@@ -121,10 +114,8 @@ class userController {
     async resendInstructorOtp(req:Request , res:Response , next:NextFunction){
         try {
             const {token} = req.body;
-            console.log("toe" , token);
     
             const response = await this.useCase.resendOtpByEmail(token);
-            console.log("respose" , response);
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -133,12 +124,10 @@ class userController {
 
        async changePassword(req:Request , res:Response , next:NextFunction){
         try {
-            const token = req.cookies.authToken;
+            const decodedToken = req.app.locals.decodedToken;
             const {current , confirm} = req.body;
-            console.log("toe" , token);
     
-            const response = await this.useCase.changeUserPassword(token , current , confirm);
-            console.log("respose" , response);
+            const response = await this.useCase.changeUserPassword(decodedToken , current , confirm);
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -149,12 +138,9 @@ class userController {
         try{
           
             const id = req.query.id;
-            const token = req.query.token
-            console.log("token",token);
-          
-            console.log("idd" , id);
+            const token = req.query.token as string
             const response = await this.useCase.getInstructorDetail(id,token);
-            console.log("response" , response);
+            
             return res.status(200).json({response})
         }catch(err) {
             next(err);
@@ -165,9 +151,6 @@ class userController {
         try{
             const {session , instructorId} = req.body;
             const token = req.cookies.authToken;
-            console.log("jjj" , token)
-            console.log("event" , session);
-            console.log("event" , instructorId);
             const {title , price , start , end , id ,scheduledSessionId
             } = session
 
@@ -185,7 +168,7 @@ class userController {
             }
 
             const response = await  this.useCase.payement(info , token)
-            console.log("Payment session URL:", response);
+           
             return res.status(200).json({ success: true, data: response });
 
 
@@ -197,7 +180,7 @@ class userController {
        async stripeWebhook(req:Request , res:Response , next:NextFunction) {
 
         const endpointSecret = process.env.WEBHOOK_SECRET!.toString();
-        console.log("rnd" , endpointSecret);
+        
         const sig = req.headers['stripe-signature'];
         if (!sig) {
             res.status(400).send('Missing Stripe signature header');
@@ -205,18 +188,17 @@ class userController {
         } 
         let event;
         try {
-            // Construct the Stripe event
+            
             event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
-            console.log("Event received:", event);
+            
           } catch (err: any) {
             console.error('Error verifying webhook signature:', err);
-            // res.status(400).send(`Webhook Error: ${err.message}`);
-            // return;
+            
           }
 
         switch (event?.type) {
             case "checkout.session.completed":
-              console.log("Inside checkout.session.completed");
+             
               const session = event.data.object;
               await this.useCase.successPayment(session);
               break;
@@ -225,14 +207,14 @@ class userController {
         console.log(`Unhandled event type: ${event?.type}`);
       
        }
-    //    return res.status(200).json({ received: true });
+   
 }
 
     async getSlots(req:Request , res:Response , next:NextFunction) {
         try{
-            const token =  req.query.token;
-            console.log("token",token);
-            const response = await this.useCase.getSlotDetails(token);
+            const decodedToken = req.app.locals.decodedToken;
+           
+            const response = await this.useCase.getSlotDetails(decodedToken);
             return res.status(200).json({response});
         }catch(err){
             next(err);
@@ -243,7 +225,7 @@ class userController {
         try{
             const token = req.cookies.authToken;
             const {img} = req.body;
-            console.log("img" , img);
+            
             const response = await this.useCase.updateUserImg(token , img);
             return res.status(200).json({response});
         }catch(err) {
@@ -253,9 +235,9 @@ class userController {
 
     async getImg(req:Request , res:Response , next:NextFunction) {
         try {
-            const token =  req.cookies.authToken
-            console.log("tokeeenccccc" , token);
-            const response = await this.useCase.getUserImg(token);
+            
+            const decodedToken = req.app.locals.decodedToken;
+            const response = await this.useCase.getUserImg(decodedToken);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -264,9 +246,9 @@ class userController {
 
     async verifyRoom(req:Request , res:Response , next:NextFunction) {
         try {
-            const roomId =  req.query.roomId;
-            const userId = req.query.userId
-            console.log('uu' , roomId , userId);
+            const roomId =  req.query.roomId as string;
+            const userId = req.query.userId as string
+            
             const response = await this.useCase.verifyRoomId(roomId , userId);
             return res.status(200).json({response});
         }catch(err) {
@@ -276,7 +258,9 @@ class userController {
 
     async rating(req:Request , res:Response , next:NextFunction) {
         try{
-            const {rating , id} = req.body;
+            const rating  = req.body.rating as number
+            const id  = req.body.id as string;
+            
             const response = await this.useCase.updateRating(rating , id);
             return res.status(200).json({response});
 
@@ -288,13 +272,11 @@ class userController {
 
     async googleAuth(req:Request , res:Response , next:NextFunction) {
         try{
-            const {email , name , img} = req.body;
+            const email  = req.body.email as string;
+            const name  = req.body.name as string
+            const img  = req.body.img as string
             const response = await this.useCase.googleCallback(email , name , img);
-            console.log('res' , response);
-            res.cookie("123", response.authToken, {
-                sameSite:"lax",
-                maxAge:15 * 60 * 1000, // 15 min
-              });
+            
             
             return res.status(200).json({response});
         }catch(err) {
@@ -304,9 +286,10 @@ class userController {
 
     async addReview(req:Request , res:Response , next:NextFunction) {
         try{
-            const {instructorId , value} = req.body;
-            const token = req.cookies.authToken;
-            const response = await this.useCase.addInstructorReview(instructorId , value , token);
+            const instructorId  = req.body.instructorId as string;
+            const value  = req.body.value ;
+            const decodedToken = req.app.locals.decodedToken;
+            const response = await this.useCase.addInstructorReview(instructorId , value , decodedToken);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -318,15 +301,6 @@ class userController {
             
             const refreshToken = req.cookies.refreshToken;
             const response = await this.useCase.verifyRefreshToken(refreshToken);
-            console.log("respo" , response);
-            if(response.success) {
-                res.cookie("authToken", response.authToken, {
-                    httpOnly: true,
-                    secure: true, 
-                    sameSite: "strict",
-                    maxAge: 7 * 24 * 60 * 60 * 1000, 
-                  });
-            }
             return res.status(200).json({response});
         }catch(err) {
             next(err);

@@ -6,7 +6,7 @@ class chatController {
 
     async createChatRoom(req:Request , res:Response , next:NextFunction) {
         try{
-            const {id} = req.body;
+            const id = req.body.id as string;
             const token = req.cookies.authToken;
             const response = await this.useCase.accessChatRoom(id , token);
             return res.status(200).json({response});
@@ -27,7 +27,8 @@ class chatController {
 
     async createMessage(req:Request , res:Response , next:NextFunction) {
         try{
-            const {content , chatId} = req.body;
+            const content  = req.body.content;
+            const chatId  = req.body.chatId as string;
             const token = req.cookies.authToken;
             const response = await this.useCase.createNewMessage(content , chatId , token);
             res.status(200).json({response})
@@ -39,7 +40,7 @@ class chatController {
 
     async fetchMessage(req:Request , res:Response , next:NextFunction) {
         try {
-            const chatId = req.query.chatId;
+            const chatId = req.query.chatId as string;
             const response = await this.useCase.fetchMsgs(chatId);
             res.status(200).json({response})
         }catch(err) {

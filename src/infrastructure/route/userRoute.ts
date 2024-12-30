@@ -6,7 +6,7 @@ import generateOtp from '../service/generateOtp';
 import sendEmailOtp from '../service/sendEmailOtp';
 import Jwt from '../service/jwt';
 import hashPassword from '../service/hashPassword';
-import userAuth from '../middleware/userAuth';
+import userAuth from '../middleware/auth';
 import stripe from '../service/stripe';
 
 const router = express.Router();
@@ -31,15 +31,15 @@ router.get('/userDetails' , userAuth,(req , res, next) => {controller.profile(re
 router.post('/updateUser' , userAuth , (req , res, next) => {controller.updateUser(req ,res , next)});
 router.get('/getInstructor' , userAuth , (req , res, next) => {controller.getInstructorData(req ,res , next)});
 router.post('/resendOtp' ,(req , res, next) => {controller.resendInstructorOtp(req ,res , next)});
-router.post('/changePassword' , (req , res, next) => {controller.changePassword(req ,res , next)});
-router.get('/getInstructorData' , (req , res, next) => {controller.getInstructor(req ,res , next)});
+router.post('/changePassword' , userAuth,(req , res, next) => {controller.changePassword(req ,res , next)});
+router.get('/getInstructorData' , userAuth , (req , res, next) => {controller.getInstructor(req ,res , next)});
 router.post('/create-checkout-session', (req , res, next) => {controller.payement(req ,res , next)});
 router.post('/webhook', express.raw({type: ['application/json', 'application/json; charset=utf-8']}), (req, res, next ) => controller.stripeWebhook(req, res, next));
-router.get('/getSlots' ,(req , res, next) => {controller.getSlots(req ,res , next)});
+router.get('/getSlots' , userAuth ,(req , res, next) => {controller.getSlots(req ,res , next)});
 router.post('/setImg' , (req , res, next) => {controller.setImg(req ,res , next)});
-router.get('/getImg' , (req , res, next) => {controller.getImg(req ,res , next)});
+router.get('/getImg' , userAuth ,(req , res, next) => {controller.getImg(req ,res , next)});
 router.get('/verifyRoom' ,(req , res, next) => {controller.verifyRoom(req ,res , next)});
-router.post('/rating' , (req , res, next) => {controller.rating(req ,res , next)});
+router.post('/rating'  , (req , res, next) => {controller.rating(req ,res , next)});
 router.post('/googleAuth' , (req , res, next) => {controller.googleAuth(req ,res , next)});
 router.post('/addReview' , (req , res, next) => {controller.addReview(req ,res , next)});
 router.post('/refreshToken' , (req , res, next) => {controller.refreshToken(req ,res , next)})

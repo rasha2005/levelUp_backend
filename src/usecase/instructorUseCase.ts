@@ -265,7 +265,7 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async deleteEventData(id:any , token:string) {
+    async deleteEventData(id:string , token:string) {
         try{
         const decodedToken = this._jwt.verifyToken(token);
         if(decodedToken) {
@@ -282,7 +282,7 @@ async resendOtpByEmail(token:string) {
         throw(err)
     }
     }
-    async getSlots(id:any) {
+    async getSlots(id:string) {
         try{
         const decodedToken = this._jwt.verifyToken(id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
@@ -297,14 +297,14 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async getWalletDetails(token:any) {
+    async getWalletDetails(token:string) {
         try{
         const decodedToken = this._jwt.verifyToken(token);
         
 
         const Wallet = await this._instructorRespository.findWallet(decodedToken?.id);
         const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
-        console.log("this is the slot");
+        
         
         if(slot) {
             return {success:true , message:"slots found successfully" , slot , Wallet}
@@ -317,7 +317,7 @@ async resendOtpByEmail(token:string) {
         
     }
 
-    async getInstructorImg(token:any) {
+    async getInstructorImg(token:string) {
         try{
         const decodedToken = this._jwt.verifyToken(token);
         
@@ -333,7 +333,7 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async verifyroomId(roomId:any , instructorId:any) {
+    async verifyroomId(roomId:string , instructorId:string) {
         try{
         const slot = await this._instructorRespository.verifyRoomById(roomId);
         if(slot?.instructorId == instructorId) {

@@ -2,7 +2,6 @@ import { PrismaClient  , Prisma} from "@prisma/client";
 import User from "../../entity/User";
 import IuserRepository from "../../interface/repository/IuserRepository";
 import Otp from "../../entity/Otp";
-import hashPassword from "../service/hashPassword";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
@@ -13,22 +12,22 @@ const prisma  = new PrismaClient();
 
 class userRepository implements IuserRepository {
     async findByEmail(email: string): Promise<User | null> {
-        console.log("iiiiiiii")
+        
         const user = await prisma.user.findUnique({
             where:{email}
         })
-        console.log("userrrr" , user)
+        
         return user
     }
    async saveOtp(email: string, UserOtp: string): Promise<Otp | null> {
-    console.log("lllllllll")
+    
     const userOtp = await prisma.otp.create({
         data: {
           email: email,
           otp: UserOtp,
         },
       });
-      console.log("repo" , userOtp)
+      
       return userOtp;
    }
 
@@ -46,7 +45,7 @@ class userRepository implements IuserRepository {
 }
     
    async findOtp(email: string): Promise<Otp | null> {
-    console.log("fjfjkjfkdl")
+    
     const otp = await prisma.otp.findUnique({
       where:{email}
   })
@@ -89,7 +88,7 @@ class userRepository implements IuserRepository {
           mobile:mobile
         }
        })
-       console.log("update" , updatedUser);
+       
 
       if(updatedUser) {
         return updatedUser
@@ -98,7 +97,7 @@ class userRepository implements IuserRepository {
       return null;
          }
 
-        async findById(id: any): Promise<User | null> {
+        async findById(id: string): Promise<User | null> {
           const user = await prisma.user.findUnique({
             where:{
               id:id
@@ -111,7 +110,7 @@ class userRepository implements IuserRepository {
 
         async getInstructor(page: number, limit: number , search:any , category:any): Promise<{ instructor: Instructor[] | null; total: number; }> {
           const skip = (page - 1) * limit;
-          console.log("cat" ,category);
+          
 
           const whereClause = {
             AND: [
@@ -156,7 +155,7 @@ class userRepository implements IuserRepository {
              return null;
          }
 
-         async getInstructorId(id: any): Promise<Instructor | null> {
+         async getInstructorId(id: string): Promise<Instructor | null> {
           const data = await prisma.instructor.findUnique({
               where:{
                   id:id
@@ -169,7 +168,7 @@ class userRepository implements IuserRepository {
                 },
               },
           })
-          console.log("data" , data);
+          
 
           if(data) {
             return data
@@ -177,7 +176,7 @@ class userRepository implements IuserRepository {
           return null
       }
 
-      async getReviewById(id: any): Promise<Review[] | null> {
+      async getReviewById(id: string): Promise<Review[] | null> {
           const review  = await prisma.review.findMany({
             where:{
               instructorId:id
@@ -188,14 +187,14 @@ class userRepository implements IuserRepository {
             take:4,
             include:({user:true})
           })
-          console.log("review" , review)
+          
           if(review) {
             return review
           }
           return null
       }
 
-      async reviewExist(instructorId: any, userId: any): Promise<boolean> {
+      async reviewExist(instructorId: string, userId: string): Promise<boolean> {
           const data = await prisma.review.findFirst({
             where:{
               instructorId:instructorId,
@@ -225,7 +224,7 @@ class userRepository implements IuserRepository {
           return null
       }
 
-      async updateEventStatus(id: any): Promise<Events | null> {
+      async updateEventStatus(id: string): Promise<Events | null> {
           const updatedData = await prisma.event.update({
             where:{
               id:id
@@ -243,8 +242,7 @@ class userRepository implements IuserRepository {
       async createInstructorWallet(id: any , amount:number , type:any , percent:any): Promise<boolean> {
         
         const admin = await prisma.admin.findFirst();
-        console.log("precent" , percent)
-        console.log("adminn" , admin)
+        
          await prisma.admin.update({
           where:{
             id:admin?.id
@@ -302,7 +300,7 @@ class userRepository implements IuserRepository {
       }
 
       async findSlots(id: string): Promise<User | null> {
-        console.log("kkkktt");
+        
           const userSlot = await prisma.user.findUnique({
             where:{
               id:id
@@ -316,7 +314,7 @@ class userRepository implements IuserRepository {
           },
           })
 
-          console.log("sle" , userSlot);
+         
 
          if(userSlot) {
           return userSlot
@@ -326,7 +324,7 @@ class userRepository implements IuserRepository {
          return null
       }
 
-      async updateImg(id: any, img: string): Promise<string | null> {
+      async updateImg(id: string, img: string): Promise<string | null> {
         if(img) {
 
           const data = await prisma.user.update({
@@ -354,7 +352,7 @@ class userRepository implements IuserRepository {
         return null
       }
 
-    async getImgById(id: any): Promise<string | null> {
+    async getImgById(id: string): Promise<string | null> {
         const data = await prisma.user.findUnique({
           where:{
             id:id
@@ -366,7 +364,7 @@ class userRepository implements IuserRepository {
         return null
     }
 
-    async verifyRoomById(roomId: any): Promise<Slot | null> {
+    async verifyRoomById(roomId: string): Promise<Slot | null> {
         const slot = await prisma.slot.findFirst({
           where:{
             roomId:roomId
@@ -378,7 +376,7 @@ class userRepository implements IuserRepository {
         return null
     }
 
-    async updateSlotById(rating: any, slotid: any): Promise<Slot | null> {
+    async updateSlotById(rating: number, slotid: string): Promise<Slot | null> {
 
      
         const data = await prisma.slot.update({
@@ -389,7 +387,7 @@ class userRepository implements IuserRepository {
             isRated:true
           }
         })
-        console.log("data" , rating);
+        
 
         if(data) {
           const instructor = await prisma.instructor.update({
@@ -402,7 +400,7 @@ class userRepository implements IuserRepository {
               }
             }
           })
-          console.log("ins" , instructor)
+          
           return data;
         }
 
@@ -411,7 +409,7 @@ class userRepository implements IuserRepository {
         return null
     }
 
-    async createUserByGoogle(email: any, name: any, img: any): Promise<User | null> {
+    async createUserByGoogle(email: string, name: string, img: string): Promise<User | null> {
         const data = await prisma.user.findUnique({
           where:{
             email:email
@@ -434,8 +432,8 @@ class userRepository implements IuserRepository {
       return null
     }
 
-    async addReview(instructorId: any, value: string, userId: string): Promise<boolean> {
-      console.log("ins" , instructorId)
+    async addReview(instructorId: string, value: string, userId: string): Promise<boolean> {
+      
       const data = await prisma.review.create({
         data:{
           value:value,
@@ -444,7 +442,7 @@ class userRepository implements IuserRepository {
             
           }
         })
-        console.log("jj" , data);
+       
         if(data) {
           return true
         }

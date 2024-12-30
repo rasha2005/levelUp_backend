@@ -7,7 +7,7 @@ class chatUseCase {
         private _ichatJwt: Ijwt
     ){}
 
-    async accessChatRoom(id:any , token:string) {
+    async accessChatRoom(id:string , token:string) {
         try{
         const decode = await this._ichatJwt.verifyToken(token)
         if(decode) {
@@ -41,7 +41,7 @@ class chatUseCase {
     }
     }
 
-    async createNewMessage(content:string , chatId:any , token:string) {
+    async createNewMessage(content:string , chatId:string , token:string) {
         try{
         const decode = await this._ichatJwt.verifyToken(token);
         if(decode) {
@@ -58,7 +58,7 @@ class chatUseCase {
     }
 
 
-    async fetchMsgs(chatId:any) {
+    async fetchMsgs(chatId:string) {
         try{
         const data = await this._ichatRepository.findMsgById(chatId);
         if(data) {

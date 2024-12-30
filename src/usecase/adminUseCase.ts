@@ -89,7 +89,7 @@ class adminUseCase {
     }
     }
 
-    async editCatData(name:string , id:any) {
+    async editCatData(name:string , id:string) {
         try{
         const category = await this._adminRepository.editCatData(name , id);
        
@@ -104,7 +104,7 @@ class adminUseCase {
   
     }
 
-    async deleteCatData(id:any) {
+    async deleteCatData(id:string) {
       try{
         const category = await this._adminRepository.deleteCatData( id);
         
@@ -119,7 +119,7 @@ class adminUseCase {
     
     }
 
-    async blockUserId(id:any) {
+    async blockUserId(id:string) {
         try{
         const user = await this._adminRepository.blockUser(id);
         if(user) {
@@ -133,7 +133,7 @@ class adminUseCase {
     
     }
 
-    async getInstructorDetaild(id:any) {
+    async getInstructorDetaild(id:string) {
         try{
         const instructor = await this._adminRepository.getInstructorId(id);
         if(instructor) {
@@ -146,7 +146,7 @@ class adminUseCase {
     }
     }
 
-    async instructorApprovel(id:any) {
+    async instructorApprovel(id:string) {
         try{
         const instructor = await this._adminRepository.updateInstructorApprovel(id);
         if(instructor) {
@@ -158,7 +158,7 @@ class adminUseCase {
         throw(err)
     }
     }
-    async instructorApprovelCancel(id:any) {
+    async instructorApprovelCancel(id:string) {
         try{
         const instructor = await this._adminRepository.cancelApprovel(id);
         if(instructor) {
@@ -171,7 +171,7 @@ class adminUseCase {
     }
     }
 
-    async getUserDetaild(id:any) {
+    async getUserDetaild(id:string) {
         try{
         const instructor = await this._adminRepository.getUserId(id);
         if(instructor) {

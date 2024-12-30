@@ -1,3 +1,6 @@
+
+import PaymentInfo from "../entity/Info";
+import DecodedToken from "../entity/Token";
 import User from "../entity/User";
 import IuserRepository from "../interface/repository/IuserRepository";
 import IgenerateOtp from "../interface/services/IgenerateOtp";
@@ -18,12 +21,12 @@ class userUseCase {
 
    async findUser(user:User) {
     try{
-        console.log("email",user);
+       
        const res = await this._iuserRepository.findByEmail(user.email);
 
        console.log("res" , res);
        if (res) {
-        console.log("kkkkkklllll");
+       
         return {status:200, success:false, message: 'User found' }; 
         }else{
             const otp = this._generateOtp.createOtp();
@@ -44,24 +47,20 @@ class userUseCase {
     try{
 
     
-        console.log("hereee")
+        
     const decodedToken = this._jwtToken.verifyToken(token);
-    console.log("decodedToken",decodedToken?.info.email);
+    
     
     const otp = await this._iuserRepository.findOtp(decodedToken?.info.email);
-    console.log("ss", userOtp);
-    console.log("user otp" , otp?.otp);
+    
     const password = decodedToken?.info.password;
     const hashedPassword =  await this._hashPassword.hash(password)
-    console.log("hashedPassword" , hashedPassword);
+    
     if(userOtp == otp?.otp){
         const res =  await this._iuserRepository.insertUser(decodedToken?.info , hashedPassword);
-        console.log("usesdlksmr" , res.user.id);
-        const authToken = this._jwtToken.authToken( res.user.id ,res.user.email, "User");
-        const refreshToken = this._jwtToken.refreshToken(res.user.id ,res.user.email, "User")
-        console.log("authToken" , authToken);
         
-
+        const authToken = this._jwtToken.authToken( res.user.id ,res.user.email, "User");
+        const refreshToken = this._jwtToken.refreshToken(res.user.id ,res.user.email, "User");
         if(res) {
             return {success:true , message:"user saved successfully" , authToken:authToken ,refreshToken };
         }
@@ -117,11 +116,9 @@ class userUseCase {
   
    }
 
-   async getUserDetails(token:string) {
+   async getUserDetails(token:DecodedToken) {
     try{
-    const decodedToken = this._jwtToken.verifyToken(token);
-    
-    const user = await this._iuserRepository.findById(decodedToken?.id);
+    const user = await this._iuserRepository.findById(token?.id);
     if(user){
         return {success:true , message:"user matched succesfully" ,user};
     }else{
@@ -181,11 +178,11 @@ class userUseCase {
     }
 }
 
-    async changeUserPassword(token:string , current:string , confirm:string) {
+    async changeUserPassword(token:DecodedToken , current:string , confirm:string) {
         try{
-        const decodedToken = this._jwtToken.verifyToken(token);
-        if(decodedToken) {
-            const user = await this._iuserRepository.findByEmail(decodedToken.email);
+        
+        if(token) {
+            const user = await this._iuserRepository.findByEmail(token.email);
             if(user && user.password) {
                 const isPasswordMatched = await this._hashPassword.compare(current , user?.password)
                 if(isPasswordMatched) {
@@ -209,7 +206,7 @@ class userUseCase {
     }
 
 
-    async getInstructorDetail(id:any , token:any) {
+    async getInstructorDetail(id:any, token:string) {
         try{
         const decodedToken = this._jwtToken.verifyToken(token);
         const instructor = await this._iuserRepository.getInstructorId(id);
@@ -226,7 +223,7 @@ class userUseCase {
     }
     }
 
-    async payement(info:any ,token:string) {
+    async payement(info:PaymentInfo ,token:string) {
         try{
         console.log("info" , info);
         const decodedToken = this._jwtToken.verifyToken(token);
@@ -259,10 +256,10 @@ class userUseCase {
         
     }
 
-    async getSlotDetails(token:any) {
+    async getSlotDetails(token:DecodedToken) {
         try{
-        const decodedToken = this._jwtToken.verifyToken(token);
-        const slot = await this._iuserRepository.findSlots(decodedToken?.id);
+        
+        const slot = await this._iuserRepository.findSlots(token?.id);
         if(slot) {
             return {success:true , message:"slots found successfully" , slot}
         }else{
@@ -288,21 +285,22 @@ class userUseCase {
     }
     }
 
-    async getUserImg(token:any) {
+    async getUserImg(token:DecodedToken ) {
         try{
-        const decodedToken = this._jwtToken.verifyToken(token);
-        const image = await this._iuserRepository.getImgById(decodedToken?.id);
+            if(token){
+        const image = await this._iuserRepository.getImgById(token?.id);
         if(image) {
             return {success:true , message:"image fetched successfully" , image};
         }else{
             return {success:false , message:"something went wrong"}
         }
+    }
     }catch(err:any){
         throw(err)
     }
     } 
 
-    async verifyRoomId(roomId:any , userId:any) {
+    async verifyRoomId(roomId:string , userId:string) {
         try{
         const data = await this._iuserRepository.verifyRoomById(roomId);
         
@@ -319,7 +317,7 @@ class userUseCase {
     }
     }
 
-    async updateRating(rating:any , slotId:any) {
+    async updateRating(rating:number , slotId:string) {
         const data = await this._iuserRepository.updateSlotById(rating , slotId);
         if(data) {
             return {success:true };
@@ -329,7 +327,7 @@ class userUseCase {
         
     }
    
-    async googleCallback(email:any , name:any , img:any) {
+    async googleCallback(email:string , name:string , img:string) {
         try{
         const user = await this._iuserRepository.createUserByGoogle(email , name , img);
         
@@ -347,11 +345,11 @@ class userUseCase {
     }
     }
 
-    async addInstructorReview(instructorId:any , value:string , token:string){
+    async addInstructorReview(instructorId:string , value:string , token:DecodedToken){
         try{
-        const decodedToken = this._jwtToken.verifyToken(token);
-        if(decodedToken) {
-            const res = await this._iuserRepository.addReview(instructorId , value , decodedToken.id);
+        
+        if(token) {
+            const res = await this._iuserRepository.addReview(instructorId , value , token.id);
             if(res) {
                 return {success:true , message:"review added successfully"};
             }else{
