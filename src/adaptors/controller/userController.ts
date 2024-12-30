@@ -248,7 +248,6 @@ class userController {
         try {
             const roomId =  req.query.roomId as string;
             const userId = req.query.userId as string
-            
             const response = await this.useCase.verifyRoomId(roomId , userId);
             return res.status(200).json({response});
         }catch(err) {

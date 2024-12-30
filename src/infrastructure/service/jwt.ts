@@ -32,7 +32,7 @@ class Jwt implements Ijwt {
 
     authToken(id:any ,email: string ,role:string): string {
         const payload = {id, email  , role};
-        const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '1m' });
+        const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '25m' });
         return token;
     }
 

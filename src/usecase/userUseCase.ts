@@ -303,7 +303,6 @@ class userUseCase {
     async verifyRoomId(roomId:string , userId:string) {
         try{
         const data = await this._iuserRepository.verifyRoomById(roomId);
-        
         if(data) {
             if(data.userId == userId) {
                 return {success:true };
