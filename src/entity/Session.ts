@@ -1,15 +1,17 @@
+import Instructor from "./Instructor";
+
 export interface Events {
     title : string;
-    start : any;
-    end   : any;
+    start : Date;
+    end   : Date;
     price : string;
     status: "open" | "booked";
-    scheduledSession? :  any
+    scheduledSession? : Session
 }
 
 export interface Session {
     id?:string;
     instructorId : string;
-    instructor?  : any;
+    instructor?  : Instructor;
     events       : Events[];
 }

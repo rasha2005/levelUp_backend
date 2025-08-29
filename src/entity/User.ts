@@ -5,7 +5,7 @@ interface User {
     email:string,
     mobile?:string | null,
     password?:string | null,
-    isBlocked:Boolean
+    isBlocked:boolean
 }
 
 export default User

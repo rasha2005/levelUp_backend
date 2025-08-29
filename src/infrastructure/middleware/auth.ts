@@ -1,71 +1,65 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "../service/jwt"
-import userRepository from "../repository/userRepository";
+import jwt from "../service/jwt";
+import {UserRepository} from "../repository/userRepository";
 
-
-const jwtToken = new jwt()
-const UserRepository = new userRepository();
+const jwtToken = new jwt();
+const userRepository = new UserRepository();
 
 const VALID_ROLES = ["User", "Admin", "Instructor"];
 
-const userAuth =  async(req: Request, res: Response, next: NextFunction):Promise<any> => {
-  const authToken = req.cookies.authToken;
-  const token:any = req.query.token;
-  console.log("kkkk" , token);
+const userAuth = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  const authToken = req.cookies?.authToken;
+  const refreshToken = req.cookies?.refreshToken;
+  const queryToken = req.query?.token as string | undefined;
 
-  if(!authToken && !token) {
-    return res.status(401).json({ message: 'Unauthorized access' });
+  if (!authToken && !queryToken) {
+  
+    return res.status(401).json({ message: "Unauthorized access" });
   }
+
   try {
-    let verifiedToken
-    if(authToken){
-       verifiedToken = jwtToken.verifyToken(authToken);
-    }else{
-      verifiedToken = jwtToken.verifyToken(token);
-    }
-    
-    
-    if(verifiedToken?.exp){
-      if (!verifiedToken || Date.now() >= verifiedToken?.exp * 1000) {
-        return res.status(401).json({ success: false, message: "Token expired" });
-      }
-    }
-    if(!VALID_ROLES.includes(verifiedToken.role) ){
-     
-        return res.status(401).send({success: false, message: "Unauthorized - Invalid Token"})
-    }
+    const tokenToVerify = authToken || queryToken;
+    const verifiedToken = jwtToken.verifyToken(tokenToVerify);
 
-    if (verifiedToken.role === 'User') {
-      if (verifiedToken.email) {
+    if (verifiedToken?.exp && Date.now() >= verifiedToken.exp * 1000) {
+      if (refreshToken) {
+  
         try {
-          const userData = await UserRepository.findByEmail(verifiedToken.email);
-    
-          if (userData?.isBlocked) {
-            res.clearCookie("authToken");
-            return res.status(403).send({ success: false, message: "User blocked" });
-          }
-          req.app.locals.decodedToken = verifiedToken;
-         
-          next();
+          jwtToken.verifyToken(refreshToken); 
         } catch (err) {
-          console.error("Error fetching user data:", err);
-          return res.status(500).send({ success: false, message: "Internal server error" });
+          console.log(err)
+          return res.status(401).json({ message: "Token expired" });
         }
-      } else {
-        return res.status(401).send({ success: false, message: "Unauthorized - Invalid Token" });
       }
-    } else if (verifiedToken.role === 'Instructor' || verifiedToken.role === 'Admin') {
-      next();
-    } else {
-      return res.status(401).send({ success: false, message: "Unauthorized - Invalid Role" });
+      return res.status(401).json({ message: "Token expired" });
     }
-    
-  }catch(err){
-    console.log(err); 
-    return res.status(401).send({ success: false, message: "Unauthorized - Invalid token" })
 
+  
+    if (!VALID_ROLES.includes(verifiedToken.role)) {
+      return res.status(401).json({ success: false, message: "Unauthorized - Invalid role" });
+    }
+
+  
+    if (verifiedToken.role === "User") {
+      if (!verifiedToken.email) {
+        return res.status(401).send({ success: false, message: "Unauthorized - Invalid token" });
+      }
+
+      const userData = await userRepository.findByEmail(verifiedToken.email);
+      if (userData?.isBlocked) {
+        res.clearCookie("authToken");
+        res.clearCookie("refreshToken");
+        return res.status(403).send({ success: false, message: "User blocked" });
+      }
+    }
+
+    req.app.locals.decodedToken = verifiedToken;
+    next();
+
+  } catch (err) {
+    console.error("Authentication error:", err);
+    return res.status(401).send({ success: false, message: "Unauthorized - Invalid token" });
   }
-
-}
+};
 
 export default userAuth;

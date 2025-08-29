@@ -2,7 +2,7 @@ interface Admin {
     id?:string,
     email:string,
     password:string,
-    walletBalance:any
+    walletBalance:number
 }
 
 export default Admin;

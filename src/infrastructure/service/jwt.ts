@@ -14,7 +14,7 @@ class Jwt implements Ijwt {
 
     verifyToken(token: string) : any {
         try {
-           
+           console.log("verifytoken" , token);
             const decoded = jwt.verify(token, process.env.SECRET_KEY!) as JwtPayload;
             return decoded;
           } catch (err:any) {

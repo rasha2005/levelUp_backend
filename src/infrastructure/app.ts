@@ -7,12 +7,14 @@ import instructorRoute from './route/instructorRoute'
 import adminRoute from './route/adminRoute'
 import chatRoute from './route/chatRoute'
 import startCronJob from "./service/node-cron";
+import morgan from "morgan";
 
 
 dotenv.config();
 
 const app:Express = express();
-
+const isProd = process.env.NODE_ENV === "production";
+app.use(morgan(isProd ? "combined" : "dev"));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.originalUrl === '/api/user/webhook') {
@@ -30,7 +32,6 @@ console.log("process.env.BASE_URL",process.env.FRONT_URL)
 app.use(
   cors({ 
     origin: process.env.FRONT_URL, 
-    // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
     
   })
@@ -63,7 +64,6 @@ io.on("connection" , (socket:any) => {
   console.log("connected to socket.io")
 
   socket.on('setup' , (user:any) => {
-    console.log("hehe" ,user.id)
     socket.join(user.id);
     socket.emit('connected')
   })
@@ -75,8 +75,6 @@ io.on("connection" , (socket:any) => {
   })
   socket.on('new message' , (newMessageReceived:any) => {
 
-    console.log("chatw" , newMessageReceived)
-    
   const { chat, senderId } = newMessageReceived;
 
   const recipientId =

@@ -1,10 +1,12 @@
+import { inject, injectable } from "inversify";
 import IchatRepository from "../interface/repository/IchatRepository";
 import Ijwt from "../interface/services/Ijwt";
 
-class chatUseCase {
+@injectable()
+export class ChatUseCase {
     constructor(
-        private _ichatRepository: IchatRepository,
-        private _ichatJwt: Ijwt
+        @inject("IchatRepository") private _ichatRepository: IchatRepository,
+        @inject("Ijwt") private _ichatJwt: Ijwt
     ){}
 
     async accessChatRoom(id:string , token:string) {
@@ -73,4 +75,3 @@ class chatUseCase {
     }
 }
 
-export default chatUseCase

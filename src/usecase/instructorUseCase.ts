@@ -1,17 +1,21 @@
+import { inject, injectable } from "inversify";
 import Instructor from "../entity/Instructor";
+import DecodedToken from "../entity/Token";
 import IinstructorRepository from "../interface/repository/IinstructorRepository";
 import IgenerateOtp from "../interface/services/IgenerateOtp";
 import IhashPassword from "../interface/services/IhashPassword";
 import Ijwt from "../interface/services/Ijwt";
 import IsendEmailOtp from "../interface/services/IsendEmailOtp";
+import { InstructorDTO } from "./dtos/InstructorDTO";
 
-class instructorUseCase {
+@injectable()
+export class InstructorUseCase {
     constructor(
-        private _instructorRespository:IinstructorRepository,
-        private _generateOtp:IgenerateOtp,
-        private _sendEmailOtp:IsendEmailOtp,
-        private _jwt:Ijwt,
-        private _hashPassword:IhashPassword
+       @inject("IinstructorRepository") private _instructorRespository:IinstructorRepository,
+       @inject("IgenerateOtp") private _generateOtp: IgenerateOtp,
+       @inject("IsendEmailOtp") private _sendEmailOtp: IsendEmailOtp,
+       @inject("Ijwt") private _jwt: Ijwt,
+       @inject("IhashPassword") private _hashPassword: IhashPassword,
     ){}
 
     async findInsrtuctor(instructor:Instructor) {
@@ -104,11 +108,11 @@ class instructorUseCase {
     }
     }
 
-    async updateInstructor(token:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string) {
+    async updateInstructor(token:DecodedToken ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
-        if(decodedToken){
-            const res = await this._instructorRespository.updateInstructorDetials(decodedToken.email ,description , experienceCategory ,experienceCertificate , resume);
+        
+        if(token){
+            const res = await this._instructorRespository.updateInstructorDetials(token.email ,description , experienceCategory ,experienceCertificate , resume);
             if(res) {
                 return {success:true , message:"updated successfully" , res}
             }else{
@@ -120,15 +124,15 @@ class instructorUseCase {
     }
     }
 
-    async getInstructorDetails(token:string) {
+    async getInstructorDetails(token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
+        
 
-            if(decodedToken){
-                
-                const res = await this._instructorRespository.getInstructorByEmail(decodedToken.email );
+            if(token){
+                const res = await this._instructorRespository.getInstructorByEmail(token.email );
                 if(res) {
-                    return {success:true , message:"updated successfully" , res}
+                    const instructorDto = InstructorDTO.fromEntity(res)
+                    return {success:true , message:"updated successfully" , res:instructorDto}
                 }else{
                     return {success:false , message:"something went wrong"};
                 }
@@ -138,14 +142,14 @@ class instructorUseCase {
         }
     }
 
-    async editInstructorDetails(token:string , name:string , mobile:string) {
+    async editInstructorDetails(token:DecodedToken , name:string , mobile:string) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
 
-        if(decodedToken){
-            const res = await this._instructorRespository.editInstructorByEmail(decodedToken.email ,name , mobile);
+        if(token){
+            const res = await this._instructorRespository.editInstructorByEmail(token.email ,name , mobile);
             if(res) {
-                return {success:true , message:"updated successfully" , res}
+                const instructorDto = InstructorDTO.fromEntity(res)
+                return {success:true , message:"updated successfully" , res:instructorDto}
             }else{
                 return {success:false , message:"something went wrong"};
             }
@@ -156,15 +160,14 @@ class instructorUseCase {
     }
 }
 
-    async updateImg(token:string , img:string ) {
+    async updateImg(token:DecodedToken , img:string ) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
 
-
-        if(decodedToken){
-            const res = await this._instructorRespository.updateProfileByEmail(decodedToken.email ,img);
+        if(token){
+            const res = await this._instructorRespository.updateProfileByEmail(token.email ,img);
             if(res) {
-                return {success:true , message:"updated successfully" , res}
+                const instructorDto = InstructorDTO.fromEntity(res)
+                return {success:true , message:"updated successfully" , res:instructorDto}
             }else{
                 return {success:false , message:"something went wrong"};
             }
@@ -202,18 +205,19 @@ async resendOtpByEmail(token:string) {
 }
 
 
-  async changeInstructorPassword(token:string , current:string , confirm:string) {
+  async changeInstructorPassword(token:DecodedToken , current:string , confirm:string) {
     try{
-    const decodedToken = this._jwt.verifyToken(token);
-    if(decodedToken) {
-        const instructor = await this._instructorRespository.findByEmail(decodedToken.email);
+    
+    if(token) {
+        const instructor = await this._instructorRespository.findByEmail(token.email);
         if(instructor) {
             const isPasswordMatched = await this._hashPassword.compare(current , instructor.password);
             if(isPasswordMatched) {
                 const hashedPassword = await this._hashPassword.hash(confirm);
-                const updatedInstructor = await this._instructorRespository.changePassword(decodedToken.email , hashedPassword); 
+                const updatedInstructor = await this._instructorRespository.changePassword(token.email , hashedPassword); 
                 if(updatedInstructor) {
-                    return {success:true , message:'password updated successfully' , updatedInstructor};
+                    const instructorDto = InstructorDTO.fromEntity(updatedInstructor)
+                    return {success:true , message:'password updated successfully' , updatedInstructor:instructorDto};
                 }else{
                     return{success:false , message:'something went wrong'}
                 }
@@ -229,12 +233,12 @@ async resendOtpByEmail(token:string) {
     }
 }
 
-    async scheduleSessionById(title:string , start:string , end:string , price: string , token:string) {
+    async scheduleSessionById(title:string , start:string , end:string , price: string , token:DecodedToken) {
         try{
-    const decodedToken = this._jwt.verifyToken(token);
+   
     
-    if(decodedToken) {
-        const session = await this._instructorRespository.scheduleSession(decodedToken.id , title , start , end , price);
+    if(token) {
+        const session = await this._instructorRespository.scheduleSession(token.id , title , start , end , price);
         
         if(session) {
             return {success:true , message:"session scheduled successfully" , session};
@@ -250,13 +254,14 @@ async resendOtpByEmail(token:string) {
     
 }
 
-    async getEventsData(token:string) {
+    async getEventsData(token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
-        const instructor = await this._instructorRespository.getInstructorByEmail(decodedToken?.email)
-        if(decodedToken) {
-            const events = await this._instructorRespository.getEventsById(decodedToken.id);
-            return {success:true , message:"events retrived successfully" , events , instructor };
+        
+        const instructor = await this._instructorRespository.getInstructorByEmail(token?.email)
+        const instructorDto = InstructorDTO.fromEntity(instructor!)
+        if(token) {
+            const events = await this._instructorRespository.getEventsById(token.id);
+            return {success:true , message:"events retrived successfully" , events , instructor:instructorDto };
         }else{
             return {success:false , message:"something went wrong"};
         }
@@ -265,11 +270,10 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async deleteEventData(id:string , token:string) {
+    async deleteEventData(id:string , token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
-        if(decodedToken) {
-            const isDeleted = await this._instructorRespository.deleteEventById(id , decodedToken.id);
+        if(token) {
+            const isDeleted = await this._instructorRespository.deleteEventById(id , token.id);
             if(isDeleted) {
                 return {success:true , message:'event deleted successfully'};
             }else{
@@ -282,10 +286,9 @@ async resendOtpByEmail(token:string) {
         throw(err)
     }
     }
-    async getSlots(id:string) {
+    async getSlots(token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(id);
-        const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
+        const slot = await this._instructorRespository.getSlotList(token?.id);
         
         if(slot) {
          return {success:true , message:"events retrived successfully" , slot};
@@ -297,13 +300,13 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async getWalletDetails(token:string) {
+    async getWalletDetails(token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
+        
         
 
-        const Wallet = await this._instructorRespository.findWallet(decodedToken?.id);
-        const slot = await this._instructorRespository.getSlotList(decodedToken?.id);
+        const Wallet = await this._instructorRespository.findWallet(token?.id);
+        const slot = await this._instructorRespository.getSlotList(token?.id);
         
         
         if(slot) {
@@ -317,12 +320,9 @@ async resendOtpByEmail(token:string) {
         
     }
 
-    async getInstructorImg(token:string) {
+    async getInstructorImg(token:DecodedToken) {
         try{
-        const decodedToken = this._jwt.verifyToken(token);
-        
-
-        const image = await this._instructorRespository.getImgById(decodedToken?.id);
+        const image = await this._instructorRespository.getImgById(token?.id);
         if(image) {
             return {success:true , message:"image fetched successfully" , image};
         }else{
@@ -348,4 +348,3 @@ async resendOtpByEmail(token:string) {
 
 }
 
-export default instructorUseCase;

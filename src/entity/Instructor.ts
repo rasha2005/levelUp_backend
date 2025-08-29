@@ -1,3 +1,7 @@
+import Chat from "./Chat";
+import { Session } from "./Session";
+import { Wallet } from "./Wallet";
+
 interface  Instructor {
     id?:string,
     img?:string | null,
@@ -10,6 +14,10 @@ interface  Instructor {
     experience?: string | null;  
     resume?: string | null;       
     isApproved?: boolean;   
+    scheduledSession? : Session | null
+    wallet?:Wallet | null
+    chats? : Chat[] | null
+    rating? : number | null
 
 
 

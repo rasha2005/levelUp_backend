@@ -3,7 +3,7 @@ import Instructor from "../../entity/Instructor";
 import Otp from "../../entity/Otp";
 import { Session } from "../../entity/Session";
 import Slot from "../../entity/Slot";
-import User from "../../entity/User";
+import { Wallet } from "../../entity/Wallet";
 
 interface IinstructorRepository {
     findByEmail(email:string):Promise<Instructor | null>
@@ -17,13 +17,13 @@ interface IinstructorRepository {
     updateProfileByEmail(email:string , img:string):Promise<Instructor | null>
     updateOtpByEmail(email:string , otp:string): Promise<Otp | null>
     changePassword(email:string , password:string): Promise<Instructor | null>
-    scheduleSession(id:any , title:string , start:string , end:string , price: string ): Promise<Session | null>
-    getEventsById(id:any): Promise<Session | null>
-    deleteEventById(id:any , instructorId:string): Promise<boolean>
-    getSlotList(id:any): Promise<Slot[] | null>
-    findWallet(token:any): Promise<any>
-    getImgById(id:any): Promise<string | null>
-    verifyRoomById(roomId:any): Promise<Slot | null>
+    scheduleSession(id:string , title:string , start:string , end:string , price: string ): Promise<Session | null>
+    getEventsById(id:string): Promise<Session | null>
+    deleteEventById(id:string , instructorId:string): Promise<boolean>
+    getSlotList(id:string): Promise<Slot[] | null>
+    findWallet(token:string): Promise<Wallet | null>
+    getImgById(id:string): Promise<string | null>
+    verifyRoomById(roomId:string): Promise<Slot | null>
 }
 
 export default IinstructorRepository;

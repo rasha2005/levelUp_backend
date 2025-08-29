@@ -2,11 +2,13 @@ import { PrismaClient  , Prisma} from "@prisma/client";
 import IchatRepository from "../../interface/repository/IchatRepository";
 import Chat from "../../entity/Chat";
 import Message from "../../entity/Message";
+import { injectable } from "inversify";
 
 const prisma  = new PrismaClient();
 
-class chatRepository implements IchatRepository {
-    async accessChat(id: any, tokenId: any): Promise<Chat|null> {
+@injectable()
+export class ChatRepository implements IchatRepository {
+    async accessChat(id: string, tokenId: string): Promise<Chat|null> {
         const chat = await prisma.chat.findFirst({
             where:{
                 userId:tokenId,
@@ -15,7 +17,6 @@ class chatRepository implements IchatRepository {
         })
 
         if(!chat){
-            console.log("loggg");
             const newChat = await prisma.chat.create({
                 data:{
                     userId:tokenId,
@@ -52,7 +53,7 @@ class chatRepository implements IchatRepository {
         return null
     }
 
-    async createMessageById(content: string, chatId: any, id: any): Promise<Message | null> {
+    async createMessageById(content: string, chatId: string, id: string): Promise<Message | null> {
         const messsage = await prisma.message.create({
             data:{
                 senderId:id,
@@ -61,7 +62,7 @@ class chatRepository implements IchatRepository {
             },
             include:{chat:true}
         })
-        console.log("mm",messsage);
+     
 
         if(messsage) {
             return messsage
@@ -70,7 +71,7 @@ class chatRepository implements IchatRepository {
         return null
     }
 
-    async findMsgById(chatId: any): Promise<Message[] | null> {
+    async findMsgById(chatId: string): Promise<Message[] | null> {
         const message = await prisma.message.findMany({
             where:{
                 chatId:chatId
@@ -98,5 +99,3 @@ class chatRepository implements IchatRepository {
         return null
     }
 }
-
-export default chatRepository;

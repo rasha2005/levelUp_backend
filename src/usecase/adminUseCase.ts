@@ -1,14 +1,16 @@
+import { injectable,inject } from "inversify";
 import IadminRepository from "../interface/repository/IadminRepository";
 import IhashPassword from "../interface/services/IhashPassword";
 import Ijwt from "../interface/services/Ijwt";
 import IsendEmailOtp from "../interface/services/IsendEmailOtp";
 
-class adminUseCase {
+@injectable()
+export class AdminUseCase {
     constructor(
-        private _hashPassword:IhashPassword,
-        private _adminRepository:IadminRepository,
-        private _jwt:Ijwt,
-        private _email:IsendEmailOtp
+        @inject("IadminRepository") private _adminRepository:IadminRepository,
+        @inject("IhashPassword") private _hashPassword:IhashPassword,
+        @inject("Ijwt") private _jwt:Ijwt,
+        @inject("IsendEmailOtp") private _email:IsendEmailOtp
     ){}
 
     async insertAdmin(email:string , password:string) {
@@ -191,7 +193,7 @@ class adminUseCase {
         const user = await this._adminRepository.findSlotsByDate(date);
         
         if(user){
-            for(let i of user){
+            for(const i of user){
                 
                 await this._email.sendReminder(i.user?.email , i.user?.name)
             }
@@ -227,5 +229,3 @@ class adminUseCase {
     }
     }
 }
-
-export default adminUseCase;

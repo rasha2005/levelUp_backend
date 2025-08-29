@@ -1,24 +1,26 @@
+import { injectable, inject } from "inversify";
 import { Request, Response, NextFunction } from "express";
-import userUseCase from "../../usecase/userUseCase";
+
 import dotenv from 'dotenv';
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
+import {UserUseCase} from "../../usecase/userUseCase";
 dotenv.config();
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "")
 
-class userController {
-    constructor(private useCase:userUseCase){}
+@injectable()
+export class UserController {
+    constructor(@inject("UserUseCase") private _useCase:UserUseCase){}
 
     async createUser(req: Request, res: Response, next: NextFunction) {
         try {
            
 
-            const { email } = req.body;
             const user = req.body
 
-            const response = await this.useCase.findUser(user);
+            const response = await this._useCase.findUser(user);
 
             if(response.success === true) {
                 return res.status(200).json({ success: true ,token:response.token});
@@ -36,7 +38,7 @@ class userController {
 
             const {userOtp , token} = req.body;
 
-            const response = await this.useCase.saveUser(userOtp , token);
+            const response = await this._useCase.saveUser(userOtp , token);
             if(response) {
                 return res.status(200).json(response);
             }
@@ -49,13 +51,13 @@ class userController {
     async verifyLogin(req:Request ,  res: Response, next: NextFunction) {
         try{
             const {email , password} = req.body;
-            const response = await this.useCase.verifyLogin(email , password);
-            console.log("kkkkk",response);
+            const response = await this._useCase.verifyLogin(email , password);
+            const REFRESH_MAXAGE = parseInt(process.env.REFRESH_MAXAGE!);
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
                 secure: true,
                 sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: REFRESH_MAXAGE
               });
             return res.status(200).json({response});
         }catch(err) {
@@ -65,7 +67,7 @@ class userController {
 
     async home(req:Request ,  res: Response, next: NextFunction) {
         try {
-            const response = await this.useCase.getCateogries();
+            const response = await this._useCase.getCateogries();
             return res.status(200).json({response});
 
         }catch(err) {
@@ -77,7 +79,7 @@ class userController {
         try {
 
             const decodedToken = req.app.locals.decodedToken;
-            const response = await this.useCase.getUserDetails(decodedToken);
+            const response = await this._useCase.getUserDetails(decodedToken);
             return res.status(200).json({response});
 
         }catch(err) {
@@ -88,7 +90,7 @@ class userController {
     async updateUser(req:Request ,  res: Response, next: NextFunction ) {
         try{
             const {id , name  , mobile} = req.body;
-            const response = await this.useCase.updateUserDetails(id , name  , mobile);
+            const response = await this._useCase.updateUserDetails(id , name  , mobile);
             return res.status(200).json({response});
 
         }catch(err) {
@@ -100,11 +102,10 @@ class userController {
         try{
             const page = parseInt(req.query.page as string) || 1; 
             const limit = parseInt(req.query.limit as string) || 10;
-            const search = req.query.searchTerm || null
-            const category = req.query.category || null
-            console.log("search" , search);
+            const search = req.query.searchTerm as string|| null 
+            const category = req.query.category as string|| null
 
-            const response = await this.useCase.getInstructorDetails(page , limit , search , category);
+            const response = await this._useCase.getInstructorDetails(page , limit , search , category);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -115,7 +116,7 @@ class userController {
         try {
             const {token} = req.body;
     
-            const response = await this.useCase.resendOtpByEmail(token);
+            const response = await this._useCase.resendOtpByEmail(token);
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -127,7 +128,7 @@ class userController {
             const decodedToken = req.app.locals.decodedToken;
             const {current , confirm} = req.body;
     
-            const response = await this.useCase.changeUserPassword(decodedToken , current , confirm);
+            const response = await this._useCase.changeUserPassword(decodedToken , current , confirm);
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -137,9 +138,9 @@ class userController {
        async getInstructor(req:Request , res:Response , next:NextFunction) {
         try{
           
-            const id = req.query.id;
-            const token = req.query.token as string
-            const response = await this.useCase.getInstructorDetail(id,token);
+            const id = req.query.id as string;
+            const decodedToken = req.app.locals.decodedToken;
+            const response = await this._useCase.getInstructorDetail(id,decodedToken);
             
             return res.status(200).json({response})
         }catch(err) {
@@ -167,7 +168,7 @@ class userController {
                 roomId
             }
 
-            const response = await  this.useCase.payement(info , token)
+            const response = await  this._useCase.payement(info , token)
            
             return res.status(200).json({ success: true, data: response });
 
@@ -179,7 +180,7 @@ class userController {
 
        async stripeWebhook(req:Request , res:Response , next:NextFunction) {
 
-        const endpointSecret = process.env.WEBHOOK_SECRET!.toString();
+        const endpointSecret = process.env.WEBHOOK_SECRET_LOCAL!.toString();
         
         const sig = req.headers['stripe-signature'];
         if (!sig) {
@@ -200,7 +201,7 @@ class userController {
             case "checkout.session.completed":
              
               const session = event.data.object;
-              await this.useCase.successPayment(session);
+              await this._useCase.successPayment(session);
               break;
 
         default:
@@ -214,7 +215,7 @@ class userController {
         try{
             const decodedToken = req.app.locals.decodedToken;
            
-            const response = await this.useCase.getSlotDetails(decodedToken);
+            const response = await this._useCase.getSlotDetails(decodedToken);
             return res.status(200).json({response});
         }catch(err){
             next(err);
@@ -223,10 +224,10 @@ class userController {
 
     async setImg(req:Request , res:Response , next:NextFunction) {
         try{
-            const token = req.cookies.authToken;
+            const token = req.app.locals.decodedToken;
             const {img} = req.body;
             
-            const response = await this.useCase.updateUserImg(token , img);
+            const response = await this._useCase.updateUserImg(token , img);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -237,7 +238,7 @@ class userController {
         try {
             
             const decodedToken = req.app.locals.decodedToken;
-            const response = await this.useCase.getUserImg(decodedToken);
+            const response = await this._useCase.getUserImg(decodedToken);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -248,7 +249,7 @@ class userController {
         try {
             const roomId =  req.query.roomId as string;
             const userId = req.query.userId as string
-            const response = await this.useCase.verifyRoomId(roomId , userId);
+            const response = await this._useCase.verifyRoomId(roomId , userId);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -260,7 +261,7 @@ class userController {
             const rating  = req.body.rating as number
             const id  = req.body.id as string;
             
-            const response = await this.useCase.updateRating(rating , id);
+            const response = await this._useCase.updateRating(rating , id);
             return res.status(200).json({response});
 
 
@@ -274,7 +275,7 @@ class userController {
             const email  = req.body.email as string;
             const name  = req.body.name as string
             const img  = req.body.img as string
-            const response = await this.useCase.googleCallback(email , name , img);
+            const response = await this._useCase.googleCallback(email , name , img);
             
             
             return res.status(200).json({response});
@@ -288,7 +289,7 @@ class userController {
             const instructorId  = req.body.instructorId as string;
             const value  = req.body.value ;
             const decodedToken = req.app.locals.decodedToken;
-            const response = await this.useCase.addInstructorReview(instructorId , value , decodedToken);
+            const response = await this._useCase.addInstructorReview(instructorId , value , decodedToken);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -299,7 +300,7 @@ class userController {
         try{
             
             const refreshToken = req.cookies.refreshToken;
-            const response = await this.useCase.verifyRefreshToken(refreshToken);
+            const response = await this._useCase.verifyRefreshToken(refreshToken);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -308,5 +309,3 @@ class userController {
 
 }
 
-
-export default userController;

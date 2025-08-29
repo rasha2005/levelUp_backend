@@ -13,16 +13,16 @@ interface IadminRepository {
     getInstructor():Promise<Instructor[] | null >
     createCategory(data:string):Promise<Category | null>
     getCatData():Promise<Category[] | null>
-    editCatData(name:string , id : any):Promise<Category[] | null>
-    deleteCatData(id:any):Promise<boolean>
-    blockUser(id:any):Promise<User | null>
-    getInstructorId(id:any):Promise<Instructor | null>
-    updateInstructorApprovel(id:any):Promise<Instructor | null >
-    cancelApprovel(id:any):Promise<Instructor | null >
-    getUserId(id:any):Promise<User | null>
-    findSlotsByDate(date:any):Promise<any>
+    editCatData(name:string , id : string):Promise<Category[] | null>
+    deleteCatData(id:string):Promise<boolean>
+    blockUser(id:string):Promise<User | null>
+    getInstructorId(id:string):Promise<Instructor | null>
+    updateInstructorApprovel(id:string):Promise<Instructor | null >
+    cancelApprovel(id:string):Promise<Instructor | null >
+    getUserId(id:string):Promise<User | null>
+    findSlotsByDate(date:Date):Promise<any>
     findWallet(): Promise<Admin | null>
-    getTransactionDetails(): Promise<any>
+    getTransactionDetails(): Promise<Instructor[]>
 }
 
 export default IadminRepository;

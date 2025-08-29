@@ -7,10 +7,12 @@ import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
 import { Events } from "../../entity/Session";
 import Review from "../../entity/Review";
+import { injectable } from "inversify";
 
 const prisma  = new PrismaClient();
 
-class userRepository implements IuserRepository {
+@injectable()
+export class UserRepository implements IuserRepository {
     async findByEmail(email: string): Promise<User | null> {
         
         const user = await prisma.user.findUnique({
@@ -56,6 +58,7 @@ class userRepository implements IuserRepository {
 
     async insertUser(userInfo: User , password:string): Promise<any> {
       const {name , email , mobile} = userInfo;
+     
       const savedUser = await prisma.user.create({
        data:{
         name:name,
@@ -108,7 +111,7 @@ class userRepository implements IuserRepository {
              
          }
 
-        async getInstructor(page: number, limit: number , search:any , category:any): Promise<{ instructor: Instructor[] | null; total: number; }> {
+        async getInstructor(page: number, limit: number , search:string , category:string): Promise<{ instructor: Instructor[] | null; total: number; }> {
           const skip = (page - 1) * limit;
           
 
@@ -169,7 +172,6 @@ class userRepository implements IuserRepository {
               },
           })
           
-
           if(data) {
             return data
           }
@@ -239,7 +241,7 @@ class userRepository implements IuserRepository {
           return null
       }
 
-      async createInstructorWallet(id: any , amount:number , type:any , percent:any): Promise<boolean> {
+      async createInstructorWallet(id: string , amount:number , type:any , percent:any): Promise<boolean> {
         
         const admin = await prisma.admin.findFirst();
         
@@ -271,25 +273,25 @@ class userRepository implements IuserRepository {
           await prisma.transaction.create({
               data: {
                   amount: amount,
-                  type: type, // 'credit' or 'debit'
+                  type: type,
                   walletId: existingWallet.id,
               },
           });
           return true;
       } else {
-          // Create a new wallet
+         
           const newWallet = await prisma.wallet.create({
               data: {
                   instructorId: id,
-                  balance: amount, // Initialize with the calculated amount
+                  balance: amount, 
               },
           });
 
-          // Create a transaction for the new wallet
+         
           await prisma.transaction.create({
               data: {
                   amount: amount,
-                  type: type, // 'credit' or 'debit'
+                  type: type, 
                   walletId: newWallet.id,
               },
           });
@@ -450,5 +452,3 @@ class userRepository implements IuserRepository {
       }
 
 }
-
-export default  userRepository

@@ -1,19 +1,20 @@
 import { Request, Response, NextFunction } from "express";
-import adminUseCase from "../../usecase/adminUseCase";
+import {AdminUseCase} from "../../usecase/adminUseCase";
+import { inject } from "inversify";
 
 
-class adminController {
-    constructor(private useCase : adminUseCase){}
+export class AdminController {
+    constructor(@inject("AdminuseCase")private _useCase : AdminUseCase){}
 
     async admin(req:Request ,res:Response ,next:NextFunction)  {
         const {email , password} = req.body;
-        const response = await this.useCase.insertAdmin(email , password);
+         await this._useCase.insertAdmin(email , password);
     }
 
     async verifyLogin(req:Request ,res:Response ,next:NextFunction) {
       try {
          const {email , password} = req.body;
-        const response = await this.useCase.verifyLogin(email , password);
+        const response = await this._useCase.verifyLogin(email , password);
         return res.status(200).json({response});
     }catch(err) {
         next(err);
@@ -22,7 +23,7 @@ class adminController {
 
     async getUserData(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const response = await this.useCase.getUsers();
+            const response = await this._useCase.getUsers();
             return res.status(200).json({response})
 
         }catch(err) {
@@ -32,7 +33,7 @@ class adminController {
 
     async getInstructorData(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const response = await this.useCase.getInstructors();
+            const response = await this._useCase.getInstructors();
             return res.status(200).json({response})
         }catch(err) {
             next(err);
@@ -42,7 +43,7 @@ class adminController {
     async createCategory(req:Request ,res:Response ,next:NextFunction) {
         try{
             const {data} = req.body;
-            const response = await this.useCase.createCat(data);
+            const response = await this._useCase.createCat(data);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -51,7 +52,7 @@ class adminController {
 
     async getCategory(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const response = await this.useCase.getCatData();
+            const response = await this._useCase.getCatData();
             return res.status(200).json({response});
 
         }catch(err) {
@@ -63,7 +64,7 @@ class adminController {
         try{
             const catName = req.body.catName;
             const id = req.body.id as string;
-            const response = await this.useCase.editCatData(catName , id);
+            const response = await this._useCase.editCatData(catName , id);
             return res.status(200).json({response});
 
         }catch(err) {
@@ -74,7 +75,7 @@ class adminController {
     async deleteCategory(req:Request ,res:Response ,next:NextFunction) {
         try{
             const id = req.body.id as string;
-            const response = await this.useCase.deleteCatData(id);
+            const response = await this._useCase.deleteCatData(id);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -84,7 +85,7 @@ class adminController {
     async blockUser(req:Request ,res:Response ,next:NextFunction) {
         try {
             const id = req.body.data.id;
-            const response = await this.useCase.blockUserId(id);
+            const response = await this._useCase.blockUserId(id);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -94,7 +95,7 @@ class adminController {
     async getInstructorById(req:Request ,res:Response ,next:NextFunction) {
         try {
             const id = req.query.id as string
-            const response = await this.useCase.getInstructorDetaild(id);
+            const response = await this._useCase.getInstructorDetaild(id);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -104,7 +105,7 @@ class adminController {
     async approveInstructor(req:Request ,res:Response ,next:NextFunction) {
         try{
             const id = req.body.id
-            const response = await this.useCase.instructorApprovel(id);
+            const response = await this._useCase.instructorApprovel(id);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -114,7 +115,7 @@ class adminController {
     async cancelApproveInstructor(req:Request ,res:Response ,next:NextFunction) {
         try{
             const id = req.body.id
-            const response = await this.useCase.instructorApprovelCancel(id);
+            const response = await this._useCase.instructorApprovelCancel(id);
             return res.status(200).json({response});
 
         }catch(err) {
@@ -125,7 +126,7 @@ class adminController {
     async getUserById(req:Request ,res:Response ,next:NextFunction) {
         try {
             const id = req.query.id as string
-            const response = await this.useCase.getUserDetaild(id);
+            const response = await this._useCase.getUserDetaild(id);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -134,7 +135,7 @@ class adminController {
 
     async getDetails(req:Request ,res:Response ,next:NextFunction)  {
         try{
-            const response = await this.useCase.fetchDetail();
+            const response = await this._useCase.fetchDetail();
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -143,7 +144,7 @@ class adminController {
 
     async fetchTransaction(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const response = await this.useCase.getTransaction();
+            const response = await this._useCase.getTransaction();
             res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -151,5 +152,3 @@ class adminController {
     }
 
 }
-
-export default adminController;

@@ -1,14 +1,16 @@
 import { Request, Response, NextFunction } from "express";
-import chatUseCase from "../../usecase/chatUseCase";
+import {ChatUseCase} from "../../usecase/chatUseCase";
+import { inject, injectable } from "inversify";
 
-class chatController {
-    constructor(private useCase:chatUseCase ){}
+@injectable()
+export class ChatController {
+    constructor(@inject("ChatUseCase") private _useCase:ChatUseCase ){}
 
     async createChatRoom(req:Request , res:Response , next:NextFunction) {
         try{
             const id = req.body.id as string;
             const token = req.cookies.authToken;
-            const response = await this.useCase.accessChatRoom(id , token);
+            const response = await this._useCase.accessChatRoom(id , token);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -18,7 +20,7 @@ class chatController {
     async fetchChats(req:Request , res:Response , next:NextFunction) {
         try {
             const token = req.cookies.authToken;
-            const response = await this.useCase.fetchChatRooms(token);
+            const response = await this._useCase.fetchChatRooms(token);
             return res.status(200).json({response});
         }catch(err) {
             next(err);
@@ -30,7 +32,7 @@ class chatController {
             const content  = req.body.content;
             const chatId  = req.body.chatId as string;
             const token = req.cookies.authToken;
-            const response = await this.useCase.createNewMessage(content , chatId , token);
+            const response = await this._useCase.createNewMessage(content , chatId , token);
             res.status(200).json({response})
 
         }catch(err) {
@@ -41,12 +43,10 @@ class chatController {
     async fetchMessage(req:Request , res:Response , next:NextFunction) {
         try {
             const chatId = req.query.chatId as string;
-            const response = await this.useCase.fetchMsgs(chatId);
+            const response = await this._useCase.fetchMsgs(chatId);
             res.status(200).json({response})
         }catch(err) {
             next(err);
         }
     }
 }
-
-export default chatController

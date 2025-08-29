@@ -1,15 +1,18 @@
+import { injectable } from "inversify";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
 import Otp from "../../entity/Otp";
 import { Session } from "../../entity/Session";
 import Slot from "../../entity/Slot";
 import User from "../../entity/User";
+import { Wallet } from "../../entity/Wallet";
 import IinstructorRepository from "../../interface/repository/IinstructorRepository";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-class instructorRepository implements IinstructorRepository {
+@injectable()
+export class InstructorRepository implements IinstructorRepository {
     constructor() {}
 
     async findByEmail(email: string): Promise<Instructor | null> {
@@ -29,7 +32,6 @@ class instructorRepository implements IinstructorRepository {
               otp: instructorOtp,
             },
           });
-          console.log("repo" , InstructorOtp)
           return InstructorOtp;
     }
 
@@ -54,7 +56,6 @@ class instructorRepository implements IinstructorRepository {
     }
 
     async insertInstructor(insructor: Instructor , hashedPassword:string): Promise<any> {
-        console.log("keee")
         const {name , email , mobile } = insructor;
         const savedInstructor = await prisma.instructor.create({
             data:{
@@ -66,7 +67,6 @@ class instructorRepository implements IinstructorRepository {
      
            })
 
-           console.log("savedInstructor",savedInstructor);
            return savedInstructor
     }
 
@@ -167,13 +167,13 @@ class instructorRepository implements IinstructorRepository {
         return null;
     }
 
-    async scheduleSession(id: any, title: string, start: string, end: string, price: string): Promise<Session | null> {
+    async scheduleSession(id: string, title: string, start: string, end: string, price: string): Promise<Session | null> {
         const existingSession = await prisma.scheduledSession.findUnique({
             where:{
                 instructorId:id
             }
         })
-        console.log("existingsession" , existingSession);
+      
         if(existingSession) {
             const updatedSession = await prisma.scheduledSession.update({
                 where: { id: existingSession.id },
@@ -212,7 +212,7 @@ class instructorRepository implements IinstructorRepository {
         return null
     }
 
-    async getEventsById(id: any): Promise<Session | null> {
+    async getEventsById(id: string): Promise<Session | null> {
         const events = await prisma.scheduledSession.findUnique({
             where:{
                 instructorId:id
@@ -225,17 +225,17 @@ class instructorRepository implements IinstructorRepository {
         return null
     }
 
-    async deleteEventById(id: any, instructorId: string): Promise<boolean> {
-        console.log("iiiis" )
+    async deleteEventById(id: string, instructorId: string): Promise<boolean> {
+
         await prisma.event.delete({
             where: { id },
         });
         return true;
     }
 
-    async getSlotList(id:any): Promise<Slot[] | null> {
+    async getSlotList(id:string): Promise<Slot[] | null> {
 
-        console.log("idddddd" , id);
+      
         const slotList = await prisma.slot.findMany({
             where:{
                 instructorId:id
@@ -249,15 +249,13 @@ class instructorRepository implements IinstructorRepository {
         return null
     }
     
-    async findWallet(token: any): Promise<any> {
+    async findWallet(token: string): Promise<Wallet | null> {
         const wallet = await prisma.wallet.findUnique({
             where:{
               instructorId:token
             },
             include: {transactions:true},
           })
-
-          console.log("sle" , wallet);
 
          if(wallet) {
           return wallet
@@ -267,7 +265,7 @@ class instructorRepository implements IinstructorRepository {
          return null
     }
 
-    async getImgById(id: any): Promise<string | null> {
+    async getImgById(id: string): Promise<string | null> {
         const data = await prisma.instructor.findUnique({
             where:{
                 id:id
@@ -279,7 +277,7 @@ class instructorRepository implements IinstructorRepository {
         return null
     }
 
-    async verifyRoomById(roomId: any): Promise<Slot | null> {
+    async verifyRoomById(roomId: string): Promise<Slot | null> {
         const data = await prisma.slot.findFirst({
             where:{
                 roomId:roomId
@@ -293,4 +291,3 @@ class instructorRepository implements IinstructorRepository {
     }
 }
 
-export default instructorRepository

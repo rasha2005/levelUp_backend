@@ -1,7 +1,7 @@
 interface Slot {
     title:string;
-    startTime:any;
-    endTime:any;
+    startTime:Date;
+    endTime:Date;
     roomId:string,
     userId:string;
     instructorId:string;

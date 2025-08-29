@@ -1,3 +1,4 @@
+import { injectable } from "inversify";
 import Admin from "../../entity/Admin";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
@@ -8,7 +9,8 @@ import { PrismaClient, Wallet } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-class adminRepository implements IadminRepository {
+@injectable()
+export class AdminRepository implements IadminRepository {
     constructor(){}
 
    async insert(email: string, password: string): Promise<Admin | null> {
@@ -49,7 +51,6 @@ class adminRepository implements IadminRepository {
         });
         
         if (existingCat) {
-            console.log("Category already exists:", existingCat);
             return null;
         }
         const catData = await prisma.category.create({
@@ -57,12 +58,10 @@ class adminRepository implements IadminRepository {
                 catName:name
             }
         });
-        console.log("catData" , catData);
         return catData
     }
 
     async getCatData(): Promise<Category[] | null> {
-        console.log("eeeee");
         const category = await prisma.category.findMany();
         return category;
 
@@ -76,7 +75,6 @@ class adminRepository implements IadminRepository {
         });
         
         if (existingCat) {
-            console.log("Category already exists:", existingCat);
             return null;
         }
         try {
@@ -89,7 +87,6 @@ class adminRepository implements IadminRepository {
                 },
             });
             
-            console.log("Category updated successfully:", updatedCategory);
             return updatedCategory ? [updatedCategory] : null;
         } catch (error) {
             console.error("Error updating category:", error);
@@ -98,17 +95,16 @@ class adminRepository implements IadminRepository {
        
     }
 
-    async deleteCatData(id: any): Promise<boolean> {
+    async deleteCatData(id: string): Promise<boolean> {
         const catData = await prisma.category.delete({
             where:{
                 id:id
             }
         })
-        console.log("cat" , catData);
         return true
     }
 
-    async  blockUser(id: any): Promise<User | null> {
+    async  blockUser(id: string): Promise<User | null> {
         const userData = await prisma.user.update({
             where:{
                 id:id
@@ -117,7 +113,6 @@ class adminRepository implements IadminRepository {
                 isBlocked:true
             }
         })
-        console.log("userData",userData);
         if(userData) {
             return userData
         }
@@ -126,7 +121,7 @@ class adminRepository implements IadminRepository {
         
     }
 
-    async getInstructorId(id: any): Promise<Instructor | null> {
+    async getInstructorId(id: string): Promise<Instructor | null> {
         const data = await prisma.instructor.findUnique({
             where:{
                 id:id
@@ -138,7 +133,7 @@ class adminRepository implements IadminRepository {
         return null
     }
 
-     async updateInstructorApprovel(id:any): Promise<Instructor | null> {
+     async updateInstructorApprovel(id:string): Promise<Instructor | null> {
         const data = await prisma.instructor.update({
             where:{
                 id:id
@@ -153,7 +148,7 @@ class adminRepository implements IadminRepository {
         return null
     }
 
-    async cancelApprovel(id: any): Promise<Instructor | null> {
+    async cancelApprovel(id: string): Promise<Instructor | null> {
         const data = await prisma.instructor.update({
             where:{
                 id:id
@@ -169,7 +164,7 @@ class adminRepository implements IadminRepository {
     }
 
 
-    async getUserId(id: any): Promise<User | null> {
+    async getUserId(id: string): Promise<User | null> {
         const data = await prisma.user.findUnique({
             where:{
                 id:id
@@ -229,5 +224,3 @@ class adminRepository implements IadminRepository {
         return details
     }
 }
-
-export default adminRepository;
