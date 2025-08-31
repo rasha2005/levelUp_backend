@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
 import {UserUseCase} from "../../usecase/userUseCase";
+import { StatusCode } from "../../enums/statuscode";
+import { Messages } from "../../enums/message";
 dotenv.config();
 
 
@@ -23,9 +25,9 @@ export class UserController {
             const response = await this._useCase.findUser(user);
 
             if(response.success === true) {
-                return res.status(200).json({ success: true ,token:response.token});
+                return res.status(StatusCode.OK).json({ success: true ,token:response.token});
             }else{
-                return res.status(200).json({success:false , message:"user found"})
+                return res.status(StatusCode.OK).json({success:false , message:Messages.FAILED})
             }
 
         }catch (err) {
@@ -40,7 +42,7 @@ export class UserController {
 
             const response = await this._useCase.saveUser(userOtp , token);
             if(response) {
-                return res.status(200).json(response);
+                return res.status(StatusCode.OK).json(response);
             }
 
         }catch (err) {
@@ -59,7 +61,7 @@ export class UserController {
                 sameSite: "strict",
                 maxAge: REFRESH_MAXAGE
               });
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -68,7 +70,7 @@ export class UserController {
     async home(req:Request ,  res: Response, next: NextFunction) {
         try {
             const response = await this._useCase.getCateogries();
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
 
         }catch(err) {
             next(err);
@@ -80,7 +82,7 @@ export class UserController {
 
             const decodedToken = req.app.locals.decodedToken;
             const response = await this._useCase.getUserDetails(decodedToken);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
 
         }catch(err) {
             next(err);
@@ -91,7 +93,7 @@ export class UserController {
         try{
             const {id , name  , mobile} = req.body;
             const response = await this._useCase.updateUserDetails(id , name  , mobile);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
 
         }catch(err) {
            next(err);
@@ -106,7 +108,7 @@ export class UserController {
             const category = req.query.category as string|| null
 
             const response = await this._useCase.getInstructorDetails(page , limit , search , category);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -117,7 +119,7 @@ export class UserController {
             const {token} = req.body;
     
             const response = await this._useCase.resendOtpByEmail(token);
-            res.status(200).json({response});
+            res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -129,7 +131,7 @@ export class UserController {
             const {current , confirm} = req.body;
     
             const response = await this._useCase.changeUserPassword(decodedToken , current , confirm);
-            res.status(200).json({response});
+            res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -142,7 +144,7 @@ export class UserController {
             const decodedToken = req.app.locals.decodedToken;
             const response = await this._useCase.getInstructorDetail(id,decodedToken);
             
-            return res.status(200).json({response})
+            return res.status(StatusCode.OK).json({response})
         }catch(err) {
             next(err);
         }
@@ -170,7 +172,7 @@ export class UserController {
 
             const response = await  this._useCase.payement(info , token)
            
-            return res.status(200).json({ success: true, data: response });
+            return res.status(StatusCode.OK).json({ success: true, data: response });
 
 
         }catch (err) {
@@ -180,7 +182,7 @@ export class UserController {
 
        async stripeWebhook(req:Request , res:Response , next:NextFunction) {
 
-        const endpointSecret = process.env.WEBHOOK_SECRET_LOCAL!.toString();
+        const endpointSecret = process.env.WEBHOOK_SECRET!.toString();
         
         const sig = req.headers['stripe-signature'];
         if (!sig) {
@@ -216,7 +218,7 @@ export class UserController {
             const decodedToken = req.app.locals.decodedToken;
            
             const response = await this._useCase.getSlotDetails(decodedToken);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err){
             next(err);
         }
@@ -228,7 +230,7 @@ export class UserController {
             const {img} = req.body;
             
             const response = await this._useCase.updateUserImg(token , img);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -239,7 +241,7 @@ export class UserController {
             
             const decodedToken = req.app.locals.decodedToken;
             const response = await this._useCase.getUserImg(decodedToken);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -250,7 +252,7 @@ export class UserController {
             const roomId =  req.query.roomId as string;
             const userId = req.query.userId as string
             const response = await this._useCase.verifyRoomId(roomId , userId);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -262,7 +264,7 @@ export class UserController {
             const id  = req.body.id as string;
             
             const response = await this._useCase.updateRating(rating , id);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
 
 
         }catch(err) {
@@ -278,7 +280,7 @@ export class UserController {
             const response = await this._useCase.googleCallback(email , name , img);
             
             
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -290,7 +292,7 @@ export class UserController {
             const value  = req.body.value ;
             const decodedToken = req.app.locals.decodedToken;
             const response = await this._useCase.addInstructorReview(instructorId , value , decodedToken);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -301,7 +303,7 @@ export class UserController {
             
             const refreshToken = req.cookies.refreshToken;
             const response = await this._useCase.verifyRefreshToken(refreshToken);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }

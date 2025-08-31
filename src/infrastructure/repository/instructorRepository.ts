@@ -8,12 +8,15 @@ import User from "../../entity/User";
 import { Wallet } from "../../entity/Wallet";
 import IinstructorRepository from "../../interface/repository/IinstructorRepository";
 import { PrismaClient } from "@prisma/client";
+import { GenericRepository } from "./GenericRepository";
 
 const prisma = new PrismaClient();
 
 @injectable()
-export class InstructorRepository implements IinstructorRepository {
-    constructor() {}
+export class InstructorRepository extends GenericRepository<Instructor> implements IinstructorRepository {
+    constructor() {
+        super(prisma, prisma.instructor);
+      }
 
     async findByEmail(email: string): Promise<Instructor | null> {
 

@@ -8,11 +8,14 @@ import Slot from "../../entity/Slot";
 import { Events } from "../../entity/Session";
 import Review from "../../entity/Review";
 import { injectable } from "inversify";
-
-const prisma  = new PrismaClient();
+import { GenericRepository } from "./GenericRepository";
+import prisma from "../service/prismaClient";
 
 @injectable()
-export class UserRepository implements IuserRepository {
+export class UserRepository extends GenericRepository<User> implements IuserRepository {
+  constructor() {
+    super(prisma, prisma.user);
+  }
     async findByEmail(email: string): Promise<User | null> {
         
         const user = await prisma.user.findUnique({

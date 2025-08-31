@@ -7,6 +7,8 @@ import IhashPassword from "../interface/services/IhashPassword";
 import Ijwt from "../interface/services/Ijwt";
 import IsendEmailOtp from "../interface/services/IsendEmailOtp";
 import { InstructorDTO } from "./dtos/InstructorDTO";
+import { StatusCode } from "../enums/statuscode";
+import { Messages } from "../enums/message";
 
 @injectable()
 export class InstructorUseCase {
@@ -18,30 +20,43 @@ export class InstructorUseCase {
        @inject("IhashPassword") private _hashPassword: IhashPassword,
     ){}
 
-    async findInsrtuctor(instructor:Instructor) {
+    async findInstructor(instructor: Instructor) {
+        try {
+          const { email } = instructor;
       
-            try {
-        const {email} = instructor
-
-        const res = await this._instructorRespository.findByEmail(email);
-       
-        if(res) {
-            return {status:200 , success:false , message:"user found" };
-        }else{
-            const otp = this._generateOtp.createOtp();
-            
-            await this._sendEmailOtp.sendEmail(email , otp);
-            const instructorOtp = await this._instructorRespository.saveOtp(email , otp);
-            
-            const token = this._jwt.otpToken(instructor);
-            
-            return {status:200 , success:true , instructorOtp , token };
+          const existingInstructor = await this._instructorRespository.findByEmail(email);
+      
+          if (existingInstructor) {
+            return {
+              status: StatusCode.OK,
+              success: false,
+              message: Messages.FOUND,
+            };
+          }
+      
+          const otp = this._generateOtp.createOtp();
+      
+          await this._sendEmailOtp.sendEmail(email, otp);
+          const instructorOtp = await this._instructorRespository.saveOtp(email, otp);
+      
+          const token = this._jwt.otpToken(instructor);
+      
+          return {
+            status: StatusCode.OK,
+            success: true,
+            message: Messages.FETCHED,
+            instructorOtp,
+            token,
+          };
+        } catch (err: any) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
-    }catch(err:any) {
-        throw(err)
-    }
-    
-    }
+      }
+      
 
     async saveInstructor(instructorOtp:string , token:string) {
         try{
@@ -61,10 +76,10 @@ export class InstructorUseCase {
                 const refreshToken = this._jwt.refreshToken(instructor.id , instructor.email , "Instructor");
 
                
-                return {success:true , message:"user saved successfully" ,authToken:authToken , refreshToken};
+                return {success:true , message:Messages.CREATED ,authToken:authToken , refreshToken};
             }
         }
-        return {success:false , message:"Invalid Otp"};
+        return {success:false , message:Messages.INVALID};
     }catch(err:any) {
         throw(err)
     }
@@ -80,14 +95,14 @@ export class InstructorUseCase {
             const refreshToken = this._jwt.refreshToken( instructor.id , instructor.email , "Instructor")
             if(password) {
                 
-                return {success:true , message:"user matched succesfully" , authToken:token , refreshToken};
+                return {success:true , message:Messages.FETCHED , authToken:token , refreshToken};
 
             }else{
-                return {success:false , message:"Invalid password"};
+                return {success:false , message:Messages.INVALID};
             }
 
         }else{
-            return {success:false , message:"Invalid Email"};
+            return {success:false , message:Messages.FAILED};
         }
       }catch(err:any) {
         throw(err)
@@ -99,9 +114,9 @@ export class InstructorUseCase {
         const res = await this._instructorRespository.getCategoryList();
        
         if(res) {
-            return {success:true , message:"category fetched successfully" , res}
+            return {success:true , message:Messages.FETCHED, res}
         }else{
-            return {success:false , message:"category not found"};
+            return {success:false , message:Messages.FAILED};
         }
     }catch(err:any) {
         throw(err)
@@ -114,9 +129,9 @@ export class InstructorUseCase {
         if(token){
             const res = await this._instructorRespository.updateInstructorDetials(token.email ,description , experienceCategory ,experienceCertificate , resume);
             if(res) {
-                return {success:true , message:"updated successfully" , res}
+                return {success:true , message:Messages.UPDATED , res}
             }else{
-                return {success:false , message:"something went wrong"};
+                return {success:false , message:Messages.FAILED};
             }
         }
     }catch(err:any){
@@ -132,9 +147,9 @@ export class InstructorUseCase {
                 const res = await this._instructorRespository.getInstructorByEmail(token.email );
                 if(res) {
                     const instructorDto = InstructorDTO.fromEntity(res)
-                    return {success:true , message:"updated successfully" , res:instructorDto}
+                    return {success:true , message:Messages.UPDATED , res:instructorDto}
                 }else{
-                    return {success:false , message:"something went wrong"};
+                    return {success:false ,message:Messages.FAILED};
                 }
             }
         }catch(err:any){
@@ -149,9 +164,9 @@ export class InstructorUseCase {
             const res = await this._instructorRespository.editInstructorByEmail(token.email ,name , mobile);
             if(res) {
                 const instructorDto = InstructorDTO.fromEntity(res)
-                return {success:true , message:"updated successfully" , res:instructorDto}
+                return {success:true , message:Messages.UPDATED , res:instructorDto}
             }else{
-                return {success:false , message:"something went wrong"};
+                return {success:false , message:Messages.FAILED};
             }
 
     }
@@ -167,9 +182,9 @@ export class InstructorUseCase {
             const res = await this._instructorRespository.updateProfileByEmail(token.email ,img);
             if(res) {
                 const instructorDto = InstructorDTO.fromEntity(res)
-                return {success:true , message:"updated successfully" , res:instructorDto}
+                return {success:true , message:Messages.UPDATED , res:instructorDto}
             }else{
-                return {success:false , message:"something went wrong"};
+                return {success:false , message:Messages.FAILED};
             }
 
     }
@@ -198,7 +213,7 @@ async resendOtpByEmail(token:string) {
         }
        
     }
-    return {success:false , message:"something went wrong"};
+    return {success:false , message:Messages.FAILED};
         }catch(err:any){
             throw(err)
         }
@@ -219,13 +234,13 @@ async resendOtpByEmail(token:string) {
                     const instructorDto = InstructorDTO.fromEntity(updatedInstructor)
                     return {success:true , message:'password updated successfully' , updatedInstructor:instructorDto};
                 }else{
-                    return{success:false , message:'something went wrong'}
+                    return{success:false , message:Messages.FAILED}
                 }
             }else{
                 return {success:false , message:'Incorrect password'}
             }
         }else{
-            return {success:false , message:"something went wrong"};
+            return {success:false , message:Messages.FAILED};
         }
     }
     }catch(err:any){
@@ -241,12 +256,12 @@ async resendOtpByEmail(token:string) {
         const session = await this._instructorRespository.scheduleSession(token.id , title , start , end , price);
         
         if(session) {
-            return {success:true , message:"session scheduled successfully" , session};
+            return {success:true , message:Messages.UPDATED , session};
         }else{
-            return {success:false , message:"something went wrong"};
+            return {success:false ,message:Messages.FAILED};
         }
     }else{
-        return {success:true , message:"something went wrong"};
+        return {success:true , message:Messages.FAILED};
     }
     }catch(err:any){
         throw(err)
@@ -261,9 +276,9 @@ async resendOtpByEmail(token:string) {
         const instructorDto = InstructorDTO.fromEntity(instructor!)
         if(token) {
             const events = await this._instructorRespository.getEventsById(token.id);
-            return {success:true , message:"events retrived successfully" , events , instructor:instructorDto };
+            return {success:true , message:Messages.FOUND , events , instructor:instructorDto };
         }else{
-            return {success:false , message:"something went wrong"};
+            return {success:false , message:Messages.FAILED};
         }
     }catch(err:any){
         throw(err)
@@ -275,12 +290,12 @@ async resendOtpByEmail(token:string) {
         if(token) {
             const isDeleted = await this._instructorRespository.deleteEventById(id , token.id);
             if(isDeleted) {
-                return {success:true , message:'event deleted successfully'};
+                return {success:true , message:Messages.DELETED};
             }else{
-                return {success:false , message:"something went wrong"}
+                return {success:false ,  message:Messages.FAILED}
             }
         }else{
-            return {success:false , message:"something went wrong"}
+            return {success:false ,  message:Messages.FAILED}
         }
     }catch(err:any){
         throw(err)
@@ -291,9 +306,9 @@ async resendOtpByEmail(token:string) {
         const slot = await this._instructorRespository.getSlotList(token?.id);
         
         if(slot) {
-         return {success:true , message:"events retrived successfully" , slot};
+         return {success:true , message:Messages.FOUND , slot};
         }else{
-         return {success:false , message:"something went wrong"};
+         return {success:false , message:Messages.FAILED};
         }
     }catch(err:any){
         throw(err)
@@ -310,9 +325,9 @@ async resendOtpByEmail(token:string) {
         
         
         if(slot) {
-            return {success:true , message:"slots found successfully" , slot , Wallet}
+            return {success:true , message:Messages.FOUND , slot , Wallet}
         }else{
-            return {success:false , message:"not found"}
+            return {success:false , message:Messages.FAILED}
         }
     }catch(err:any){
         throw(err)
@@ -324,9 +339,9 @@ async resendOtpByEmail(token:string) {
         try{
         const image = await this._instructorRespository.getImgById(token?.id);
         if(image) {
-            return {success:true , message:"image fetched successfully" , image};
+            return {success:true , message:Messages.FETCHED , image};
         }else{
-            return {success:false , message:"something went wrong"}
+            return {success:false , message:Messages.FAILED}
         }
     }catch(err:any){
         throw(err)

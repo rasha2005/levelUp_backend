@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import {ChatUseCase} from "../../usecase/chatUseCase";
 import { inject, injectable } from "inversify";
+import { StatusCode } from "../../enums/statuscode";
 
 @injectable()
 export class ChatController {
@@ -11,7 +12,7 @@ export class ChatController {
             const id = req.body.id as string;
             const token = req.cookies.authToken;
             const response = await this._useCase.accessChatRoom(id , token);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -21,7 +22,7 @@ export class ChatController {
         try {
             const token = req.cookies.authToken;
             const response = await this._useCase.fetchChatRooms(token);
-            return res.status(200).json({response});
+            return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
@@ -33,7 +34,7 @@ export class ChatController {
             const chatId  = req.body.chatId as string;
             const token = req.cookies.authToken;
             const response = await this._useCase.createNewMessage(content , chatId , token);
-            res.status(200).json({response})
+            res.status(StatusCode.OK).json({response})
 
         }catch(err) {
             next(err);
@@ -44,7 +45,7 @@ export class ChatController {
         try {
             const chatId = req.query.chatId as string;
             const response = await this._useCase.fetchMsgs(chatId);
-            res.status(200).json({response})
+            res.status(StatusCode.OK).json({response})
         }catch(err) {
             next(err);
         }

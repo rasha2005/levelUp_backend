@@ -3,11 +3,14 @@ import IchatRepository from "../../interface/repository/IchatRepository";
 import Chat from "../../entity/Chat";
 import Message from "../../entity/Message";
 import { injectable } from "inversify";
-
-const prisma  = new PrismaClient();
+import { GenericRepository } from "./GenericRepository";
+import prisma from "../service/prismaClient";
 
 @injectable()
-export class ChatRepository implements IchatRepository {
+export class ChatRepository extends GenericRepository<Chat> implements IchatRepository {
+    constructor() {
+        super(prisma, prisma.instructor);
+      }
     async accessChat(id: string, tokenId: string): Promise<Chat|null> {
         const chat = await prisma.chat.findFirst({
             where:{

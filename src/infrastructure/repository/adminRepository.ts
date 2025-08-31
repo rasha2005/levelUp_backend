@@ -5,13 +5,15 @@ import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
 import User from "../../entity/User";
 import IadminRepository from "../../interface/repository/IadminRepository";
-import { PrismaClient, Wallet } from "@prisma/client";
+import { GenericRepository } from "./GenericRepository";
+import prisma from "../service/prismaClient";
 
-const prisma = new PrismaClient();
 
 @injectable()
-export class AdminRepository implements IadminRepository {
-    constructor(){}
+export class AdminRepository extends GenericRepository<Admin> implements IadminRepository {
+    constructor() {
+        super(prisma, prisma.user);
+      }
 
    async insert(email: string, password: string): Promise<Admin | null> {
         const savedAdmin = await prisma.admin.create({
