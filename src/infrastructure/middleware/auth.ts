@@ -7,7 +7,7 @@ const userRepository = new UserRepository();
 
 const VALID_ROLES = ["User", "Admin", "Instructor"];
 
-const userAuth = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+const Auth = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   const authToken = req.cookies?.authToken;
   const refreshToken = req.cookies?.refreshToken;
   const queryToken = req.query?.token as string | undefined;
@@ -62,4 +62,4 @@ const userAuth = async (req: Request, res: Response, next: NextFunction): Promis
   }
 };
 
-export default userAuth;
+export default Auth;
