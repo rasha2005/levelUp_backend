@@ -54,7 +54,6 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".levelup.icu" : undefined,
-            path: "/"
         });
     
         res.clearCookie("refreshToken", {
@@ -62,7 +61,6 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".levelup.icu" : undefined,
-            path: "/"
         });
         return res.status(403).send({ success: false, message: "User blocked" });
       }
