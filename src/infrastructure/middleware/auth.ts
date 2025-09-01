@@ -47,8 +47,23 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
 
       const userData = await userRepository.findByEmail(verifiedToken.email);
       if (userData?.isBlocked) {
-        res.clearCookie("authToken");
-        res.clearCookie("refreshToken");
+        const isProd = process.env.NODE_ENV === "production";
+
+        res.clearCookie("authToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".levelup.icu" : undefined,
+            path: "/"
+        });
+    
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".levelup.icu" : undefined,
+            path: "/"
+        });
         return res.status(403).send({ success: false, message: "User blocked" });
       }
     }
