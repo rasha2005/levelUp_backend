@@ -213,20 +213,34 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
       }
 
      async createSlot(details: any): Promise<Slot | null> {
-          const slot = await prisma.slot.create({
-            data:{
-              title:details.title,
-              startTime:details.start,
-              endTime:details.end,
-              roomId:details.roomId,
-              userId:details.userId,
-              instructorId:details.instructorId
-            }
-          })
-          if(slot) {
-            return slot
-          }
-          return null
+      const existingSlot = await prisma.slot.findFirst({
+        where: {
+            startTime: details.start,
+            endTime: details.end,
+            roomId: details.roomId,
+            userId: details.userId,
+            instructorId: details.instructorId,
+        },
+    });
+
+    if (existingSlot) {
+        console.log("Duplicate slot detected, not creating a new one");
+        return null;
+    }
+
+
+    const slot = await prisma.slot.create({
+        data: {
+            title: details.title,
+            startTime: details.start,
+            endTime: details.end,
+            roomId: details.roomId,
+            userId: details.userId,
+            instructorId: details.instructorId,
+        },
+    });
+
+    return slot;
       }
 
       async updateEventStatus(id: string): Promise<Events | null> {
