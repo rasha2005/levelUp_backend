@@ -50,17 +50,17 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
         const isProd = process.env.NODE_ENV === "production";
 
         res.clearCookie("authToken", {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "none" : "lax",
-            domain: isProd ? ".levelup.icu" : undefined,
+          path: '/',
+          domain: isProd ? ".levelup.icu" : undefined,
+          secure: isProd,
+          sameSite: isProd ? "none" : "lax",
         });
-    
+        
         res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "none" : "lax",
-            domain: isProd ? ".levelup.icu" : undefined,
+          path: '/',
+          domain: isProd ? ".levelup.icu" : undefined,
+          secure: isProd,
+          sameSite: isProd ? "none" : "lax",
         });
         return res.status(403).send({ success: false, message: "User blocked" });
       }
