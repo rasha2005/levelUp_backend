@@ -57,8 +57,9 @@ export class UserController {
             const REFRESH_MAXAGE = parseInt(process.env.REFRESH_MAXAGE!);
             res.cookie("refreshToken", response.refreshToken, {
                 httpOnly: true,
-                secure: true,
-                sameSite: "strict",
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                domain: ".levelup.icu",
                 maxAge: REFRESH_MAXAGE
               });
             return res.status(StatusCode.OK).json({response});
