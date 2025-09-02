@@ -244,7 +244,10 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
                 instructorId:id
                 
             },
-            include:{user:true}
+            include:{user:true},
+            orderBy: {
+                createdAt: "desc", 
+              },
         })
         if(slotList){
             return slotList

@@ -69,7 +69,7 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
 
     }
 
-    async editCatData(name:string , id:any): Promise<Category[] | null> {
+    async editCatData(name:string , id:string): Promise<Category[] | null> {
         const existingCat = await prisma.category.findUnique({
             where: {
                 catName: name,

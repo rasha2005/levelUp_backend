@@ -9,6 +9,7 @@ import IsendEmailOtp from "../interface/services/IsendEmailOtp";
 import { InstructorDTO } from "./dtos/InstructorDTO";
 import { StatusCode } from "../enums/statuscode";
 import { Messages } from "../enums/message";
+import { UserDTO } from "./dtos/UserDTO";
 
 @injectable()
 export class InstructorUseCase {
@@ -306,7 +307,13 @@ async resendOtpByEmail(token:string) {
         const slot = await this._instructorRespository.getSlotList(token?.id);
         
         if(slot) {
-         return {success:true , message:Messages.FOUND , slot};
+            const sanitizedSlots = slot.map((slot: any) => {
+                return {
+                  ...slot,
+                  user: UserDTO.fromEntity(slot.user) 
+                };
+              });
+         return {success:true , message:Messages.FOUND , slot:sanitizedSlots};
         }else{
          return {success:false , message:Messages.FAILED};
         }
