@@ -22,12 +22,12 @@ app.use(morgan("combined", { stream: accessLogStream }));
 
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.originalUrl === '/api/user/webhook') {
-      express.raw({type: 'application/json'})(req, res, next);
-    } else {
-      express.json()(req, res, next);
-    }
-  });
+  if (req.originalUrl === "/api/v1/user/webhook") {
+    express.raw({ type: "application/json" })(req, res, next);
+  } else {
+    express.json()(req, res, next);
+  }
+});
 
 app.use(express.urlencoded({ extended: true }));
 

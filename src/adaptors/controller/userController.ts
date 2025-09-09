@@ -192,7 +192,7 @@ export class UserController {
         } 
         let event;
         try {
-            
+
             event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
             
           } catch (err: any) {
