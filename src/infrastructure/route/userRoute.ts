@@ -21,7 +21,7 @@ router.post('/resendOtp' ,(req , res, next) => {userController.resendInstructorO
 router.post('/changePassword' , userAuth,(req , res, next) => {userController.changePassword(req ,res , next)});
 router.get('/getInstructorData' , userAuth , (req , res, next) => {userController.getInstructor(req ,res , next)});
 router.post('/create-checkout-session', (req , res, next) => {userController.payement(req ,res , next)});
-router.post('/webhook', express.raw({type: ['application/json', 'application/json; charset=utf-8']}), (req, res, next ) => userController.stripeWebhook(req, res, next));
+router.post('/webhook',  (req, res, next ) => userController.stripeWebhook(req, res, next));
 router.get('/getSlots' , userAuth ,(req , res, next) => {userController.getSlots(req ,res , next)});
 router.post('/setImg' , userAuth,(req , res, next) => {userController.setImg(req ,res , next)});
 router.get('/getImg' , userAuth ,(req , res, next) => {userController.getImg(req ,res , next)});

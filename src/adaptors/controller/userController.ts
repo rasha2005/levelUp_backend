@@ -200,10 +200,11 @@ export class UserController {
             
           }
 
+          let session 
         switch (event?.type) {
             case "checkout.session.completed":
-             
-              const session = event.data.object;
+               session = event.data.object;
+              
               await this._useCase.successPayment(session);
               break;
 

@@ -336,13 +336,13 @@ export class UserUseCase {
       async successPayment(session:any) {
         try {
           const {instructorId , userId , id , price} = session.metadata;
-          await this._iuserRepository.createSlot(session.metadata);
-          await this._iuserRepository.updateEventStatus(id);
+            await this._iuserRepository.createSlot(session.metadata);
+           await this._iuserRepository.updateEventStatus(id);
           const priceNumber = parseFloat(price);
           const percent = price * 0.15;
           const amount =  priceNumber - percent;
           const type = "credit";
-          await this._iuserRepository.createInstructorWallet(instructorId , amount , type , percent);
+           await this._iuserRepository.createInstructorWallet(instructorId , amount , type , percent);
           return {status: StatusCode.OK, success:true , message: Messages.UPDATED};
         } catch(err:any) {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};

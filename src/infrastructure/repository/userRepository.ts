@@ -212,38 +212,44 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           return false
       }
 
-     async createSlot(details: Slot): Promise<Slot | null> {
-      const existingSlot = await prisma.slot.findFirst({
-        where: {
-            startTime: details.startTime,
-            endTime: details.startTime,
-            roomId: details.roomId,
-            userId: details.userId,
-            instructorId: details.instructorId,
-        },
-    });
+     async createSlot(details: any): Promise<Slot | null > {
+      try{
 
-    if (existingSlot) {
-        console.log("Duplicate slot detected, not creating a new one");
-        return null;
-    }
-
-
-    const slot = await prisma.slot.create({
-        data: {
-            title: details.title,
-            startTime: details.startTime,
-            endTime: details.startTime,
-            roomId: details.roomId,
-            userId: details.userId,
-            instructorId: details.instructorId,
-        },
-    });
-
-    return slot;
+        const existingSlot = await prisma.slot.findFirst({
+          where: {
+              startTime: details.start,
+              endTime: details.end,
+              roomId: details.roomId,
+              userId: details.userId,
+              instructorId: details.instructorId,
+          },
+      });
+  
+      if (existingSlot) {
+          console.log("Duplicate slot detected, not creating a new one");
+          return null;
+      }
+  
+  
+      const slot = await prisma.slot.create({
+          data: {
+              title: details.title,
+              startTime: details.start,
+              endTime: details.end,
+              roomId: details.roomId,
+              userId: details.userId,
+              instructorId: details.instructorId,
+          },
+      });
+  
+      return slot;
+      }catch(err:any){
+        return null
+      }
       }
 
       async updateEventStatus(id: string): Promise<Events | null> {
+      
           const updatedData = await prisma.event.update({
             where:{
               id:id

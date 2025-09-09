@@ -21,7 +21,7 @@ interface IuserRepository {
     getInstructorId(id:string):Promise<Instructor | null>
     getReviewById(id:string): Promise<Review[] | null>
     reviewExist(instructorId:string , userId:string): Promise<boolean>
-    createSlot(data:any): Promise<Slot | null>
+    createSlot(data:any): Promise<Slot | null >
     updateEventStatus(id:string): Promise<Events | null >
     createInstructorWallet(id:any, amount:number , type:any , percent:any): Promise<boolean>
     findSlots(id:string): Promise<User | null>
