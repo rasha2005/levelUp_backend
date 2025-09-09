@@ -32,7 +32,7 @@ class stripe implements Istripe {
                     title , start , end , price , instructorId , id , roomId ,userId
                 }
             })
-            console.log("Stripe session created:", session);
+           
 return session.url;
         }catch(err) {
             console.log(err);

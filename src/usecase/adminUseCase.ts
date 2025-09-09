@@ -5,6 +5,8 @@ import Ijwt from "../interface/services/Ijwt";
 import IsendEmailOtp from "../interface/services/IsendEmailOtp";
 import { StatusCode } from "../enums/statuscode";
 import { Messages } from "../enums/message";
+import { UserDTO } from "./dtos/UserDTO";
+import { InstructorDTO } from "./dtos/InstructorDTO";
 
 @injectable()
 export class AdminUseCase {
@@ -45,8 +47,9 @@ export class AdminUseCase {
       async getUsers() {
         try {
           const userData = await this._adminRepository.getUser();
-          if (userData) {
-            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, userData };
+          if (userData  && userData.length > 0) {
+            const usersDto = userData.map(user => UserDTO.fromEntity(user));
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, userData:usersDto };
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }
@@ -59,7 +62,9 @@ export class AdminUseCase {
         try {
           const instructorData = await this._adminRepository.getInstructor();
           if (instructorData) {
-            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData };
+            const instructorDto = instructorData.map(i => InstructorDTO.fromEntity(i));
+
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto };
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }
@@ -124,7 +129,9 @@ export class AdminUseCase {
         try {
           const user = await this._adminRepository.blockUser(id);
           if (user) {
-            return { status: StatusCode.OK, success: true, message: Messages.UPDATED, user };
+            const userDTO = UserDTO.fromEntity(user);
+    
+            return { status: StatusCode.OK, success: true, message: Messages.UPDATED, user:userDTO };
           } else {
             return { status: StatusCode.INTERNAL_SERVER_ERROR, success: false, message: Messages.FAILED };
           }
@@ -137,7 +144,8 @@ export class AdminUseCase {
         try {
           const instructor = await this._adminRepository.getInstructorId(id);
           if (instructor) {
-            return { status: StatusCode.OK, success: true, message: Messages.FOUND, instructor };
+            const instructorDto = InstructorDTO.fromEntity(instructor);
+            return { status: StatusCode.OK, success: true, message: Messages.FOUND, instructor:instructorDto };
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }
@@ -176,7 +184,8 @@ export class AdminUseCase {
         try {
           const user = await this._adminRepository.getUserId(id);
           if (user) {
-            return { status: StatusCode.OK, success: true, message: Messages.FOUND, user };
+            const userDTO = UserDTO.fromEntity(user)
+            return { status: StatusCode.OK, success: true, message: Messages.FOUND, user:userDTO };
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }

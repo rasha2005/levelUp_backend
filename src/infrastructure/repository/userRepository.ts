@@ -84,7 +84,7 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
        
    }
 
-   async editUserDetails(id:any ,name: string,  mobile: string): Promise<User | null> {
+   async editUserDetails(id:string ,name: string,  mobile: string): Promise<User | null> {
        const updatedUser = await prisma.user.update({
         where:{
           id:id
@@ -212,11 +212,11 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           return false
       }
 
-     async createSlot(details: any): Promise<Slot | null> {
+     async createSlot(details: Slot): Promise<Slot | null> {
       const existingSlot = await prisma.slot.findFirst({
         where: {
-            startTime: details.start,
-            endTime: details.end,
+            startTime: details.startTime,
+            endTime: details.startTime,
             roomId: details.roomId,
             userId: details.userId,
             instructorId: details.instructorId,
@@ -232,8 +232,8 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
     const slot = await prisma.slot.create({
         data: {
             title: details.title,
-            startTime: details.start,
-            endTime: details.end,
+            startTime: details.startTime,
+            endTime: details.startTime,
             roomId: details.roomId,
             userId: details.userId,
             instructorId: details.instructorId,

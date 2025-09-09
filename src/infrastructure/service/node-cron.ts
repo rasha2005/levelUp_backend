@@ -21,10 +21,8 @@ const adminUseCaseInstance = new AdminUseCase( adminRepository,hashPassword, jwt
 
 const startCronJob = () => {
   cron.schedule("0 0 * * *", async () => {
-    console.log("Executing task at midnight...");
     try {
       await adminUseCaseInstance.reminder();
-      console.log("Reminder executed successfully.");
     } catch (error) {
       console.error("Error in reminder function:", error);
     }

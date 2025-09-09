@@ -107,19 +107,20 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
     }
 
     async  blockUser(id: string): Promise<User | null> {
-        const userData = await prisma.user.update({
-            where:{
-                id:id
-            },
-            data:{
-                isBlocked:true
-            }
-        })
-        if(userData) {
-            return userData
-        }
+        const existingUser = await prisma.user.findUnique({
+            where: { id }
+          });
+        
+          if (!existingUser) return null;
+        
+         
+          const updatedUser = await prisma.user.update({
+            where: { id },
+            data: { isBlocked: !existingUser.isBlocked }
+          });
+        
 
-        return null
+        return updatedUser
         
     }
 
@@ -203,24 +204,24 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
     async getTransactionDetails(): Promise<any> {
         const details = await prisma.instructor.findMany({
             select: {
-                id: true, // Select instructor's id
-                name: true, // Select instructor's name
+                id: true, 
+                name: true, 
                 wallet: {
                   select: {
-                    id: true, // Select wallet id
-                    balance: true, // Select wallet's balance (if applicable)
+                    id: true,
+                    balance: true, 
                     transactions: {
                       select: {
-                        id: true, // Select transaction id
-                        amount: true, // Select transaction amount
-                        createdAt: true, // Select the creation date of the transaction
+                        id: true, 
+                        amount: true, 
+                        createdAt: true, 
                       },
                     },
                   },
                 },
               },
         });
-        console.log("dee" , details)
+    
        
 
         return details

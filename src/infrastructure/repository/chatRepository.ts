@@ -89,7 +89,7 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
         return null
     }
 
-    async findChat(chatId: any): Promise<Chat | null> {
+    async findChat(chatId: string): Promise<Chat | null> {
         const chat = await prisma.chat.findUnique({
             where:{
                 id:chatId

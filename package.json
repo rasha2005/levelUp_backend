@@ -33,6 +33,7 @@
     "nodemailer": "^6.9.15",
     "prisma": "^4.16.0",
     "reflect-metadata": "^0.2.2",
+    "rotating-file-stream": "^3.2.7",
     "socket.io": "^4.8.1",
     "stripe": "^17.3.1",
     "uuid": "^11.0.3"

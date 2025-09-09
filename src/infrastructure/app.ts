@@ -7,14 +7,19 @@ import instructorRoute from './route/instructorRoute'
 import adminRoute from './route/adminRoute'
 import chatRoute from './route/chatRoute'
 import startCronJob from "./service/node-cron";
+
 import morgan from "morgan";
+import { accessLogStream } from "./service/morgan";
 
 
 dotenv.config();
 
+
 const app:Express = express();
 const isProd = process.env.NODE_ENV === "production";
 app.use(morgan(isProd ? "combined" : "dev"));
+app.use(morgan("combined", { stream: accessLogStream }));
+
 
 app.use((req: Request, res: Response, next: NextFunction) => {
     if (req.originalUrl === '/api/user/webhook') {
@@ -27,8 +32,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 4000
-console.log("process.env.BASE_URL",process.env.FRONT_URL)
-
 app.use(
   cors({ 
     origin: process.env.FRONT_URL, 
@@ -41,10 +44,10 @@ app.use(
 
 app.use(cookieParser());
 
-app.use('/api/user',userRoute);
-app.use('/api/instructor',instructorRoute);
-app.use('/api/admin',adminRoute);
-app.use('/api/chat',chatRoute)
+app.use('/api/v1/user',userRoute);
+app.use('/api/v1/instructor',instructorRoute);
+app.use('/api/v1/admin',adminRoute);
+app.use('/api/v1/chat',chatRoute)
 
 startCronJob();
 

@@ -56,7 +56,7 @@ class sendEmailOtp implements IsendEmailOtp {
         // Send email and handle result or errors
         try {
             await transporter.sendMail(message);
-            console.log('Email sent successfully');
+
         } catch (error) {
             console.error('Error sending email:', error);
             throw new Error('Failed to send email');
@@ -113,7 +113,6 @@ class sendEmailOtp implements IsendEmailOtp {
         // Send email and handle result or errors
         try {
             await transporter.sendMail(message);
-            console.log('Email sent successfully');
         } catch (error) {
             console.error('Error sending email:', error);
             throw new Error('Failed to send email');
