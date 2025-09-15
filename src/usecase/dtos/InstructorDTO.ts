@@ -18,6 +18,7 @@ export class InstructorDTO {
     chats? : Chat[] | null
     rating? : number | null
     isApproved?: boolean
+    specializations : string[] |null
 
     constructor(instructor: Instructor) {
         this.id = instructor.id;
@@ -33,7 +34,8 @@ export class InstructorDTO {
         this.wallet = instructor.wallet || null;
         this.chats = instructor.chats || null;
         this.rating = instructor.rating || null;
-        this.isApproved = instructor.isApproved
+        this.isApproved = instructor.isApproved;
+        this.specializations = instructor.specializations || null
     }
     
 

@@ -71,10 +71,10 @@ export class InstructorController {
 
    async updateInstructor(req:Request , res:Response , next:NextFunction) {
     try {
-        const {description , experienceCategory ,experienceCertificate , resume} = req.body;
+        const {description , experienceCategory ,experienceCertificate , resume , specialization} = req.body;
         const token = req.app.locals.decodedToken;
-        const response = await this.useCase.updateInstructor(token.authToken , description , experienceCategory ,experienceCertificate , resume);
-        
+
+        const response = await this.useCase.updateInstructor(token , description , experienceCategory ,experienceCertificate , resume ,specialization);
         res.status(StatusCode.OK).json({response});
     }catch(err) {
         next(err);
@@ -211,6 +211,17 @@ export class InstructorController {
         return res.status(StatusCode.OK).json({response});
     }catch(err) {
         next(err)
+    }
+   }
+
+   async joinedRoom(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const roomId =  req.body.roomId as string;
+        const response = await this.useCase.updateRoomJoin(roomId);
+        return res.status(StatusCode.OK).json({response});
+    }catch(err) {
+        next(err);
     }
    }
 }

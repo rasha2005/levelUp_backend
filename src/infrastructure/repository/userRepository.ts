@@ -124,7 +124,13 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
                 ? {
                     OR: [
                       { name: { contains: search, mode: Prisma.QueryMode.insensitive } },
-                      // { email: { contains: search, mode: Prisma.QueryMode.insensitive } },
+                      {
+                        specializations: {
+                          has: search, 
+                          
+                        },
+                      }
+                      
                     ],
                   }
                 : {}, 
@@ -472,6 +478,16 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           return true
         }
         return false
+      }
+
+      async getRoomStatus(roomId: string): Promise<boolean | undefined> {
+          const slot = await prisma.slot.findFirst({
+            where:{roomId}
+          })
+          if(slot){
+            return slot.hasInstructorJoined
+          }
+
       }
 
 }

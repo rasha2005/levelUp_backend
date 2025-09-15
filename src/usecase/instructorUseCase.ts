@@ -124,11 +124,11 @@ export class InstructorUseCase {
     }
     }
 
-    async updateInstructor(token:DecodedToken ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string) {
+    async updateInstructor(token:DecodedToken ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string , specialization:string[]) {
         try{
-        
         if(token){
-            const res = await this._instructorRespository.updateInstructorDetials(token.email ,description , experienceCategory ,experienceCertificate , resume);
+            
+            const res = await this._instructorRespository.updateInstructorDetials(token.email ,description , experienceCategory ,experienceCertificate , resume , specialization);
             if(res) {
                 return {success:true , message:Messages.UPDATED , res}
             }else{
@@ -148,7 +148,7 @@ export class InstructorUseCase {
                 const res = await this._instructorRespository.getInstructorByEmail(token.email );
                 if(res) {
                     const instructorDto = InstructorDTO.fromEntity(res)
-                    return {success:true , message:Messages.UPDATED , res:instructorDto}
+                    return {success:true , message:Messages.FETCHED , res:instructorDto}
                 }else{
                     return {success:false ,message:Messages.FAILED};
                 }
@@ -366,6 +366,20 @@ async resendOtpByEmail(token:string) {
     }catch(err:any){
         throw(err)
     }
+    }
+
+    async updateRoomJoin(roomId:string) {
+        try{
+            const res = await this._instructorRespository.updateInstructorJoin(roomId);
+            if(res){
+                return {sucess:true , message:Messages.UPDATED}
+            }else{
+                return {sucess:false , message:Messages.FAILED};
+            }
+
+        }catch(err) {
+            throw(err);
+        }
     }
 
 }

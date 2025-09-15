@@ -11,7 +11,7 @@ interface IinstructorRepository {
     findOtpByEmail(email:string): Promise<Otp | null>
     insertInstructor(insructor:Instructor , hashedPassword:string): Promise<any>;
     getCategoryList(): Promise<Category[] | null>
-    updateInstructorDetials(email:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string): Promise<Instructor | null >;
+    updateInstructorDetials(email:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string , specialization:string[]): Promise<Instructor | null >;
     getInstructorByEmail(email:string) :Promise<Instructor | null>
     editInstructorByEmail(email:string , name:string , mobile:string) :Promise<Instructor | null>
     updateProfileByEmail(email:string , img:string):Promise<Instructor | null>
@@ -24,6 +24,7 @@ interface IinstructorRepository {
     findWallet(token:string): Promise<Wallet | null>
     getImgById(id:string): Promise<string | null>
     verifyRoomById(roomId:string): Promise<Slot | null>
+    updateInstructorJoin(roomId:string):Promise<boolean>
 }
 
 export default IinstructorRepository;

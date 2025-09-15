@@ -468,4 +468,14 @@ export class UserUseCase {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
         }
       }
+
+      async roomStatus(roomId:string) {
+        try{
+          const res = await this._iuserRepository.getRoomStatus(roomId)
+          return {status: StatusCode.OK, success:true , data:res};
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
     }      

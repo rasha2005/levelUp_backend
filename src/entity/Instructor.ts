@@ -18,6 +18,7 @@ interface  Instructor {
     wallet?:Wallet | null
     chats? : Chat[] | null
     rating? : number | null
+    specializations?  : string[] | null
 
 
 

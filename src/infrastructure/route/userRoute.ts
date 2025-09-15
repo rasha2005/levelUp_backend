@@ -29,7 +29,9 @@ router.get('/verifyRoom' ,(req , res, next) => {userController.verifyRoom(req ,r
 router.post('/rating'  , (req , res, next) => {userController.rating(req ,res , next)});
 router.post('/googleAuth' , (req , res, next) => {userController.googleAuth(req ,res , next)});
 router.post('/addReview' , (req , res, next) => {userController.addReview(req ,res , next)});
-router.post('/refreshToken' , (req , res, next) => {userController.refreshToken(req ,res , next)})
+router.post('/refreshToken' , (req , res, next) => {userController.refreshToken(req ,res , next)});
+router.get('/roomStatus' , (req , res, next) => {userController.getRoomStatus(req ,res , next)});
+
 
 
 

@@ -31,6 +31,7 @@ interface IuserRepository {
     updateSlotById(rating:number , slotid:string): Promise<Slot | null>
     createUserByGoogle(email:string , name:string , img:string ): Promise<User | null>
     addReview(instructorId:string , value:string , userId:string): Promise<boolean>
+    getRoomStatus(roomId:string): Promise<boolean | undefined>
 }
 
 export default IuserRepository;

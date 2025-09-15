@@ -42,4 +42,6 @@ router.get('/getImg' , instructorAuth,(req ,res, next) => {instructorController.
 
 router.get('/verifyRoom' , (req ,res, next) => {instructorController.verifyRoom(req , res , next)});
 
+router.put('/joinedRoom' , (req ,res, next) => {instructorController.joinedRoom(req , res , next)});
+
 export default router;

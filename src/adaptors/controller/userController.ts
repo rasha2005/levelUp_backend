@@ -311,5 +311,17 @@ export class UserController {
         }
     }
 
+    async getRoomStatus(req:Request , res:Response , next:NextFunction) {
+        try{
+            console.log("here")
+            const roomId =  req.query.roomId as string;
+            const response = await this._useCase.roomStatus(roomId);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
 }
 

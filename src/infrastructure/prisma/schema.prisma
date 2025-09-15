@@ -57,6 +57,7 @@ model Instructor {
   category         String?
   experience       String?
   resume           String?
+  specializations  String[]
   scheduledSession ScheduledSession?
   wallet           Wallet?
   chats            Chat[]            @relation("InstructorChats")
@@ -103,6 +104,8 @@ model Slot {
   instructorId String   @db.ObjectId
   createdAt DateTime @default(now())
   user         User    @relation("UserSlots", fields: [userId], references: [id]) 
+
+  hasInstructorJoined Boolean @default(false)
  
 }
 

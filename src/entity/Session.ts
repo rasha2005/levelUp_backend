@@ -7,6 +7,7 @@ export interface Events {
     price : string;
     status: "open" | "booked";
     scheduledSession? : Session
+    // hasInstructorJoined : boolean
 }
 
 export interface Session {

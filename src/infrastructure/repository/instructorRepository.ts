@@ -81,22 +81,34 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         return null
     }
 
-    async updateInstructorDetials(email:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string): Promise<Instructor | null> {
-        const updatedData = await prisma.instructor.update({
-            where:{
-                email:email
-            },
-            data:{
-                category:experienceCategory,
-                description:description,
-                experience:experienceCertificate,
-                resume:resume
-            }
-        });
-        if(updatedData) {
-            return updatedData
-        }
-        return null
+    async updateInstructorDetials(email:string ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string , specialization:string[]): Promise<Instructor | null> {
+        const existing = await prisma.instructor.findUnique({
+            where: { email },
+            select: { specializations: true }
+          });
+        
+          // 2️⃣ Build update payload for always-updated fields
+          const updateData: any = {
+            category: experienceCategory,
+            description,
+            experience: experienceCertificate,
+            resume
+          };
+        
+          // 3️⃣ If specialization array is not empty → merge with existing
+          if (specialization && specialization.length > 0) {
+            const current = existing?.specializations ?? [];
+            updateData.specializations = [...current, ...specialization];
+          }
+        
+          // 4️⃣ Update instructor
+          const updatedData = await prisma.instructor.update({
+            where: { email },
+            data: updateData
+          });
+        
+          console.log("updatedData", updatedData);
+          return updatedData ?? null;
     }
 
     async getInstructorByEmail(email: string): Promise<Instructor | null> {
@@ -294,6 +306,18 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         }
 
         return null
+    }
+    async updateInstructorJoin(roomId : string):Promise<boolean> {
+        console.log("roo",roomId)
+        const data = await prisma.slot.updateMany({
+            where:{
+                roomId:roomId
+            },
+            data: { hasInstructorJoined: true },
+        })
+        console.log("data",data);
+        if(data) return true;
+        return false;
     }
 }
 
