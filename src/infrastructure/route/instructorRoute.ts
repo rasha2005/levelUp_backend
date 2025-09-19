@@ -44,4 +44,24 @@ router.get('/verifyRoom' , (req ,res, next) => {instructorController.verifyRoom(
 
 router.put('/joinedRoom' , (req ,res, next) => {instructorController.joinedRoom(req , res , next)});
 
+router.post('/createBundle' , (req ,res, next) => {instructorController.createBundle(req , res , next)});
+
+router.get('/BundleData' , (req ,res, next) => {instructorController.bundleData(req , res , next)});
+
+router.post('/createQuestion', (req ,res, next) => {instructorController.createQuestion(req , res , next)})
+
+router.get('/getQuestions', (req ,res, next) => {instructorController.getQuestions(req , res , next)})
+
+router.post('/createTest', (req ,res, next) => {instructorController.createTest(req , res , next)})
+
+router.delete('/deleteQuestion' , (req , res, next) => {instructorController.deleteQuestion(req ,res , next)});
+
+router.delete('/deleteBundle' , (req , res, next) => {instructorController.deleteBundle(req ,res , next)});
+
+router.put('/updateBundle' , (req , res, next) => {instructorController.updateBundle(req ,res , next)});
+
+
+
+
+
 export default router;

@@ -313,7 +313,7 @@ export class UserController {
 
     async getRoomStatus(req:Request , res:Response , next:NextFunction) {
         try{
-            console.log("here")
+            
             const roomId =  req.query.roomId as string;
             const response = await this._useCase.roomStatus(roomId);
             return res.status(StatusCode.OK).json({response});
@@ -322,6 +322,42 @@ export class UserController {
             next(err)
         }
     }
+    async getTest(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const slotId =  req.query.slotId as string;
+            const response = await this._useCase.getTestData(slotId);
+            return res.status(StatusCode.OK).json({response});
 
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async getQuestion(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const qId =  req.query.qId as string;
+            const response = await this._useCase.getQuestionData(qId);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async updateResult(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const {slotId , score} =  req.body
+            const response = await this._useCase.updateResultData(slotId,score);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+     
 }
 

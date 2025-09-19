@@ -31,6 +31,12 @@ router.post('/googleAuth' , (req , res, next) => {userController.googleAuth(req 
 router.post('/addReview' , (req , res, next) => {userController.addReview(req ,res , next)});
 router.post('/refreshToken' , (req , res, next) => {userController.refreshToken(req ,res , next)});
 router.get('/roomStatus' , (req , res, next) => {userController.getRoomStatus(req ,res , next)});
+router.get('/getTest' , (req , res, next) => {userController.getTest(req ,res , next)});
+router.get('/getQuestion' , (req , res, next) => {userController.getQuestion(req ,res , next)});
+router.put('/updateResult' , (req , res, next) => {userController.updateResult(req ,res , next)});
+
+
+
 
 
 

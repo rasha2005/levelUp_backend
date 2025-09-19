@@ -1,4 +1,4 @@
-import { PrismaClient  , Prisma} from "@prisma/client";
+import { PrismaClient  , Prisma,} from "@prisma/client";
 import User from "../../entity/User";
 import IuserRepository from "../../interface/repository/IuserRepository";
 import Otp from "../../entity/Otp";
@@ -10,6 +10,8 @@ import Review from "../../entity/Review";
 import { injectable } from "inversify";
 import { GenericRepository } from "./GenericRepository";
 import prisma from "../service/prismaClient";
+import { Test } from "../../entity/Test";
+import Question from "../../entity/Question";
 
 @injectable()
 export class UserRepository extends GenericRepository<User> implements IuserRepository {
@@ -489,5 +491,49 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           }
 
       }
+
+      async getTests(slotId: string): Promise<Test | null> {
+          const test = await prisma.test.findFirst({
+            where:{
+              slotId:slotId
+            }
+          })
+          if(test) return test
+          return null
+      }
+
+      async getQuestion(qId: string): Promise<Question | null> {
+        const question = await prisma.question.findFirst({
+          where:{
+            id:qId
+          }
+        })
+        if(question) return question
+        return null
+      }
+
+      async updateResult(slotId: string , score:number): Promise<boolean> {
+          await prisma.slot.update({
+            where:{
+              id:slotId
+            },
+            data:{
+              isAttended:true
+            }
+          });
+
+          await prisma.test.update({
+            where:{
+              slotId:slotId
+            },
+            data:{
+              score:score
+            }
+          })
+
+          return true
+      }
+
+    
 
 }

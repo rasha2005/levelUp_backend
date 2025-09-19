@@ -1,6 +1,8 @@
+import QuestionBundle from "../../entity/Bundle";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
 import Otp from "../../entity/Otp";
+import Question from "../../entity/Question";
 import { Session } from "../../entity/Session";
 import Slot from "../../entity/Slot";
 import { Wallet } from "../../entity/Wallet";
@@ -25,6 +27,17 @@ interface IinstructorRepository {
     getImgById(id:string): Promise<string | null>
     verifyRoomById(roomId:string): Promise<Slot | null>
     updateInstructorJoin(roomId:string):Promise<boolean>
+    createQuestionBundle(instructorId:string , bundleName:string):Promise<boolean>
+    getBundleData(instructorId:string):Promise<QuestionBundle[] | null>
+    createQuestion(questionText:string , type:string , options:string[], answe:string , bundleId:string): Promise<Question | null>
+    getQuestions(bundleId:string):Promise<Question[] | null>
+    createTest(activeSlotId:string,selectedQuestions:string[]):Promise<boolean>
+    deleteQuestion(id:string): Promise<boolean>
+    deleteBundle(id:string): Promise<boolean>
+    updateBundle(name:string ,id:string): Promise<boolean>
+
+
+
 }
 
 export default IinstructorRepository;

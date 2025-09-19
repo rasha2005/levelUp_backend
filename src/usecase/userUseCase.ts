@@ -478,4 +478,37 @@ export class UserUseCase {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
         }
       }
+
+      async getTestData(slotId:string) {
+        try{
+          const res = await this._iuserRepository.getTests(slotId)
+          return {status: StatusCode.OK, success:true , data:res};
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async getQuestionData(qId:string) {
+        try{
+          const res = await this._iuserRepository.getQuestion(qId)
+          return {status: StatusCode.OK, success:true , data:res};
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async updateResultData(slotId:string , score:number) {
+        try{
+          const res = await this._iuserRepository.updateResult(slotId , score)
+          return {status: StatusCode.OK, success:true };
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+   
+        
     }      

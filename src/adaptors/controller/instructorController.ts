@@ -224,4 +224,97 @@ export class InstructorController {
         next(err);
     }
    }
+
+   async createBundle(req:Request , res:Response , next:NextFunction) {
+    try{
+        const token = req.app.locals.decodedToken;
+        const bundleName = req.body.bundleName;
+        const response = await this.useCase.createNewBundle(token , bundleName);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async bundleData(req:Request , res:Response , next:NextFunction) {
+    try{
+        const token = req.app.locals.decodedToken;
+        const response = await this.useCase.bundleData(token);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async createQuestion(req:Request , res:Response , next:NextFunction) {
+    try{
+        const {data , bundleId} = req.body
+        const {questionText , type , options, answer} = data;
+        const response = await this.useCase.createNewQuestion(questionText , type , options, answer , bundleId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async getQuestions(req:Request , res:Response , next:NextFunction) {
+    try{
+        const bundleId = req.query.slug as string;
+        const response = await this.useCase.getBundleQuestions(bundleId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+   async createTest(req:Request , res:Response , next:NextFunction) {
+    try{
+        const {activeSlotId ,selectedBundle,selectedQuestions} = req.body;
+        const response = await this.useCase.createNewTest(activeSlotId ,selectedBundle,selectedQuestions);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async deleteQuestion(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const id =  req.query.id as string
+        const response = await this.useCase.deleteQuestionById(id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
+async deleteBundle(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const id =  req.query.id as string
+        const response = await this.useCase.deleteBundleById(id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
+async updateBundle(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const {name ,id} =  req.body;
+        const response = await this.useCase.updateBundleById(name , id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
 }

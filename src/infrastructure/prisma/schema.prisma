@@ -23,6 +23,8 @@ enum WalletType {
   debit
 }
 
+
+
 model User {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
   img       String?
@@ -106,6 +108,9 @@ model Slot {
   user         User    @relation("UserSlots", fields: [userId], references: [id]) 
 
   hasInstructorJoined Boolean @default(false)
+  isAttended          Boolean @default(false)
+  hasTest Boolean @default(false)
+  test Test?
  
 }
 
@@ -156,3 +161,33 @@ model Review {
   user         User    @relation(fields: [userId], references: [id])
 }
 
+model QuestionBundle {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  instructorId   String
+  bundleName     String
+  questionsCount Int        @default(0)
+  createdAt      DateTime   @default(now())
+  questions    Question[]
+}
+
+model Question {
+  id          String        @id @map("_id") @default(auto()) @db.ObjectId
+  bundleId    String
+  bundle      QuestionBundle @relation(fields: [bundleId], references: [id])
+  text        String
+  type        String
+  options     String[] @default([])  
+  answer      String
+  createdAt   DateTime       @default(now())
+}
+
+model Test {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  slotId    String   @unique @db.ObjectId
+  questions String[]
+  score     Int?     @default(0)
+  attended  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  slot    Slot @relation(fields: [slotId], references: [id])
+}

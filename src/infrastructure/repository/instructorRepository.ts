@@ -9,6 +9,8 @@ import { Wallet } from "../../entity/Wallet";
 import IinstructorRepository from "../../interface/repository/IinstructorRepository";
 import { PrismaClient } from "@prisma/client";
 import { GenericRepository } from "./GenericRepository";
+import QuestionBundle from "../../entity/Bundle";
+import Question from "../../entity/Question";
 
 const prisma = new PrismaClient();
 
@@ -308,16 +310,146 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         return null
     }
     async updateInstructorJoin(roomId : string):Promise<boolean> {
-        console.log("roo",roomId)
         const data = await prisma.slot.updateMany({
             where:{
                 roomId:roomId
             },
             data: { hasInstructorJoined: true },
         })
-        console.log("data",data);
         if(data) return true;
         return false;
+    }
+
+    async createQuestionBundle(instructorId: string, bundleName: string): Promise<boolean> {
+        const bundle = await prisma.questionBundle.create({
+            data: {
+              instructorId,
+              bundleName,
+            },
+          });
+          if(bundle) return true
+          return false;
+    }
+
+    async getBundleData(instructorId: string): Promise<QuestionBundle[] | null> {
+        const bundle = await prisma.questionBundle.findMany({
+            where: { instructorId },
+            include: { questions: true },
+            orderBy: {
+                createdAt: "desc", 
+              },
+            
+        })
+
+        if(bundle) return bundle
+        return null
+    }
+
+    async createQuestion(questionText:string , type:string , options:string[], answer:string , bundleId: string): Promise<Question | null> {
+        
+        const question = await prisma.question.create({
+            data: { 
+              bundleId,   
+              text: questionText,
+              type,
+              options,
+              answer
+            },
+          });
+        
+          await prisma.questionBundle.update({
+            where:{
+                id:bundleId
+            },
+            data:{
+                questionsCount:{increment:1}
+            }
+          })
+         if(question) return question;
+        return null
+    }
+
+    async getQuestions(bundleId: string): Promise<Question[] | null> {
+        const data = await prisma.question.findMany({
+            where:{
+                bundleId
+            }
+        })
+        if(data) return data
+        return null
+    }
+
+    async createTest(activeSlotId: string,  selectedQuestions: string[]): Promise<boolean> {
+        const test = await prisma.test.create({
+            data:{
+                slotId:activeSlotId,
+                questions:selectedQuestions,
+                
+            }
+        })
+        
+        if(test){
+           await prisma.slot.update({
+                where: { id: activeSlotId },
+                data: { hasTest: true },
+              })
+             
+
+              return true
+        }
+        return false
+    }
+
+    async deleteQuestion(id: string): Promise<boolean> {
+        const data = await prisma.question.findFirst({
+            where:{
+                id
+            }
+        })
+        const bundleId = data?.bundleId
+        await prisma.questionBundle.update({
+            where:{
+                id:bundleId
+            },
+            data:{
+                questionsCount:{decrement:1}
+            }
+        })
+        await prisma.question.delete({
+          where:{
+            id:id,
+
+          }
+        })
+
+
+        return true
+    }
+
+   async deleteBundle(id: string): Promise<boolean> {
+        await prisma.question.deleteMany({
+            where:{
+                bundleId:id
+            }
+        })
+        await prisma.questionBundle.delete({
+            where:{
+                id
+            }
+        })
+        return true;
+    }
+
+    async updateBundle(name:string , id: string): Promise<boolean> {
+        await prisma.questionBundle.update({
+            where:{
+                id
+            },
+            data:{
+                bundleName:name
+            }
+        })
+        return true
     }
 }
 

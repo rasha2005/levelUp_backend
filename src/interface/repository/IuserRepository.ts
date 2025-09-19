@@ -5,6 +5,8 @@ import Slot from "../../entity/Slot";
 import User from "../../entity/User";
 import {Events} from "../../entity/Session";
 import Review from "../../entity/Review";
+import { Test } from "../../entity/Test";
+import Question from "../../entity/Question";
 
 
 interface IuserRepository {
@@ -32,6 +34,11 @@ interface IuserRepository {
     createUserByGoogle(email:string , name:string , img:string ): Promise<User | null>
     addReview(instructorId:string , value:string , userId:string): Promise<boolean>
     getRoomStatus(roomId:string): Promise<boolean | undefined>
+    getTests(slotId:string): Promise<Test | null>
+    getQuestion(qId:string): Promise<Question | null>
+    updateResult(slotId:string , score:number): Promise<boolean>
+
+
 }
 
 export default IuserRepository;

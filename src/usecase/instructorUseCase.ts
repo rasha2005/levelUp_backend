@@ -322,7 +322,7 @@ async resendOtpByEmail(token:string) {
     }
     }
 
-    async getWalletDetails(token:DecodedToken) {
+    async getWalletDetails(token:DecodedToken ) {
         try{
         
         
@@ -382,5 +382,100 @@ async resendOtpByEmail(token:string) {
         }
     }
 
+    async createNewBundle(token:DecodedToken , bundleName:string){
+        try{
+            const data = await this._instructorRespository.createQuestionBundle(token.id , bundleName);
+           
+            if(data) {
+                return {sucess:true , message:Messages.CREATED , res:data}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , res:data} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async bundleData(token:DecodedToken){
+        try{
+            const data = await this._instructorRespository.getBundleData(token.id);
+           
+            if(data) {
+                return {sucess:true , message:Messages.FETCHED , res:data}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , res:data} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async createNewQuestion(questionText:string , type:string , options:string[], answer:string , bundleId:string) {
+        try{
+            const res = await this._instructorRespository.createQuestion(questionText , type , options, answer , bundleId);
+            if(res){
+                return {sucess:true , message:Messages.CREATED , data:res}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , data:res} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async getBundleQuestions(bundleId:string) {
+        try{
+            const data = await this._instructorRespository.getQuestions(bundleId);
+            if(data) {
+                return {sucess:true , message:Messages.FETCHED , data}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , data} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+    async createNewTest(activeSlotId:string ,selectedBundle:string,selectedQuestions:string[]) {
+        try{
+            const data = await this._instructorRespository.createTest(activeSlotId,selectedQuestions);
+            if(data) {
+                return {sucess:true , message:Messages.CREATED , data}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , data} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async deleteQuestionById(id:string) {
+        try{
+          const res = await this._instructorRespository.deleteQuestion(id)
+          return {status: StatusCode.OK, success:true };
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async deleteBundleById(id:string) {
+        try{
+          const res = await this._instructorRespository.deleteBundle(id)
+          return {status: StatusCode.OK, success:true };
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async updateBundleById(name:string ,id:string) {
+        try{
+          const res = await this._instructorRespository.updateBundle(name ,id)
+          return {status: StatusCode.OK, success:true };
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
 }
 
