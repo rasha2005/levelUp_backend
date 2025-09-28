@@ -38,6 +38,7 @@ model User {
   chats     Chat[]  @relation("UserChats")
   reviews Review[]
   enrollments      Enrollment[]
+  notifications Notification[]  
 
 }
 
@@ -226,4 +227,15 @@ model Enrollment {
   course      CourseBundle @relation(fields: [courseId], references: [id])
 
   @@unique([userId, courseId])
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
 }

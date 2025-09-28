@@ -457,7 +457,7 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
 
     async courseBundle(data: ICourseBundle , token:string): Promise<CourseBundle | undefined> {
         try{
-console.log("token",token)
+
             const {
             name,
             thumbnail,
@@ -506,7 +506,7 @@ console.log("token",token)
         const startDateTime = new Date(`${date}T${startTime}:00`);
         const endDateTime = new Date(`${date}T${endTime}:00`);
 
-        await prisma.courseBundle.update({
+       const course =  await prisma.courseBundle.update({
             where:{
                 id:bundleId
             },
@@ -526,6 +526,21 @@ console.log("token",token)
                 isCourse:true
             }
         })
+
+        const enrolledStudents = await prisma.enrollment.findMany({
+            where: { courseId: bundleId },
+            select: { userId: true }
+        });
+    
+        const notifications = enrolledStudents.map((student:any) => ({
+            userId: student.userId,
+            title: `New session for ${course.name}`,
+            message: `A new session "${title}" has been scheduled on ${date} from ${startTime} to ${endTime}.`,
+        }));
+    
+        if (notifications.length > 0) {
+            await prisma.notification.createMany({ data: notifications });
+        }
         return data
     }
 

@@ -37,6 +37,10 @@ router.put('/updateResult' ,userAuth, (req , res, next) => {userController.updat
 router.get('/getCourse' ,userAuth, (req , res, next) => {userController.getCourse(req ,res , next)});
 router.post('/create-course-checkout-session' ,userAuth, (req , res, next) => {userController.coursePayment(req ,res , next)});
 router.get('/studentCourse' ,userAuth, (req , res, next) => {userController.studentCourse(req ,res , next)});
+router.get('/getNotification' ,userAuth, (req , res, next) => {userController.getNotification(req ,res , next)});
+router.delete('/deleteNotifications' ,userAuth, (req , res, next) => {userController.deleteNotifications(req ,res , next)});
+
+
 
 
 

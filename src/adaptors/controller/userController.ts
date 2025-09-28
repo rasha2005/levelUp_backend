@@ -414,6 +414,30 @@ export class UserController {
             next(err)
         }
     }
+
+    async getNotification(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const token =  req.app.locals.decodedToken;
+            const response = await this._useCase.userNotification(token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async deleteNotifications(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const token =  req.app.locals.decodedToken;
+            const response = await this._useCase.clearAllNotification(token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
      
 }
 

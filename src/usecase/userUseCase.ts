@@ -573,5 +573,25 @@ export class UserUseCase {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
         }
       }
+
+      async userNotification(userId:string) {
+        try{
+          const res = await this._iuserRepository.getNotification(userId);
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async clearAllNotification(userId:string) {
+        try{
+          const res = await this._iuserRepository.deleteNotifications(userId);
+          return {status: StatusCode.OK, success:true };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
         
     }      

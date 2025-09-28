@@ -13,6 +13,7 @@ import prisma from "../service/prismaClient";
 import { Test } from "../../entity/Test";
 import Question from "../../entity/Question";
 import CourseBundle from "../../entity/CourseBundle";
+import Notification from "../../entity/Notification";
 
 @injectable()
 export class UserRepository extends GenericRepository<User> implements IuserRepository {
@@ -593,6 +594,28 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
       });
     
       // Extract just the course details from enrollments
-      return enrollments.map((enrollment) => enrollment.course);
+      return enrollments.map((enrollment:any) => enrollment.course);
+    }
+
+    async getNotification(userId: string): Promise<Notification[] | null> {
+        const data = await prisma.notification.findMany({
+          where:{
+            userId
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        })
+
+        return data
+    }
+
+    async deleteNotifications(userId: string): Promise<boolean> {
+      await prisma.notification.deleteMany({
+        where: {
+          userId: userId,
+        },
+      });
+      return true;
     }
 }
