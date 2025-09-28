@@ -1,11 +1,13 @@
 import QuestionBundle from "../../entity/Bundle";
 import Category from "../../entity/Category";
+import CourseBundle from "../../entity/CourseBundle";
 import Instructor from "../../entity/Instructor";
 import Otp from "../../entity/Otp";
 import Question from "../../entity/Question";
 import { Session } from "../../entity/Session";
 import Slot from "../../entity/Slot";
 import { Wallet } from "../../entity/Wallet";
+import ICourseBundle from "../entity/ICourseBundle";
 
 interface IinstructorRepository {
     findByEmail(email:string):Promise<Instructor | null>
@@ -35,6 +37,13 @@ interface IinstructorRepository {
     deleteQuestion(id:string): Promise<boolean>
     deleteBundle(id:string): Promise<boolean>
     updateBundle(name:string ,id:string): Promise<boolean>
+    courseBundle(data:ICourseBundle , token:string): Promise<CourseBundle | undefined>
+    getCourseBundle(insructorId:string): Promise<CourseBundle[] | null>
+    courseSlots(title:string , date:string,startTime:string , endTime:string,bundleId:string,instructorId:string,roomId:string): Promise<Slot | null>
+    getCourseSlots(bundleId:string):Promise<Slot[] | null>
+    bundleStatus(bundleId:string): Promise<boolean>
+
+
 
 
 

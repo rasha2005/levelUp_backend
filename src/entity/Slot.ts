@@ -3,8 +3,9 @@ interface Slot {
     startTime:Date;
     endTime:Date;
     roomId:string,
-    userId:string;
+    userId?:string | null;
     instructorId:string;
+    courseBundleId?:string | null
 }
 
 export default Slot;

@@ -60,6 +60,16 @@ router.delete('/deleteBundle' , (req , res, next) => {instructorController.delet
 
 router.put('/updateBundle' , (req , res, next) => {instructorController.updateBundle(req ,res , next)});
 
+router.post('/courseBundle' , (req , res, next) => {instructorController.courseBundle(req ,res , next)});
+
+router.get('/courseData' , (req , res, next) => {instructorController.courseData(req ,res , next)});
+
+router.post('/courseSlot' , (req , res, next) => {instructorController.courseSlot(req ,res , next)});
+
+router.get('/getCourseSlots' , (req , res, next) => {instructorController.getCourseSlots(req ,res , next)});
+
+router.put('/bundleStatus' , (req , res, next) => {instructorController.bundleStatus(req ,res , next)});
+
 
 
 

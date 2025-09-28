@@ -182,7 +182,7 @@ export class UserController {
        }
 
        async stripeWebhook(req:Request , res:Response , next:NextFunction) {
-
+        console.log("here");
         const endpointSecret = process.env.WEBHOOK_SECRET!.toString();
         
         const sig = req.headers['stripe-signature'];
@@ -205,8 +205,15 @@ export class UserController {
             case "checkout.session.completed":
                session = event.data.object;
               
-              await this._useCase.successPayment(session);
-              break;
+               const type = session.metadata?.type;
+
+               if (type === "slot") {
+                 await this._useCase.successPayment(session);
+               } else if (type === "course") {
+                 await this._useCase.successCoursePayment(session);
+               }
+               break;
+             
 
         default:
         console.log(`Unhandled event type: ${event?.type}`);
@@ -253,6 +260,7 @@ export class UserController {
         try {
             const roomId =  req.query.roomId as string;
             const userId = req.query.userId as string
+            console.log("room",roomId,userId);
             const response = await this._useCase.verifyRoomId(roomId , userId);
             return res.status(StatusCode.OK).json({response});
         }catch(err) {
@@ -358,6 +366,54 @@ export class UserController {
         }
     }
 
+    async getCourse(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const courseId =  req.query.courseId as string;
+            const token =  req.app.locals.decodedToken;
+            const response = await this._useCase.getCourseDetails(courseId , token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+
+    async coursePayment(req:Request , res:Response , next:NextFunction) {
+        try{
+            const {details} = req.body;
+            const token =  req.app.locals.decodedToken;
+            const {id , name , startDate , endDate , instructorId , price} = details
+            const info = {
+                id , 
+                name , 
+                startDate ,
+                endDate ,
+                instructorId ,
+                price
+            }
+            const response = await  this._useCase.coursePayement(info , token.id)
+           
+            return res.status(StatusCode.OK).json({ success: true, data: response });
+
+
+        }catch (err) {
+            next(err);
+        }
+       }
+
+       async studentCourse(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const token =  req.app.locals.decodedToken;
+            const response = await this._useCase.getEnrolledCourses(token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
      
 }
 

@@ -37,6 +37,8 @@ model User {
   slots     Slot[]  @relation("UserSlots")
   chats     Chat[]  @relation("UserChats")
   reviews Review[]
+  enrollments      Enrollment[]
+
 }
 
 model Otp {
@@ -96,23 +98,25 @@ model Event {
 }
 
 model Slot {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  title        String
-  startTime    DateTime
-  endTime      DateTime
-  isRated      Boolean @default(false)
-  roomId       String
-  userId       String   @db.ObjectId // Foreign key to User model
-  instructorId String   @db.ObjectId
-  createdAt DateTime @default(now())
-  user         User    @relation("UserSlots", fields: [userId], references: [id]) 
-
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  title             String
+  startTime         DateTime
+  endTime           DateTime
+  isRated           Boolean  @default(false)
+  roomId            String
+  instructorId      String   @db.ObjectId
+  createdAt         DateTime @default(now())
+  userId            String?  @db.ObjectId 
+  courseBundleId    String?  @db.ObjectId 
+  isCourse          Boolean  @default(false)
   hasInstructorJoined Boolean @default(false)
   isAttended          Boolean @default(false)
-  hasTest Boolean @default(false)
-  test Test?
- 
-}
+  hasTest             Boolean @default(false)
+  test                Test?
+  user       User?          @relation("UserSlots", fields: [userId], references: [id])
+  courseBundle    CourseBundle?  @relation("CourseBundleSlots", fields: [courseBundleId], references: [id])
+  }
+
 
 model Wallet {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
@@ -190,4 +194,36 @@ model Test {
   createdAt DateTime @default(now())
 
   slot    Slot @relation(fields: [slotId], references: [id])
+}
+
+model CourseBundle {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  thumbnail        String?   
+  description      String
+  price            Float
+  participantLimit Int
+  startDate        DateTime
+  endDate          DateTime
+  isFreeTrial      Boolean   @default(false)
+  status           String @default("draft")
+  sessionCount     Int       @default(0)
+  enrollmentCount  Int       @default(0)
+  createdAt        DateTime  @default(now())
+  instructorId     String   @db.ObjectId
+  slots            Slot[]   @relation("CourseBundleSlots")
+  enrollments      Enrollment[]
+}
+
+model Enrollment {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String      @db.ObjectId
+  courseId    String      @db.ObjectId
+  status      String      @default("active") 
+  enrolledAt  DateTime    @default(now())
+  completedAt DateTime?
+  user        User        @relation(fields: [userId], references: [id])
+  course      CourseBundle @relation(fields: [courseId], references: [id])
+
+  @@unique([userId, courseId])
 }

@@ -7,6 +7,7 @@ import {Events} from "../../entity/Session";
 import Review from "../../entity/Review";
 import { Test } from "../../entity/Test";
 import Question from "../../entity/Question";
+import CourseBundle from "../../entity/CourseBundle";
 
 
 interface IuserRepository {
@@ -37,6 +38,12 @@ interface IuserRepository {
     getTests(slotId:string): Promise<Test | null>
     getQuestion(qId:string): Promise<Question | null>
     updateResult(slotId:string , score:number): Promise<boolean>
+    getCourseById(instructorId:string): Promise<CourseBundle[] | null>
+    getCourseData(courseId:string): Promise<CourseBundle | null>
+    createEnrollment(instructorId:string , userId:string , courseId:string , price:number): Promise<boolean>
+    enrolledCourses(userId:string): Promise<CourseBundle[] | null>
+
+
 
 
 }

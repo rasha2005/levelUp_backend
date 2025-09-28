@@ -317,4 +317,63 @@ async updateBundle(req:Request , res:Response , next:NextFunction) {
     }
 }
 
+
+async courseBundle(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const {data} =  req.body;
+        const token = req.app.locals.decodedToken;
+        const response = await this.useCase.createCourseBundle(data , token);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+async courseData(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const token = req.app.locals.decodedToken;
+        const response = await this.useCase.fetchCourseData(token.id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
+async courseSlot(req:Request , res:Response , next:NextFunction) {
+    try{
+        
+        const token = req.app.locals.decodedToken;
+        const {title , date,startTime , endTime,bundleId} = req.body;
+        const response = await this.useCase.CreateCourseSlot(title , date,startTime , endTime,bundleId,token.id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
+async getCourseSlots(req:Request , res:Response , next:NextFunction) {
+    try{
+        const bundleId = req.query.bundleId as string;
+        const response = await this.useCase.fetchCourseSlots(bundleId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+async bundleStatus(req:Request , res:Response , next:NextFunction) {
+    try{
+        const bundleId = req.body.bundleId
+        const response = await this.useCase.updateBundleStatus(bundleId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
 }

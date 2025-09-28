@@ -12,6 +12,7 @@ import { GenericRepository } from "./GenericRepository";
 import prisma from "../service/prismaClient";
 import { Test } from "../../entity/Test";
 import Question from "../../entity/Question";
+import CourseBundle from "../../entity/CourseBundle";
 
 @injectable()
 export class UserRepository extends GenericRepository<User> implements IuserRepository {
@@ -534,6 +535,64 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           return true
       }
 
-    
+    async getCourseById(instructorId: string): Promise<CourseBundle[] | null> {
+        const data = await prisma.courseBundle.findMany({
+          where:{
+            instructorId,
+            status:"published"
+          }
+        })
 
+        return data
+    }
+
+    async getCourseData(courseId: string): Promise<CourseBundle | null> {
+        const course = await prisma.courseBundle.findFirst({
+          where:{
+            id:courseId
+          },
+          include:{
+            slots:true,
+            enrollments:true
+            }
+        })
+
+        return course
+    }
+
+    async createEnrollment(instructorId: string, userId: string, courseId: string, price: number): Promise<boolean> {
+      const data = await prisma.enrollment.create({
+        data:{
+          userId,
+          courseId,
+        }
+      })
+
+      if(data){
+        await prisma.courseBundle.update({
+          where:{
+            id:courseId
+          },
+          data:{
+            enrollmentCount:{increment:1}
+          }
+        })
+        return true
+      }
+        return false
+    }
+
+    async enrolledCourses(userId: string): Promise<CourseBundle[] | null> {
+      const enrollments = await prisma.enrollment.findMany({
+        where: {
+          userId: userId,
+        },
+        include: {
+          course: true, // this pulls in the related CourseBundle
+        },
+      });
+    
+      // Extract just the course details from enrollments
+      return enrollments.map((enrollment) => enrollment.course);
+    }
 }

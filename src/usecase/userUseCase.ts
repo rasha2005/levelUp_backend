@@ -310,7 +310,8 @@ export class UserUseCase {
             const review = await this._iuserRepository.getReviewById(id);
             const isReview = await this._iuserRepository.reviewExist(id , token?.id);
             const instructorDto = InstructorDTO.fromEntity(instructor);
-            return {status: StatusCode.OK, success:true , message: Messages.FOUND , instructor:instructorDto  , review , isReview};
+            const course = await this._iuserRepository.getCourseById(id);
+            return {status: StatusCode.OK, success:true , message: Messages.FOUND , instructor:instructorDto  , review , isReview ,course};
           } else {
             return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
           }
@@ -335,6 +336,7 @@ export class UserUseCase {
       
       async successPayment(session:any) {
         try {
+          console.log("kjjk")
           const {instructorId , userId , id , price} = session.metadata;
             await this._iuserRepository.createSlot(session.metadata);
            await this._iuserRepository.updateEventStatus(id);
@@ -393,12 +395,20 @@ export class UserUseCase {
       async verifyRoomId(roomId:string , userId:string) {
         try {
           const data = await this._iuserRepository.verifyRoomById(roomId);
-          if(data) {
-            if(data.userId == userId) {
-              return {status: StatusCode.OK, success:true};
+          if (!data) {
+            return { status: StatusCode.NOT_FOUND, success: false };
+          }
+        
+          if (data.userId) {
+            if (data.userId === userId) {
+              return { status: StatusCode.OK, success: true };
             } else {
-              return {status: StatusCode.UNAUTHORIZED, success:false};
+              return { status: StatusCode.UNAUTHORIZED, success: false };
             }
+          }
+        
+          if (data.courseBundleId) {
+            return { status: StatusCode.OK, success: true };
           }
           return {status: StatusCode.NOT_FOUND, success:false};
         } catch(err:any) {
@@ -509,6 +519,59 @@ export class UserUseCase {
         }
       }
 
-   
+      async getCourseDetails(courseId:string, userId:string) {
+        try{
+          const res = await this._iuserRepository.getCourseData(courseId)
+          const enrolled = res?.enrollments;
+          const userEnrollment = enrolled?.find(e => e.userId === userId) || null;
+          if(userEnrollment){
+
+            return {status: StatusCode.OK, success:true , data:res , isEnrolled:userEnrollment};
+          }
+          return {status: StatusCode.OK, success:true , data:res };
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async coursePayement(info:any ,userId:string) {
+        try {
+          const res = await this._stripe.stripeCoursePayment(info ,userId);
+          if(res) {
+            return {status: StatusCode.OK, success:true , message: Messages.CREATED , res};
+          } else {
+            return {status: StatusCode.BAD_REQUEST, success:false , message: Messages.FAILED};
+          }
+        } catch(err:any) {
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+        }
+      }
+
+      async successCoursePayment(session:any) {
+        try {
+          console.log("enroll")
+          const {instructorId , userId , courseId , price} = session.metadata;
+            await this._iuserRepository.createEnrollment(instructorId , userId , courseId , price);
+          const priceNumber = parseFloat(price);
+          const percent = price * 0.15;
+          const amount =  priceNumber - percent;
+          const type = "credit";
+           await this._iuserRepository.createInstructorWallet(instructorId , amount , type , percent);
+          return {status: StatusCode.OK, success:true , message: Messages.UPDATED};
+        } catch(err:any) {
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+        }
+      }
+
+      async getEnrolledCourses(userId:string) {
+        try{
+          const res = await this._iuserRepository.enrolledCourses(userId);
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
         
     }      

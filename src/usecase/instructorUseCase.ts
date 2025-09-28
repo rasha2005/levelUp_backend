@@ -10,6 +10,9 @@ import { InstructorDTO } from "./dtos/InstructorDTO";
 import { StatusCode } from "../enums/statuscode";
 import { Messages } from "../enums/message";
 import { UserDTO } from "./dtos/UserDTO";
+import ICourseBundle from "../interface/entity/ICourseBundle";
+import { v4 as uuidv4 } from "uuid";
+
 
 @injectable()
 export class InstructorUseCase {
@@ -305,7 +308,6 @@ async resendOtpByEmail(token:string) {
     async getSlots(token:DecodedToken) {
         try{
         const slot = await this._instructorRespository.getSlotList(token?.id);
-        
         if(slot) {
             const sanitizedSlots = slot.map((slot: any) => {
                 return {
@@ -477,5 +479,77 @@ async resendOtpByEmail(token:string) {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
         }
       }
+
+      async createCourseBundle(data:ICourseBundle , token:DecodedToken) {
+        try{
+           
+          const res = await this._instructorRespository.courseBundle(data , token.id)
+          if(res){
+
+              return {status: StatusCode.OK, success:true ,message:Messages.CREATED , data:res};
+          }else{
+             return {sucess:false , message:Messages.FAILED } ;
+          }
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async fetchCourseData(instructorId:string) {
+        try{
+          const data = await this._instructorRespository.getCourseBundle(instructorId)
+          if(data) {
+            return {sucess:true , message:Messages.FETCHED , data}
+        }else{
+            return {sucess:false , message:Messages.FAILED  , data} ;
+        }
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async CreateCourseSlot(title:string , date:string,startTime:string , endTime:string,bundleId:string,instructorId:string) {
+        try{
+          const roomId = uuidv4();
+          const res = await this._instructorRespository.courseSlots(title,date,startTime,endTime,bundleId,instructorId,roomId)
+          if(res){
+
+              return {status: StatusCode.OK, success:true ,message:Messages.CREATED , data:res};
+          }else{
+             return {status: StatusCode.OK,sucess:false , message:Messages.FAILED } ;
+          }
+
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async fetchCourseSlots(bundleId:string) {
+        try{
+            const data = await this._instructorRespository.getCourseSlots(bundleId);
+            if(data) {
+                return {sucess:true , message:Messages.FETCHED , data}
+            }else{
+                return {sucess:false , message:Messages.FAILED  , data} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async updateBundleStatus(bundleId:string) {
+        try{
+            const data = await this._instructorRespository.bundleStatus(bundleId);
+            if(data) {
+                return {success:true , message:Messages.UPDATED}
+            }else{
+                return {success:false , message:Messages.FAILED} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
 }
 

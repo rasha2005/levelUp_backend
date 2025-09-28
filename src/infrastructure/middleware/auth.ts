@@ -11,7 +11,6 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
   const authToken = req.cookies?.authToken;
   const refreshToken = req.cookies?.refreshToken;
   const queryToken = req.query?.token as string | undefined;
- 
   if (!authToken && !queryToken) {
   
     return res.status(401).json({ message: "Unauthorized access" });

@@ -28,12 +28,16 @@ router.get('/getImg' , userAuth ,(req , res, next) => {userController.getImg(req
 router.get('/verifyRoom' ,(req , res, next) => {userController.verifyRoom(req ,res , next)});
 router.post('/rating'  , (req , res, next) => {userController.rating(req ,res , next)});
 router.post('/googleAuth' , (req , res, next) => {userController.googleAuth(req ,res , next)});
-router.post('/addReview' , (req , res, next) => {userController.addReview(req ,res , next)});
+router.post('/addReview' , userAuth,(req , res, next) => {userController.addReview(req ,res , next)});
 router.post('/refreshToken' , (req , res, next) => {userController.refreshToken(req ,res , next)});
-router.get('/roomStatus' , (req , res, next) => {userController.getRoomStatus(req ,res , next)});
-router.get('/getTest' , (req , res, next) => {userController.getTest(req ,res , next)});
-router.get('/getQuestion' , (req , res, next) => {userController.getQuestion(req ,res , next)});
-router.put('/updateResult' , (req , res, next) => {userController.updateResult(req ,res , next)});
+router.get('/roomStatus' , userAuth,(req , res, next) => {userController.getRoomStatus(req ,res , next)});
+router.get('/getTest' , userAuth,(req , res, next) => {userController.getTest(req ,res , next)});
+router.get('/getQuestion' ,userAuth, (req , res, next) => {userController.getQuestion(req ,res , next)});
+router.put('/updateResult' ,userAuth, (req , res, next) => {userController.updateResult(req ,res , next)});
+router.get('/getCourse' ,userAuth, (req , res, next) => {userController.getCourse(req ,res , next)});
+router.post('/create-course-checkout-session' ,userAuth, (req , res, next) => {userController.coursePayment(req ,res , next)});
+router.get('/studentCourse' ,userAuth, (req , res, next) => {userController.studentCourse(req ,res , next)});
+
 
 
 

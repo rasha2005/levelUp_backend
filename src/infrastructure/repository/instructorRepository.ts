@@ -11,6 +11,8 @@ import { PrismaClient } from "@prisma/client";
 import { GenericRepository } from "./GenericRepository";
 import QuestionBundle from "../../entity/Bundle";
 import Question from "../../entity/Question";
+import CourseBundle from "../../entity/CourseBundle";
+import ICourseBundle from "../../interface/entity/ICourseBundle";
 
 const prisma = new PrismaClient();
 
@@ -255,7 +257,8 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
       
         const slotList = await prisma.slot.findMany({
             where:{
-                instructorId:id
+                instructorId:id,
+                userId:{not:null}
                 
             },
             include:{user:true},
@@ -450,6 +453,103 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
             }
         })
         return true
+    }
+
+    async courseBundle(data: ICourseBundle , token:string): Promise<CourseBundle | undefined> {
+        try{
+console.log("token",token)
+            const {
+            name,
+            thumbnail,
+            description,
+            price,
+            participantLimit,
+            startDate,
+            endDate,
+            isFreeTrial,
+            } = data;
+            const startDateObj = new Date(startDate + "T00:00:00"); 
+            const endDateObj = new Date(endDate + "T23:59:59"); //
+            const course = await prisma.courseBundle.create({
+                data: {
+                    name,
+                    thumbnail,
+                    description,
+                    price,
+                    participantLimit,
+                    startDate:startDateObj,
+                    endDate:endDateObj,
+                    isFreeTrial,
+                    instructorId:token
+                  },
+            })
+            return course
+
+           
+        }catch(err){
+            console.log(err);
+        }
+    }
+
+    async getCourseBundle(instructorId: string): Promise<CourseBundle[] | null> {
+        const data = await prisma.courseBundle.findMany({
+            where:{
+                instructorId
+            }
+        })
+        if(data)return data
+        return null
+    }
+
+    async courseSlots(title: string, date: string, startTime: string, endTime: string, bundleId: string, instructorId: string , roomId:string): Promise<Slot | null> {
+        
+        const startDateTime = new Date(`${date}T${startTime}:00`);
+        const endDateTime = new Date(`${date}T${endTime}:00`);
+
+        await prisma.courseBundle.update({
+            where:{
+                id:bundleId
+            },
+            data:{
+                sessionCount:{increment:1}
+            }
+        })
+       
+        const data = await prisma.slot.create({
+            data:{
+                title,
+                startTime:startDateTime,
+                endTime:endDateTime,
+                roomId,
+                instructorId,
+                courseBundleId:bundleId,
+                isCourse:true
+            }
+        })
+        return data
+    }
+
+    async getCourseSlots(bundleId: string): Promise<Slot[] | null> {
+        const data = await prisma.slot.findMany({
+            where:{
+                courseBundleId:bundleId
+            }
+        })
+        console.log('eh',data)
+        return data
+    }
+
+    async bundleStatus(bundleId: string): Promise<boolean> {
+        const data = await prisma.courseBundle.update({
+            where:{
+                id:bundleId
+            },
+            data:{
+                status:"published"
+            }
+        })
+        if(data)return true
+        return false 
     }
 }
 

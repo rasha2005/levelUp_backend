@@ -29,7 +29,15 @@ class stripe implements Istripe {
                 success_url: `${process.env.FRONT_URL}/user/paymentSuccess`,
                 cancel_url: `${process.env.FRONT_URL}/user/paymentCancel`,
                 metadata:{
-                    title , start , end , price , instructorId , id , roomId ,userId
+                    type: "slot",
+                    title , 
+                    start ,
+                    end , 
+                    price , 
+                    instructorId , 
+                    id , 
+                    roomId ,
+                    userId
                 }
             })
            
@@ -37,6 +45,49 @@ return session.url;
         }catch(err) {
             console.log(err);
         }
+    }
+
+    async stripeCoursePayment(info: any, userId: string): Promise<any> {
+        try{
+console.log("herew")
+            const {id , name , startDate , endDate , instructorId , price} = info
+
+            const session = await stripeApi.checkout.sessions.create({
+                payment_method_types:["card"],
+                mode:"payment",
+                line_items:[
+                    {
+                        price_data:{
+                            currency:"inr",
+                            product_data:{
+                                name:name
+                            },
+                            unit_amount:price * 100
+                        },
+                        quantity:1
+                    },
+                ],
+                success_url: `${process.env.FRONT_URL}/user/paymentSuccess`,
+                cancel_url: `${process.env.FRONT_URL}/user/paymentCancel`,
+                metadata:{
+                    type: "course",
+                    courseId:id ,
+                    name ,
+                    startDate ,
+                    endDate ,
+                    instructorId ,
+                    price , 
+                    userId
+                }
+            })
+           
+        return session.url;
+        }catch(err) {
+            console.log(err);
+        }
+    
+
+        
     }
 }
 
