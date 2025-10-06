@@ -376,4 +376,50 @@ async bundleStatus(req:Request , res:Response , next:NextFunction) {
         next(err);
     }
    }
+
+   async createAnnouncement(req:Request , res:Response , next:NextFunction) {
+    try{
+        const token = req.app.locals.decodedToken;
+        const {announcementTitle , announcementMessage , bundleId} = req.body;
+        const response = await this.useCase.createCourseAnnouncement(announcementTitle , announcementMessage , bundleId , token.id);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err)
+    }
+}
+
+async deleteCourseSlot(req:Request , res:Response , next:NextFunction) {
+    try{
+        const slotId = req.query.id as string
+        const response = await this.useCase.deleteCourseSlotById(slotId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async deleteCourse(req:Request , res:Response , next:NextFunction) {
+    try{
+        const courseId = req.query.id as string
+        const response = await this.useCase.deleteCourseById(courseId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+
+   async updateCourse(req:Request , res:Response , next:NextFunction) {
+    try{
+        const {bundleName , description , price,participantLimit , thumbnail , courseId} = req.body;
+        const response = await this.useCase.updateCourseById(bundleName , description , price,participantLimit , thumbnail , courseId);
+        return res.status(StatusCode.OK).json({response});
+
+    }catch(err){
+        next(err);
+    }
+   }
+ 
 }

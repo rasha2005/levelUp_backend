@@ -3,6 +3,8 @@ import Admin from "../../entity/Admin";
 import Category from "../../entity/Category";
 import Instructor from "../../entity/Instructor";
 import Slot from "../../entity/Slot";
+import { Ticket } from "../../entity/Ticket";
+import { TransactionSummaryResponse } from "../../entity/Transaction";
 import User from "../../entity/User";
 
 
@@ -10,7 +12,7 @@ interface IadminRepository {
     insert(email:string , password:string):Promise<Admin| null>
     findByEmail(email:string):Promise<Admin | null>
     getUser():Promise<User[]| null>
-    getInstructor():Promise<Instructor[] | null >
+    getInstructor():Promise<{topInstructors: Instructor[];  totalInstructorCount: number; revenueSummary: { totalCourses: number; totalEnrollments: number; totalRevenue: number }} >
     createCategory(data:string):Promise<Category | null>
     getCatData():Promise<Category[] | null>
     editCatData(name:string , id : string):Promise<Category[] | null>
@@ -22,7 +24,13 @@ interface IadminRepository {
     getUserId(id:string):Promise<User | null>
     findSlotsByDate(date:Date):Promise<any>
     findWallet(): Promise<Admin | null>
-    getTransactionDetails(): Promise<Instructor[]>
+    getTransactionDetails(search:string|"" , page:number , limit:number): Promise<TransactionSummaryResponse>
+    approveInstrcutors(): Promise<Instructor[]>
+    getMonthlyRevenue(): Promise<{ month: string; amount: number }[]>
+    getAllTickets(search:string|"" , page:number , limit:number): Promise<{ tickets: Ticket[]; totalCount: number } | null>
+    updateTicketById(status:string , ticketId:string):Promise<boolean>
+
+
 }
 
 export default IadminRepository;

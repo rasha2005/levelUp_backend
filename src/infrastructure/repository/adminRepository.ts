@@ -7,6 +7,8 @@ import User from "../../entity/User";
 import IadminRepository from "../../interface/repository/IadminRepository";
 import { GenericRepository } from "./GenericRepository";
 import prisma from "../service/prismaClient";
+import { TransactionSummaryResponse } from "../../entity/Transaction";
+import { Ticket } from "../../entity/Ticket";
 
 
 @injectable()
@@ -40,9 +42,44 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
         return users
     }
     
-    async getInstructor(): Promise<Instructor[] | null> {
-        const Instructors = await prisma.instructor.findMany();
-        return Instructors ;
+    async getInstructor(): Promise<{topInstructors: Instructor[]; totalInstructorCount: number; revenueSummary: { totalCourses: number; totalEnrollments: number; totalRevenue: number }}> {
+        const instructors = await prisma.instructor.findMany({
+            include: {
+              courseBundles: {
+                include: {
+                  enrollments: true,
+                },
+              },
+            },
+          });
+          const totalInstructorCount = instructors.length;
+          let totalCourses = 0;
+          let totalEnrollments = 0;
+          let totalRevenue = 0;
+        
+          instructors.forEach((inst) => {
+            totalCourses += inst.courseBundles.length;
+            inst.courseBundles.forEach((course) => {
+              totalEnrollments += course.enrollments.length;
+              totalRevenue += course.price * course.enrollments.length;
+            });
+          });
+
+          const topInstructors = [...instructors]
+          .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0))
+          .slice(0, 5);
+        
+          return {
+            topInstructors,
+            totalInstructorCount,
+            revenueSummary: {
+              totalCourses,
+              totalEnrollments,
+              totalRevenue,
+            },
+          };
+
+
     }
 
     async createCategory(name:string): Promise<Category | null> {
@@ -201,29 +238,190 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
         return admin
     }
 
-    async getTransactionDetails(): Promise<any> {
-        const details = await prisma.instructor.findMany({
+    async getTransactionDetails(search:string|"" , page:number , limit:number): Promise<TransactionSummaryResponse> {
+        const skip = (page - 1) * limit;
+
+       
+        const instructors = await prisma.instructor.findMany({
+            where: search
+              ? { name: { contains: search, mode: "insensitive" } }
+              : {},
+            skip,
+            take: limit,
             select: {
-                id: true, 
-                name: true, 
-                wallet: {
-                  select: {
-                    id: true,
-                    balance: true, 
-                    transactions: {
-                      select: {
-                        id: true, 
-                        amount: true, 
-                        createdAt: true, 
-                      },
-                    },
+              id: true,
+              name: true,
+              email:true,
+              wallet: {
+                select: {
+                  transactions: {
+                    select: { amount: true },
                   },
                 },
               },
-        });
+            },
+          });
+        
+          // Compute totals in memory
+          const data = instructors.map((instructor) => {
+            const totalEarnings = instructor.wallet?.transactions.reduce(
+              (sum, t) => sum + t.amount,
+              0
+            ) || 0;
     
-       
+            const adminEarnings = totalEarnings * 0.15;
+        
+            return {
+              instructorId: instructor.id,
+              instructorEmail:instructor.email,
+              instructorName: instructor.name,
+              totalEarnings,
+              adminEarnings,
+            };
+          });
+        
+          const total = await prisma.instructor.count({
+            where: search
+            ? {
+                OR: [
+                  { name: { contains: search, mode: "insensitive" } },
+                  { email: { contains: search, mode: "insensitive" } },
+                ],
+              }
+            : {},
+          });
+        
+          return { total, data };
+    }
 
-        return details
+    async approveInstrcutors(): Promise<Instructor[]> {
+        const pendingInstructors = await prisma.instructor.findMany({
+            where: {
+              isApproved: false,
+            },
+            orderBy: {
+              id: "desc",
+            },
+          });
+    
+          return pendingInstructors;
+    }
+
+    async getMonthlyRevenue(): Promise<{ month: string; amount: number; }[]> {
+        const transactions = await prisma.transaction.findMany({
+            where: {
+              type: "credit", // assuming only credit transactions count as revenue
+            },
+            select: {
+              amount: true,
+              createdAt: true,
+            },
+          });
+        
+          const revenueMap: Record<string, number> = {};
+        
+          transactions.forEach((tx) => {
+            const month = tx.createdAt.toLocaleString("default", { month: "short" }); // "Jan", "Feb", etc.
+            if (!revenueMap[month]) revenueMap[month] = 0;
+            revenueMap[month] += tx.amount;
+          });
+        
+          
+          const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        
+          const monthlyRevenue = monthOrder.map((m) => ({
+            month: m,
+            amount: revenueMap[m] || 0,
+          }));
+        
+          return monthlyRevenue;
+    }
+
+    async getAllTickets(search: string | "", page: number, limit: number): Promise<{ tickets: Ticket[]; totalCount: number } | null> {
+      const skip = (page - 1) * limit;
+
+      
+
+      const tickets = await prisma.ticket.findMany({
+        where: search
+          ? {
+              OR: [
+                { user: { name: { contains: search, mode: "insensitive" } } },
+                { instructor: { name: { contains: search, mode: "insensitive" } } },
+                { course: { name: { contains: search, mode: "insensitive" } } },
+              ],
+            }
+          : {},
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          description: true,
+          attachments: true,
+          status: true,
+          adminRemarks: true,
+          createdAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          instructor: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          course: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+      const totalCount = await prisma.ticket.count({
+        where:search
+        ? {
+            OR: [
+              { user: { name: { contains: search, mode: "insensitive" } } },
+              { instructor: { name: { contains: search, mode: "insensitive" } } },
+              { course: { name: { contains: search, mode: "insensitive" } } },
+            ],
+          }
+        : {},
+      });
+
+      const mappedTickets = tickets.map((t) => ({
+        id: t.id,
+        userId: t.user.id,
+        userName: t.user.name,
+        userEmail: t.user.email,
+        instructorId: t.instructor?.id,
+        instructorName: t.instructor?.name,
+        courseId: t.course?.id,
+        courseName: t.course?.name,
+        description: t.description,
+        attachments: t.attachments,
+        status: t.status,
+        adminRemarks: t.adminRemarks,
+        createdAt: t.createdAt,
+      }));
+    
+      return { tickets: mappedTickets, totalCount };
+      
+    }
+
+    async updateTicketById(status: string, ticketId: string): Promise<boolean> {
+    
+      await prisma.ticket.update({
+        where: { id: ticketId },
+        data: { status: status },
+      });
+    
+      return true;
     }
 }

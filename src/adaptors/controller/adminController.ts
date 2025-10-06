@@ -146,11 +146,53 @@ export class AdminController {
 
     async fetchTransaction(req:Request ,res:Response ,next:NextFunction) {
         try {
-            const response = await this._useCase.getTransaction();
+            const search = (req.query.search as string) || ""; 
+            const page = parseInt(req.query.page as string) || 1; 
+            const limit = parseInt(req.query.limit as string) || 10;
+            const response = await this._useCase.getTransaction(search , page , limit);
             res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);
         }
     }
 
+    async approveInstrcutors(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const response = await this._useCase.getApproveInstrcutors();
+            res.status(StatusCode.OK).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async revenueSummary(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const response = await this._useCase.fetchMonthyRevenue();
+            res.status(StatusCode.OK).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async fetchTickets(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const search = (req.query.search as string) || ""; 
+            const page = parseInt(req.query.page as string) || 1; 
+            const limit = parseInt(req.query.limit as string) || 10;
+            const response = await this._useCase.getTicketData(search , page , limit);
+            res.status(StatusCode.OK).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
+
+    async updateTicket(req:Request ,res:Response ,next:NextFunction) {
+        try {
+            const {status , ticketId} = req.body;
+            const response = await this._useCase.updateTicketStatus(status , ticketId);
+            res.status(StatusCode.OK).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
 }

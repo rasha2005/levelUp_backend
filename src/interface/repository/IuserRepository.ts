@@ -9,6 +9,8 @@ import { Test } from "../../entity/Test";
 import Question from "../../entity/Question";
 import CourseBundle from "../../entity/CourseBundle";
 import Notification from "../../entity/Notification";
+import QnA from "../../entity/QnA";
+import Announcement from "../../entity/Announcement";
 
 
 interface IuserRepository {
@@ -45,6 +47,21 @@ interface IuserRepository {
     enrolledCourses(userId:string): Promise<CourseBundle[] | null>
     getNotification(userId:string): Promise<Notification[] | null>
     deleteNotifications(userId:string): Promise<boolean>
+    getBannerData(): Promise<CourseBundle[] | null>
+    getLatestCourse(): Promise<CourseBundle[] | null>
+    getPopularInstructors(): Promise<Instructor[] | null>
+    getSearchCourse(page:number, limit:number, search:string | null, category:string | null, minPrice:number | null, maxPrice:number | null): Promise<{ courses: CourseBundle[]; total: number }>
+    createCourseTicket(attachments:string | null , description:string ,courseId:string, instructorId:string , userId:string): Promise<boolean>
+    postQnaData(message:string , parentId :string | null, courseId:string, userId:string): Promise<QnA| null>
+    getQnADatas(courseId:string): Promise<QnA[] | null>
+    getAnnouncementDatas(): Promise<Announcement[] | null>
+
+
+
+
+
+
+
 
 
 

@@ -44,31 +44,39 @@ router.get('/verifyRoom' , (req ,res, next) => {instructorController.verifyRoom(
 
 router.put('/joinedRoom' , (req ,res, next) => {instructorController.joinedRoom(req , res , next)});
 
-router.post('/createBundle' , (req ,res, next) => {instructorController.createBundle(req , res , next)});
+router.post('/createBundle' , instructorAuth,(req ,res, next) => {instructorController.createBundle(req , res , next)});
 
-router.get('/BundleData' , (req ,res, next) => {instructorController.bundleData(req , res , next)});
+router.get('/BundleData' , instructorAuth,(req ,res, next) => {instructorController.bundleData(req , res , next)});
 
-router.post('/createQuestion', (req ,res, next) => {instructorController.createQuestion(req , res , next)})
+router.post('/createQuestion', instructorAuth,(req ,res, next) => {instructorController.createQuestion(req , res , next)})
 
-router.get('/getQuestions', (req ,res, next) => {instructorController.getQuestions(req , res , next)})
+router.get('/getQuestions', instructorAuth,(req ,res, next) => {instructorController.getQuestions(req , res , next)})
 
-router.post('/createTest', (req ,res, next) => {instructorController.createTest(req , res , next)})
+router.post('/createTest', instructorAuth,(req ,res, next) => {instructorController.createTest(req , res , next)})
 
-router.delete('/deleteQuestion' , (req , res, next) => {instructorController.deleteQuestion(req ,res , next)});
+router.delete('/deleteQuestion' , instructorAuth,(req , res, next) => {instructorController.deleteQuestion(req ,res , next)});
 
-router.delete('/deleteBundle' , (req , res, next) => {instructorController.deleteBundle(req ,res , next)});
+router.delete('/deleteBundle' , instructorAuth,(req , res, next) => {instructorController.deleteBundle(req ,res , next)});
 
-router.put('/updateBundle' , (req , res, next) => {instructorController.updateBundle(req ,res , next)});
+router.put('/updateBundle' ,instructorAuth, (req , res, next) => {instructorController.updateBundle(req ,res , next)});
 
-router.post('/courseBundle' , (req , res, next) => {instructorController.courseBundle(req ,res , next)});
+router.post('/courseBundle' ,instructorAuth, (req , res, next) => {instructorController.courseBundle(req ,res , next)});
 
-router.get('/courseData' , (req , res, next) => {instructorController.courseData(req ,res , next)});
+router.get('/courseData' ,instructorAuth, (req , res, next) => {instructorController.courseData(req ,res , next)});
 
-router.post('/courseSlot' , (req , res, next) => {instructorController.courseSlot(req ,res , next)});
+router.post('/courseSlot' , instructorAuth,(req , res, next) => {instructorController.courseSlot(req ,res , next)});
 
-router.get('/getCourseSlots' , (req , res, next) => {instructorController.getCourseSlots(req ,res , next)});
+router.get('/getCourseSlots' ,instructorAuth, (req , res, next) => {instructorController.getCourseSlots(req ,res , next)});
 
-router.put('/bundleStatus' , (req , res, next) => {instructorController.bundleStatus(req ,res , next)});
+router.put('/bundleStatus' , instructorAuth,(req , res, next) => {instructorController.bundleStatus(req ,res , next)});
+
+router.post ('/announcememt' ,instructorAuth, (req , res, next) => {instructorController.createAnnouncement(req ,res , next)});
+
+router.delete ('/deleletSlot' ,instructorAuth, (req , res, next) => {instructorController.deleteCourseSlot(req ,res , next)});
+
+router.delete ('/deleteCourse' ,instructorAuth, (req , res, next) => {instructorController.deleteCourse(req ,res , next)});
+
+router.put('/updateCourse' , instructorAuth,(req , res, next) => {instructorController.updateCourse(req ,res , next)});
 
 
 

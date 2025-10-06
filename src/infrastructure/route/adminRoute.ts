@@ -36,4 +36,14 @@ router.get('/getUser' , adminAuth,(req ,res, next) => {controller.getUserById(re
 router .get('/fetchDetails' ,adminAuth, (req ,res, next) => {controller.getDetails(req, res, next)});
 
 router.get('/fetchTransaction' , adminAuth, (req ,res, next) => {controller.fetchTransaction(req, res, next)})
+
+router.get('/approveInstrcutors' , adminAuth, (req ,res, next) => {controller.approveInstrcutors(req, res, next)})
+
+router.get('/revenue-summary' , adminAuth, (req ,res, next) => {controller.revenueSummary(req, res, next)})
+
+router.get('/getTickets' , adminAuth, (req ,res, next) => {controller.fetchTickets(req, res, next)})
+
+router.put('/updateTicket' , adminAuth, (req ,res, next) => {controller.updateTicket(req, res, next)})
+
+
 export default router;

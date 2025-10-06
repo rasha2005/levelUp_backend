@@ -566,5 +566,44 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         if(data)return true
         return false 
     }
+
+   async  creareAnnouncement(announcementTitle: string, announcementMessages: string, bundleId: string , instructorId:string): Promise<boolean> {
+        const data = await prisma.announcement.create({
+            data:{
+                title:announcementTitle,
+                message:announcementMessages,
+                courseId:bundleId,
+                instructorId
+            }
+        })
+        if(data) return true
+        return false
+    }
+
+    async deleteCourseSlot(slotId: string): Promise<boolean> {
+        await prisma.slot.delete({
+            where: { id: slotId },
+          });
+          return true;    }
+
+    async deleteCourse(courseId: string): Promise<boolean> {
+        await prisma.courseBundle.delete({
+            where: { id: courseId },
+          });
+          return true;    }
+
+   async updateCourse(bundleName: string, description: string, price: number, participantLimit: number, thumbnail: string | null, courseId: string): Promise<boolean> {
+    await prisma.courseBundle.update({
+        where: { id: courseId },
+        data: {
+          name:bundleName,
+          description,
+          price,
+          participantLimit,
+          thumbnail,
+        },
+      });
+      return true;
+    }
 }
 

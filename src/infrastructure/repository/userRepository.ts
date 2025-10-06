@@ -14,6 +14,8 @@ import { Test } from "../../entity/Test";
 import Question from "../../entity/Question";
 import CourseBundle from "../../entity/CourseBundle";
 import Notification from "../../entity/Notification";
+import QnA from "../../entity/QnA";
+import Announcement from "../../entity/Announcement";
 
 @injectable()
 export class UserRepository extends GenericRepository<User> implements IuserRepository {
@@ -618,4 +620,171 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
       });
       return true;
     }
+
+    async getBannerData(): Promise<CourseBundle[] | null > {
+      const topInstructors = await prisma.instructor.findMany({
+        orderBy: { rating: "desc" },
+        take: 3,
+        select: { id: true, name: true, rating: true },
+      });
+      
+      const courses: CourseBundle[] = [];
+
+      for (const inst of topInstructors) {
+        const course = await prisma.courseBundle.findFirst({
+          where: { instructorId: inst.id },
+          orderBy: { createdAt: "desc" },
+        });
+  
+        if (course) {
+          courses.push(course);
+        }
+
+    }
+
+    return courses
+}
+
+async getLatestCourse(): Promise<CourseBundle[] | null> {
+  const courses = await prisma.courseBundle.findMany({
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 6,
+  });
+
+  return courses;
+}
+
+async getPopularInstructors(): Promise<Instructor[] | null> {
+  const instructors = await prisma.instructor.findMany({
+    orderBy: {
+      rating: 'desc',
+    },
+    take: 4,
+  });
+
+  return instructors;
+}
+
+async getSearchCourse(page: number, limit: number, search: string | null, category: string | null, minPrice: number | null, maxPrice: number | null):  Promise<{ courses: CourseBundle[]; total: number }> {
+  const skip = (page - 1) * limit;
+
+  const whereClause: any = {
+    AND: [
+      search
+        ? {
+            OR: [
+              { name: { contains: search, mode:  Prisma.QueryMode.insensitive } },
+              { instructor: { name: { contains: search, mode:  Prisma.QueryMode.insensitive } } }, 
+            ],
+          }
+        : {},
+
+      category ? { instructor: { category: { equals: category } } } : {},
+
+      minPrice !== null ? { price: { gte: minPrice } } : {},
+      maxPrice !== null ? { price: { lte: maxPrice } } : {},
+    ],
+  };
+
+  const courses = await prisma.courseBundle.findMany({
+    where: whereClause,
+    skip,
+    take: limit,
+    include: {
+      instructor: {
+        select: {
+          id: true,      
+          name: true,     
+          category: true, 
+          rating:true
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const total = await prisma.courseBundle.count({ where: whereClause });
+
+  return { courses, total };
+}
+
+async createCourseTicket(attachments: string | null, description: string, courseId: string, instructorId: string , userId:string): Promise<boolean> {
+   await prisma.ticket.create({
+    data: {
+      userId, 
+      instructorId,
+      courseId,
+      description,
+      attachments,
+    },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId,
+      title: "Report Submitted",
+      message: "Your report has been submitted successfully. Sorry for the inconvenience, we will get back to you shortly.",
+     
+    },
+  });
+
+  return true;
+    
+}
+async postQnaData(message: string, parentId: string | null, courseId: string, userId: string): Promise<QnA | null> {
+    const user = await prisma.user.findFirst({
+      where:{
+        id:userId
+      },
+      select:{
+        name:true,
+        img:true
+      }
+    })
+
+    const data = await prisma.qnA.create({
+      data:{
+        courseId,
+        userId,
+        userName:user?.name,
+        userImg:user?.img,
+        message,
+        parentId
+      }
+    })
+
+    return data
+}
+
+async getQnADatas(courseId: string): Promise<QnA[] | null> {
+  const qnas = await prisma.qnA.findMany({
+    where: { courseId },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  return qnas
+}
+
+async getAnnouncementDatas(): Promise<Announcement[] | null> {
+    const data = await prisma.announcement.findMany({
+      include:{
+        course:{
+          select:{
+            name:true,
+          }
+        },
+        instructor:{
+          select:{
+            name:true,
+          }
+        }
+      },
+      orderBy:{
+        createdAt:"desc"
+      }
+    })
+    return data
+}
 }

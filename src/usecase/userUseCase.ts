@@ -593,5 +593,89 @@ export class UserUseCase {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
         }
       }
+
+      async bannerRatingData() {
+        try{
+          const res = await this._iuserRepository.getBannerData();
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async latestCourseData() {
+        try{
+          const res = await this._iuserRepository.getLatestCourse();
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async popularInstructorData() {
+        try{
+          const res = await this._iuserRepository.getPopularInstructors();
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async searchCourseData(page:number, limit:number, search:string | null, category:string | null, minPrice:number | null, maxPrice:number | null) {
+        try{
+          const { courses, total } = await this._iuserRepository.getSearchCourse(page, limit, search, category, minPrice, maxPrice);
+          return {status: StatusCode.OK, success:true , courseData:courses , total };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async reportCourseIssue(attachments:string | null , description:string ,courseId:string, instructorId:string , userId:string) {
+        try{
+          const data = await this._iuserRepository.createCourseTicket(attachments , description ,courseId, instructorId,userId);
+          if(data) {
+            return {success:true , message:Messages.CREATED}
+          }else{
+            return {success:false , message:Messages.FAILED} ;
+                      }
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async createQnaData(message:string , parentId :string | null, courseId:string, userId:string) {
+        try{
+          const res = await this._iuserRepository.postQnaData(message , parentId,courseId,userId);
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async getAllQnADatas(courseId:string) {
+        try{
+          const res = await this._iuserRepository.getQnADatas(courseId);
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async getAllAnnouncementDatas() {
+        try{
+          const res = await this._iuserRepository.getAnnouncementDatas();
+          return {status: StatusCode.OK, success:true , data:res };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
         
     }      

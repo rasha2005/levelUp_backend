@@ -551,5 +551,57 @@ async resendOtpByEmail(token:string) {
             throw(err);
         }
     }
+
+    async createCourseAnnouncement(announcementTitle:string , announcementMessages:string ,bundleId:string , insructorId:string) {
+        try{
+            const data = await this._instructorRespository.creareAnnouncement(announcementTitle,announcementMessages,bundleId , insructorId);
+            if(data) {
+                return {success:true , message:Messages.CREATED}
+            }else{
+                return {success:false , message:Messages.FAILED} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async deleteCourseSlotById(slotId:string) {
+        try{
+            const data = await this._instructorRespository.deleteCourseSlot(slotId);
+            if(data) {
+                return {success:true , message:Messages.DELETED}
+            }else{
+                return {success:false , message:Messages.FAILED} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async deleteCourseById(courseId:string) {
+        try{
+            const data = await this._instructorRespository.deleteCourse(courseId);
+            if(data) {
+                return {success:true , message:Messages.DELETED}
+            }else{
+                return {success:false , message:Messages.FAILED} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
+
+    async updateCourseById(bundleName:string , description:string , price:number,participantLimit:number , thumbnail:string|null ,courseId:string) {
+        try{
+            const data = await this._instructorRespository.updateCourse(bundleName , description , price,participantLimit , thumbnail ,courseId);
+            if(data) {
+                return {success:true , message:Messages.UPDATED}
+            }else{
+                return {success:false , message:Messages.FAILED} ;
+            }
+        }catch(err){
+            throw(err);
+        }
+    }
 }
 

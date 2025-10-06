@@ -60,11 +60,11 @@ export class AdminUseCase {
       
       async getInstructors() {
         try {
-          const instructorData = await this._adminRepository.getInstructor();
-          if (instructorData) {
-            const instructorDto = instructorData.map(i => InstructorDTO.fromEntity(i));
+          const data = await this._adminRepository.getInstructor();
+          if (data.topInstructors) {
+            const instructorDto = data.topInstructors.map(i => InstructorDTO.fromEntity(i));
 
-            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto };
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto ,totalInstructor:data.totalInstructorCount ,revenueSummary:data.revenueSummary};
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }
@@ -222,11 +222,68 @@ export class AdminUseCase {
         }
       }
       
-      async getTransaction() {
+      async getTransaction(search:string|"" , page:number , limit:number) {
         try {
-          const transaction = await this._adminRepository.getTransactionDetails();
+          const transaction = await this._adminRepository.getTransactionDetails(search, page , limit);
+          if (transaction) {
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, data:transaction.data , total:transaction.total };
+          } else {
+            return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          throw err;
+        }
+      }
+
+      async getApproveInstrcutors() {
+        try {
+          const instructorData = await this._adminRepository.approveInstrcutors();
+          if (instructorData) {
+            const instructorDto = instructorData.map(i => InstructorDTO.fromEntity(i));
+
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto };
+          } else {
+            return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          throw err;
+        }
+      }
+
+      async fetchMonthyRevenue() {
+        try {
+          const transaction = await this._adminRepository.getMonthlyRevenue();
+         
           if (transaction) {
             return { status: StatusCode.OK, success: true, message: Messages.FETCHED, transaction };
+          } else {
+            return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          throw err;
+        }
+      }
+
+      async getTicketData(search:string|"" , page:number , limit:number) {
+        try {
+          const ticket = await this._adminRepository.getAllTickets(search, page , limit);
+         
+          if (ticket) {
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, ticket:ticket.tickets , total:ticket.totalCount };
+          } else {
+            return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          throw err;
+        }
+      }
+
+      async updateTicketStatus(status:string , ticketId:string) {
+        try {
+          const ticket = await this._adminRepository.updateTicketById(status , ticketId);
+         
+          if (ticket) {
+            return { status: StatusCode.OK, success: true, message: Messages.UPDATED };
           } else {
             return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
           }

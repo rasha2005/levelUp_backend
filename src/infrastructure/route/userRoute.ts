@@ -39,6 +39,20 @@ router.post('/create-course-checkout-session' ,userAuth, (req , res, next) => {u
 router.get('/studentCourse' ,userAuth, (req , res, next) => {userController.studentCourse(req ,res , next)});
 router.get('/getNotification' ,userAuth, (req , res, next) => {userController.getNotification(req ,res , next)});
 router.delete('/deleteNotifications' ,userAuth, (req , res, next) => {userController.deleteNotifications(req ,res , next)});
+router.get('/getBannerData' ,userAuth, (req , res, next) => {userController.getBannerData(req ,res , next)});
+router.get('/latestCourse' ,userAuth, (req , res, next) => {userController.getLatestCourse(req ,res , next)});
+router.get('/popularInstrcutors' ,userAuth, (req , res, next) => {userController.getPopularInstrcutors(req ,res , next)});
+router.get('/searchCourse' ,userAuth, (req , res, next) => {userController.getSearchCourse(req ,res , next)});
+router.post('/raiseTicket' ,userAuth, (req , res, next) => {userController.raiseCourseTicket(req ,res , next)});
+router.post('/createQnA' ,userAuth, (req , res, next) => {userController.createQnA(req ,res , next)});
+router.get('/fetchQnAData' ,userAuth, (req , res, next) => {userController.fetchQnAData(req ,res , next)});
+router.get('/announcements' ,userAuth, (req , res, next) => {userController.fetchAnnoucementData(req ,res , next)});
+
+
+
+
+
+
 
 
 

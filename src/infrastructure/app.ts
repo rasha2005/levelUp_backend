@@ -87,5 +87,14 @@ io.on("connection" , (socket:any) => {
 
     
   })
+
+  socket.on("join qna", (courseId: string) => {
+    socket.join(courseId);
+  });
+
+  socket.on("new qna", (newQna: any) => {
+    const { courseId } = newQna;
+    socket.in(courseId).emit("qna received", newQna);
+  });
 })
 

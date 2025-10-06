@@ -39,6 +39,8 @@ model User {
   reviews Review[]
   enrollments      Enrollment[]
   notifications Notification[]  
+  tickets     Ticket[]
+  
 
 }
 
@@ -66,6 +68,10 @@ model Instructor {
   scheduledSession ScheduledSession?
   wallet           Wallet?
   chats            Chat[]            @relation("InstructorChats")
+  courseBundles CourseBundle[]
+  announcements    Announcement[]
+  tickets     Ticket[]
+
 }
 
 model Admin {
@@ -212,8 +218,12 @@ model CourseBundle {
   enrollmentCount  Int       @default(0)
   createdAt        DateTime  @default(now())
   instructorId     String   @db.ObjectId
+  instructor   Instructor   @relation(fields: [instructorId], references: [id])
   slots            Slot[]   @relation("CourseBundleSlots")
   enrollments      Enrollment[]
+  announcements    Announcement[]
+  tickets     Ticket[]
+
 }
 
 model Enrollment {
@@ -238,4 +248,42 @@ model Notification {
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model Announcement {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  courseId      String?  @db.ObjectId 
+  instructorId  String?  @db.ObjectId 
+  title         String
+  message       String
+  createdAt     DateTime @default(now())
+  course        CourseBundle? @relation(fields: [courseId], references: [id])
+  instructor    Instructor?   @relation(fields: [instructorId], references: [id])
+
+}
+
+model Ticket {
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String      @db.ObjectId
+  instructorId   String?     @db.ObjectId
+  courseId       String?     @db.ObjectId
+  description    String
+  attachments    String?   
+  status         String @default("pending")
+  adminRemarks   String?    
+  createdAt      DateTime    @default(now())
+  user           User        @relation(fields: [userId], references: [id])
+  instructor     Instructor? @relation(fields: [instructorId], references: [id])
+  course         CourseBundle?     @relation(fields: [courseId], references: [id])
+}
+
+model QnA {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  courseId  String
+  userId    String
+  userImg   String?
+  userName  String?
+  message   String
+  parentId  String?  
+  createdAt DateTime @default(now())
 }

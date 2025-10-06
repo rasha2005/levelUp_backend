@@ -42,6 +42,11 @@ interface IinstructorRepository {
     courseSlots(title:string , date:string,startTime:string , endTime:string,bundleId:string,instructorId:string,roomId:string): Promise<Slot | null>
     getCourseSlots(bundleId:string):Promise<Slot[] | null>
     bundleStatus(bundleId:string): Promise<boolean>
+    creareAnnouncement(announcementTitle:string , announcementMessages:string,bundleId:string , instructorId:string): Promise<boolean>
+    deleteCourseSlot(slotId:string): Promise<boolean>
+    deleteCourse(courseId:string): Promise<boolean>
+    updateCourse(bundleName:string , description:string , price:number,participantLimit:number , thumbnail:string|null ,courseId:string): Promise<boolean>
+
 
 
 

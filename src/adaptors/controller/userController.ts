@@ -438,6 +438,102 @@ export class UserController {
             next(err)
         }
     }
-     
+
+    async getBannerData(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const response = await this._useCase.bannerRatingData();
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async getLatestCourse(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const response = await this._useCase.latestCourseData();
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async getPopularInstrcutors(req:Request , res:Response , next:NextFunction) {
+        try{
+            
+            const response = await this._useCase.popularInstructorData();
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async getSearchCourse(req:Request , res:Response , next:NextFunction) {
+        try{
+           
+            const page: number = parseInt(req.query.page as string) || 1;
+            const limit: number = parseInt(req.query.limit as string) || 10;
+            const search: string | null = (req.query.searchTerm as string) || null;
+            const category: string | null = (req.query.selectedCategory as string) || null;
+            const minPrice: number | null = req.query.minPrice ? Number(req.query.minPrice) : null;
+            const maxPrice: number | null = req.query.maxPrice ? Number(req.query.maxPrice) : null;
+
+            const response = await this._useCase.searchCourseData(page,limit,search,category,minPrice,maxPrice);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async raiseCourseTicket(req:Request , res:Response , next:NextFunction) {
+        try{
+            const token =  req.app.locals.decodedToken;
+            const {thumbnail , description ,courseId, instructorId} = req.body
+            const response = await this._useCase.reportCourseIssue(thumbnail , description ,courseId, instructorId , token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async createQnA(req:Request , res:Response , next:NextFunction) {
+        try{
+            const token =  req.app.locals.decodedToken;
+            const {message , parentId,courseId} = req.body
+            const response = await this._useCase.createQnaData(message , parentId,courseId, token.id);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async fetchQnAData(req:Request , res:Response , next:NextFunction) {
+        try{
+            const courseId =  req.query.courseId as string;
+            const response = await this._useCase.getAllQnADatas(courseId);
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
+
+    async fetchAnnoucementData(req:Request , res:Response , next:NextFunction) {
+        try{
+           
+            const response = await this._useCase.getAllAnnouncementDatas();
+            return res.status(StatusCode.OK).json({response});
+
+        }catch(err){
+            next(err)
+        }
+    }
 }
 
