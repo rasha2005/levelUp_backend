@@ -402,10 +402,10 @@ async resendOtpByEmail(token:string) {
         try{
             const data = await this._instructorRespository.getBundleData(token.id);
            
-            if(data) {
-                return {sucess:true , message:Messages.FETCHED , res:data}
+            if(data === false) {
+                return {sucess:true , message:Messages.FETCHED , isApproved:false}
             }else{
-                return {sucess:false , message:Messages.FAILED  , res:data} ;
+                return {sucess:false , message:Messages.FAILED  , res:data , isApproved:true} ;
             }
         }catch(err){
             throw(err);
@@ -499,10 +499,10 @@ async resendOtpByEmail(token:string) {
       async fetchCourseData(instructorId:string) {
         try{
           const data = await this._instructorRespository.getCourseBundle(instructorId)
-          if(data) {
-            return {sucess:true , message:Messages.FETCHED , data}
+          if(data === false) {
+            return {sucess:true , message:Messages.FETCHED , isApproved:false}
         }else{
-            return {sucess:false , message:Messages.FAILED  , data} ;
+            return {sucess:false , message:Messages.FAILED  , data , isApproved:true} ;
         }
 
         }catch(err){

@@ -30,7 +30,7 @@ interface IinstructorRepository {
     verifyRoomById(roomId:string): Promise<Slot | null>
     updateInstructorJoin(roomId:string):Promise<boolean>
     createQuestionBundle(instructorId:string , bundleName:string):Promise<boolean>
-    getBundleData(instructorId:string):Promise<QuestionBundle[] | null>
+    getBundleData(instructorId:string):Promise<QuestionBundle[] | null | boolean>
     createQuestion(questionText:string , type:string , options:string[], answe:string , bundleId:string): Promise<Question | null>
     getQuestions(bundleId:string):Promise<Question[] | null>
     createTest(activeSlotId:string,selectedQuestions:string[]):Promise<boolean>
@@ -38,7 +38,7 @@ interface IinstructorRepository {
     deleteBundle(id:string): Promise<boolean>
     updateBundle(name:string ,id:string): Promise<boolean>
     courseBundle(data:ICourseBundle , token:string): Promise<CourseBundle | undefined>
-    getCourseBundle(insructorId:string): Promise<CourseBundle[] | null>
+    getCourseBundle(insructorId:string): Promise<CourseBundle[] | null | boolean>
     courseSlots(title:string , date:string,startTime:string , endTime:string,bundleId:string,instructorId:string,roomId:string): Promise<Slot | null>
     getCourseSlots(bundleId:string):Promise<Slot[] | null>
     bundleStatus(bundleId:string): Promise<boolean>

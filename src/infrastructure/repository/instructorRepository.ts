@@ -334,7 +334,11 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
           return false;
     }
 
-    async getBundleData(instructorId: string): Promise<QuestionBundle[] | null> {
+    async getBundleData(instructorId: string): Promise<QuestionBundle[] | null | boolean> {
+        const instructor = await prisma.instructor.findUnique({
+            where: { id: instructorId }
+        });
+        if(instructor?.isApproved){
         const bundle = await prisma.questionBundle.findMany({
             where: { instructorId },
             include: { questions: true },
@@ -346,6 +350,9 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
 
         if(bundle) return bundle
         return null
+     }else{
+        return false
+     }
     }
 
     async createQuestion(questionText:string , type:string , options:string[], answer:string , bundleId: string): Promise<Question | null> {
@@ -491,14 +498,26 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         }
     }
 
-    async getCourseBundle(instructorId: string): Promise<CourseBundle[] | null> {
-        const data = await prisma.courseBundle.findMany({
-            where:{
-                instructorId
-            }
-        })
-        if(data)return data
-        return null
+    async getCourseBundle(instructorId: string): Promise<CourseBundle[] | null | boolean> {
+        const instructor = await prisma.instructor.findUnique({
+            where: { id: instructorId }
+        });
+        if(instructor?.isApproved){
+
+            const data = await prisma.courseBundle.findMany({
+                where:{
+                    instructorId
+                },
+                orderBy:{
+                    createdAt:"desc"
+                }
+                
+            })
+            if(data)return data
+            return null
+        }else{
+            return false
+        }    
     }
 
     async courseSlots(title: string, date: string, startTime: string, endTime: string, bundleId: string, instructorId: string , roomId:string): Promise<Slot | null> {
