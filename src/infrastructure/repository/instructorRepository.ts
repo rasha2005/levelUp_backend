@@ -600,10 +600,27 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
     }
 
     async deleteCourseSlot(slotId: string): Promise<boolean> {
-        await prisma.slot.delete({
+        const slot = await prisma.slot.findFirst({
             where: { id: slotId },
           });
-          return true;    }
+        
+          if (!slot) {
+            throw new Error("Slot not found");
+          }
+          if(slot.courseBundleId){
+
+              await prisma.courseBundle.update({
+                where: { id: slot.courseBundleId },
+                data: {
+                  sessionCount: {
+                    decrement: 1,
+                  },
+                },
+              });
+          }
+        
+          return true;
+         }
 
     async deleteCourse(courseId: string): Promise<boolean> {
         await prisma.courseBundle.delete({
