@@ -291,4 +291,15 @@ export class AdminUseCase {
           throw err;
         }
       }
+
+      async getAllInstructorData() {
+        try {
+          const data = await this._adminRepository.getAllInstructor();
+          if (data) {
+            const instructorDto = data.map(i => InstructorDTO.fromEntity(i));
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto };          }
+        } catch (err: any) {
+          throw err;
+        }
+      }
     }      

@@ -195,4 +195,14 @@ export class AdminController {
             next(err);
         }
     }
+
+    async getAllInstructors(req:Request ,res:Response ,next:NextFunction) {
+        try {
+           
+            const response = await this._useCase.getAllInstructorData();
+            res.status(StatusCode.OK).json({response});
+        }catch(err) {
+            next(err);
+        }
+    }
 }

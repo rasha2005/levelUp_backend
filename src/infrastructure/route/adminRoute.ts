@@ -45,5 +45,8 @@ router.get('/getTickets' , adminAuth, (req ,res, next) => {controller.fetchTicke
 
 router.put('/updateTicket' , adminAuth, (req ,res, next) => {controller.updateTicket(req, res, next)})
 
+router.get('/allInstructor' , adminAuth, (req ,res, next) => {controller.getAllInstructors(req, res, next)})
+
+
 
 export default router;

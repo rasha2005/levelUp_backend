@@ -29,6 +29,8 @@ interface IadminRepository {
     getMonthlyRevenue(): Promise<{ month: string; amount: number }[]>
     getAllTickets(search:string|"" , page:number , limit:number): Promise<{ tickets: Ticket[]; totalCount: number } | null>
     updateTicketById(status:string , ticketId:string):Promise<boolean>
+    getAllInstructor(): Promise<Instructor[] | null>
+
 
 
 }

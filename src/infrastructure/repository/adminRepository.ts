@@ -424,4 +424,9 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
     
       return true;
     }
+
+    async getAllInstructor(): Promise<Instructor[] | null> {
+        const data = await prisma.instructor.findMany();
+        return data
+    }
 }
