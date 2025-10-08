@@ -106,7 +106,7 @@ export class InstructorUseCase {
             }
 
         }else{
-            return {success:false , message:Messages.FAILED};
+            return {success:false , message:Messages.INVALID};
         }
       }catch(err:any) {
         throw(err)
