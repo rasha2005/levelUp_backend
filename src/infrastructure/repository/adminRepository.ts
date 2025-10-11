@@ -83,11 +83,14 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
     }
 
     async createCategory(name:string): Promise<Category | null> {
-        const existingCat = await prisma.category.findUnique({
-            where: {
-                catName: name,
-            },
-        });
+      const existingCat = await prisma.category.findFirst({
+        where: {
+          catName: {
+            equals: name,
+            mode: "insensitive", 
+          },
+        },
+      });
         
         if (existingCat) {
             return null;
@@ -107,11 +110,14 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
     }
 
     async editCatData(name:string , id:string): Promise<Category[] | null> {
-        const existingCat = await prisma.category.findUnique({
-            where: {
-                catName: name,
-            },
-        });
+      const existingCat = await prisma.category.findFirst({
+        where: {
+          catName: {
+            equals: name,
+            mode: "insensitive", 
+          },
+        },
+      });
         
         if (existingCat) {
             return null;

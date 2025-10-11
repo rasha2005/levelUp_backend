@@ -78,7 +78,8 @@ export class ChatUseCase {
             const res = await this._ichatRepository.createMessageById(
               content,
               chatId,
-              decode.id
+              decode.id,
+              decode.role
             );
       
             if (res) {

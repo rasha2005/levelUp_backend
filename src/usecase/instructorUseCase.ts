@@ -93,7 +93,7 @@ export class InstructorUseCase {
     async verifyLogin(email:string , instructorpassword:string) {
       try{
          const instructor = await this._instructorRespository.findByEmail(email);
-        if(instructor) {
+        if(instructor && instructor.password) {
             const password = await this._hashPassword.compare(instructorpassword , instructor.password);
             const token = this._jwt.authToken( instructor.id , instructor.email , "Instructor")
             const refreshToken = this._jwt.refreshToken( instructor.id , instructor.email , "Instructor")
@@ -229,8 +229,8 @@ async resendOtpByEmail(token:string) {
     
     if(token) {
         const instructor = await this._instructorRespository.findByEmail(token.email);
-        if(instructor) {
-            const isPasswordMatched = await this._hashPassword.compare(current , instructor.password);
+        if(instructor && instructor.password) {
+            const isPasswordMatched = await this._hashPassword.compare(current , instructor?.password);
             if(isPasswordMatched) {
                 const hashedPassword = await this._hashPassword.hash(confirm);
                 const updatedInstructor = await this._instructorRespository.changePassword(token.email , hashedPassword); 
@@ -603,5 +603,95 @@ async resendOtpByEmail(token:string) {
             throw(err);
         }
     }
+
+    async sendForgotPasswordOTP(email:string) {
+        try{
+          const instructor = await this._instructorRespository.findByEmail(email);
+          if(instructor) {
+            const otp = this._generateOtp.createOtp();
+    
+            await this._sendEmailOtp.sendEmail(instructor.email, otp)
+
+            const instructorOtp = await this._instructorRespository.findOtpByEmail(instructor.email);
+            if(instructorOtp){
+            await this._instructorRespository.updateOtpByEmail(instructor.email , otp);
+            }else{
+            await this._instructorRespository.saveOtp(instructor.email , otp);
+            }
+            const instructorDTO = InstructorDTO.fromEntity(instructor);
+            console.log("haha",instructorDTO)
+            const token = this._jwt.otpToken(instructorDTO);
+            return {
+              status: StatusCode.OK,           
+              success: true,
+              message: `OTP ${Messages.CREATED}`,
+              instructorOtp,
+              token,
+            };
+          }
+          return {
+            status: StatusCode.OK,
+            success: false,
+            message: `Email not found`,
+          };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+    async verifyPasswordOtp(userOtp:string , token:string) {
+        try{
+          const decodedToken = this._jwt.verifyToken(token);
+    
+          const otp = await this._instructorRespository.findOtpByEmail(decodedToken?.info.email);
+          if(userOtp == otp?.otp) {
+            return {
+              status: StatusCode.OK,
+              success: true,
+              message: 'otp matched',
+            };
+          }
+          return {
+            status: StatusCode.OK,
+            success: false,
+            message: `Invalid Otp`,
+          };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async changeInstructor_Password(token:string , confirm:string) {
+        try {
+          const decodedToken = this._jwt.verifyToken(token);
+          if(decodedToken) {
+            const instructor = await this._instructorRespository.findByEmail(decodedToken.info.email);
+     
+            if(instructor && instructor.password) {
+                const hashedPassword = await this._hashPassword.hash(confirm);
+                const updatedUser = await this._instructorRespository.changePassword(instructor.email ,hashedPassword);
+                if(updatedUser) {
+                  const userDTO = InstructorDTO.fromEntity(instructor);
+                  const authToken = this._jwt.authToken(instructor.id, instructor.email, "Instructor");
+                  const refreshToken = this._jwt.refreshToken(
+                    instructor.id,
+                    instructor.email,
+                    "Instructor"
+                  );
+                  return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedUser:userDTO,authToken , refreshToken};
+                } else {
+                  return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+                }
+             
+            } else {
+              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
+            }
+          }
+        } catch(err:any) {
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+        }
+      }
 }
 

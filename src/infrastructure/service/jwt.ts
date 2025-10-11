@@ -6,7 +6,7 @@ import Instructor from "../../entity/Instructor";
 class Jwt implements Ijwt {
 
     otpToken(info: User | Instructor): string {
-        const payload = { info };
+        const payload = { info  };
         const token = jwt.sign(payload, process.env.SECRET_KEY!, { expiresIn: '365d' });
         return token;
     }
@@ -24,7 +24,6 @@ class Jwt implements Ijwt {
               const decoded = jwt.decode(token) as JwtPayload;
               return decoded; 
             }
-            console.log("JWT verification error:", err);
             return null;
           }
         

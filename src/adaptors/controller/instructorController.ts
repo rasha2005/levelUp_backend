@@ -421,5 +421,52 @@ async deleteCourseSlot(req:Request , res:Response , next:NextFunction) {
         next(err);
     }
    }
+
+   async forgotPassword(req:Request , res:Response , next:NextFunction) {
+    try{
+        const email = req.query.email as string
+        const response = await this.useCase.sendForgotPasswordOTP(email);
+        if(response.success === true) {
+            return res.status(StatusCode.OK).json({ success: true ,token:response.token});
+        }else{
+            return res.status(StatusCode.OK).json({success:false , message:response.message})
+        }
+
+    }catch(err){
+        next(err)
+    }
+}
+
+   async passwordOtp(req:Request , res:Response , next:NextFunction) {
+    try{
+        const otp = req.query.userOtp as string
+        const token = req.query.token as string;
+        const response = await this.useCase.verifyPasswordOtp(otp , token);
+        return res.status(StatusCode.OK).json({response});
+    }catch(err){
+        next(err)
+    }
+}
+
+async resetPassword(req:Request , res:Response , next:NextFunction){
+    try {
+        
+        const {confirm , token} = req.body;
+        const response = await this.useCase.changeInstructor_Password(token , confirm);
+        if(response?.success){
+            const REFRESH_MAXAGE = parseInt(process.env.REFRESH_MAXAGE!);
+            res.cookie("refreshToken", response.refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                domain: ".levelup.icu",
+                maxAge: REFRESH_MAXAGE
+              });
+        }
+        return res.status(StatusCode.OK).json({response});
+    }catch(err) {
+        next(err);
+    }
+   }
  
 }

@@ -39,7 +39,8 @@ export class UserUseCase {
     
             await this._sendEmailOtp.sendEmail(user.email, otp);
             const userOtp = await this._iuserRepository.saveOtp(user.email, otp);
-            const token = this._jwtToken.otpToken(user);
+            const userDTO = UserDTO.fromEntity(user);
+            const token = this._jwtToken.otpToken(userDTO);
     
             return {
               status: StatusCode.OK,
@@ -260,13 +261,13 @@ export class UserUseCase {
           if(decodedToken) {
             const otp = this._generateOtp.createOtp();
             await this._sendEmailOtp.sendEmail(decodedToken.info.email , otp);
-            const otpData = await this._iuserRepository.findOtp(decodedToken.info.email);
-      
+            const otpData = await this._iuserRepository.findOtp(decodedToken.info.email);      
             if(otpData) {
               const updatedOtp = await this._iuserRepository.updateOtpByEmail(decodedToken.info.email , otp);
               return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedOtp};
             } else {
-              const savedOtp = await this._iuserRepository.saveOtp(decodedToken.info , otp);
+              
+              const savedOtp = await this._iuserRepository.saveOtp(decodedToken.info.email , otp);
               return {status: StatusCode.OK, success:true , message: Messages.CREATED , savedOtp};
             }
           }
@@ -292,7 +293,7 @@ export class UserUseCase {
                   return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
                 }
               } else {
-                return {status: StatusCode.UNAUTHORIZED, success:false , message: Messages.AUTH_FAILED};
+                return {status: StatusCode.UNAUTHORIZED, success:false , message:"Invalid Password"};
               }
             } else {
               return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
@@ -336,7 +337,6 @@ export class UserUseCase {
       
       async successPayment(session:any) {
         try {
-          console.log("kjjk")
           const {instructorId , userId , id , price} = session.metadata;
             await this._iuserRepository.createSlot(session.metadata);
            await this._iuserRepository.updateEventStatus(id);
@@ -550,9 +550,8 @@ export class UserUseCase {
 
       async successCoursePayment(session:any) {
         try {
-          console.log("enroll")
           const {instructorId , userId , courseId , price} = session.metadata;
-            await this._iuserRepository.createEnrollment(instructorId , userId , courseId , price);
+          await this._iuserRepository.createEnrollment(instructorId , userId , courseId , price);
           const priceNumber = parseFloat(price);
           const percent = price * 0.15;
           const amount =  priceNumber - percent;
@@ -675,6 +674,94 @@ export class UserUseCase {
         
         }catch(err){
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async sendForgotPasswordOTP(email:string) {
+        try{
+          const user = await this._iuserRepository.findByEmail(email);
+          if(user) {
+            const otp = this._generateOtp.createOtp();
+    
+            await this._sendEmailOtp.sendEmail(user.email, otp);
+            const userOtp = await this._iuserRepository.findOtp(user.email);
+            if(userOtp){
+            await this._iuserRepository.updateOtpByEmail(user.email , otp);
+            }else{
+            await this._iuserRepository.saveOtp(user.email , otp);
+            }
+            const userDTO = UserDTO.fromEntity(user);
+            const token = this._jwtToken.otpToken(userDTO);
+            return {
+              status: StatusCode.OK,
+              success: true,
+              message: `OTP ${Messages.CREATED}`,
+              userOtp,
+              token,
+            };
+          }
+          return {
+            status: StatusCode.OK,
+            success: false,
+            message: `Email not found`,
+          };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async verifyPasswordOtp(userOtp:string , token:string) {
+        try{
+          const decodedToken = this._jwtToken.verifyToken(token);
+          console.log('de',decodedToken);
+          const otp = await this._iuserRepository.findOtp(decodedToken?.info.email);
+          console.log("otcp",otp);
+          if(userOtp == otp?.otp) {
+            return {
+              status: StatusCode.OK,
+              success: true,
+              message: 'otp matched',
+            };
+          }
+          return {
+            status: StatusCode.OK,
+            success: false,
+            message: `Invalid Otp`,
+          };
+        
+        }catch(err){
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        }
+      }
+
+      async changeUser_Password(token:string , confirm:string) {
+        try {
+          const decodedToken = this._jwtToken.verifyToken(token);
+          if(decodedToken) {
+            const user = await this._iuserRepository.findByEmail(decodedToken.info.email);
+            if(user && user.password) {
+                const hashedPassword = await this._hashPassword.hash(confirm);
+                const updatedUser = await this._iuserRepository.changePassword(user.email ,hashedPassword);
+                if(updatedUser) {
+                  const userDTO = UserDTO.fromEntity(user);
+                  const authToken = this._jwtToken.authToken(user.id, user.email, "User");
+                  const refreshToken = this._jwtToken.refreshToken(
+                    user.id,
+                    user.email,
+                    "User"
+                  );
+                  return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedUser:userDTO,authToken , refreshToken};
+                } else {
+                  return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+                }
+           
+            } else {
+              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
+            }
+          }
+        } catch(err:any) {
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
         }
       }
         

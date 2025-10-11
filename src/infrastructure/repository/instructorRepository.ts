@@ -111,7 +111,6 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
             data: updateData
           });
         
-          console.log("updatedData", updatedData);
           return updatedData ?? null;
     }
 
@@ -569,7 +568,6 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
                 courseBundleId:bundleId
             }
         })
-        console.log('eh',data)
         return data
     }
 

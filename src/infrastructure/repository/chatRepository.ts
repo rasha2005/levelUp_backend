@@ -56,8 +56,8 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
         return null
     }
 
-    async createMessageById(content: string, chatId: string, id: string): Promise<Message | null> {
-        const messsage = await prisma.message.create({
+    async createMessageById(content: string, chatId: string, id: string , role:string): Promise<Message | null> {
+        const message = await prisma.message.create({
             data:{
                 senderId:id,
                 content:content,
@@ -67,9 +67,18 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
         })
      
 
-        if(messsage) {
-            return messsage
-        }
+        if (message) {
+            await prisma.chat.update({
+              where: { id: chatId },
+              data: {
+                latestMessageId: message.id,
+              },
+            });
+        
+            return message;
+          }
+        
+          return null;
 
         return null
     }

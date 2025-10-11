@@ -78,6 +78,12 @@ router.delete ('/deleteCourse' ,instructorAuth, (req , res, next) => {instructor
 
 router.put('/updateCourse' , instructorAuth,(req , res, next) => {instructorController.updateCourse(req ,res , next)});
 
+router.get('/forgotPassword' , (req , res, next) => {instructorController.forgotPassword(req ,res , next)});
+
+router.get('/passwordOtp' , (req , res, next) => {instructorController.passwordOtp(req ,res , next)});
+
+router.put('/resetPassword' , (req , res, next) => {instructorController.resetPassword(req ,res , next)});
+
 
 
 

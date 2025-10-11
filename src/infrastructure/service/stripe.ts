@@ -49,7 +49,6 @@ return session.url;
 
     async stripeCoursePayment(info: any, userId: string): Promise<any> {
         try{
-console.log("herew")
             const {id , name , startDate , endDate , instructorId , price} = info
 
             const session = await stripeApi.checkout.sessions.create({

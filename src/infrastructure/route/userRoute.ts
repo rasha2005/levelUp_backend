@@ -47,6 +47,13 @@ router.post('/raiseTicket' ,userAuth, (req , res, next) => {userController.raise
 router.post('/createQnA' ,userAuth, (req , res, next) => {userController.createQnA(req ,res , next)});
 router.get('/fetchQnAData' ,userAuth, (req , res, next) => {userController.fetchQnAData(req ,res , next)});
 router.get('/announcements' ,userAuth, (req , res, next) => {userController.fetchAnnoucementData(req ,res , next)});
+router.get('/forgotPassword' , (req , res, next) => {userController.forgotPassword(req ,res , next)});
+router.get('/passwordOtp' , (req , res, next) => {userController.passwordOtp(req ,res , next)});
+router.put('/resetPassword' , (req , res, next) => {userController.resetPassword(req ,res , next)});
+
+
+
+
 
 
 

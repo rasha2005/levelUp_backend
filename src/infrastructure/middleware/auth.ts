@@ -26,7 +26,6 @@ const Auth = async (req: Request, res: Response, next: NextFunction): Promise<an
         try {
           jwtToken.verifyToken(refreshToken); 
         } catch (err) {
-          console.log(err)
           return res.status(401).json({ message: "Token expired" });
         }
       }

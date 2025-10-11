@@ -1,3 +1,4 @@
+import Instructor from "./Instructor";
 import Slot from "./Slot";
 
 interface Enrollment {
@@ -21,5 +22,5 @@ export default interface CourseBundle {
     status: string; 
     sessionCount?: number;       
     instructorId : string;
-    enrollments? : Enrollment[]
+    enrollments? : Enrollment[];
 }

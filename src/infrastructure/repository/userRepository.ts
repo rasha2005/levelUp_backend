@@ -238,7 +238,6 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
       });
   
       if (existingSlot) {
-          console.log("Duplicate slot detected, not creating a new one");
           return null;
       }
   
@@ -556,7 +555,14 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
           },
           include:{
             slots:true,
-            enrollments:true
+            enrollments:true,
+            instructor:{
+              select:{
+                id:true,
+                name:true,
+                img:true
+              }
+            }
             }
         })
 
@@ -564,6 +570,18 @@ export class UserRepository extends GenericRepository<User> implements IuserRepo
     }
 
     async createEnrollment(instructorId: string, userId: string, courseId: string, price: number): Promise<boolean> {
+      const existingEnrollment = await prisma.enrollment.findFirst({
+        where: {
+          userId,
+          courseId,
+        },
+      });
+    
+      if (existingEnrollment) {
+        console.log("Enrollment already exists, skipping duplicate creation.");
+        return false;
+      }
+      
       const data = await prisma.enrollment.create({
         data:{
           userId,

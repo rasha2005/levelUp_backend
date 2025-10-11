@@ -1,5 +1,0 @@
-/home/rasha/PROJECTS/levelup-backend/src/logs/20250915-0000-01-access.log
-/home/rasha/PROJECTS/levelup-backend/src/logs/20250924-0000-01-access.log
-/home/rasha/PROJECTS/levelup-backend/src/logs/20250926-0000-01-access.log
-/home/rasha/PROJECTS/levelup-backend/src/logs/20250928-0000-01-access.log
-/home/rasha/PROJECTS/levelup-backend/src/logs/20250929-0020-01-access.log

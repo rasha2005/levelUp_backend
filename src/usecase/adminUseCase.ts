@@ -79,7 +79,7 @@ export class AdminUseCase {
           if (categoryData) {
             return { status: StatusCode.CREATED, success: true, message: Messages.CREATED, categoryData };
           } else {
-            return { status: StatusCode.CONFLICT, success: false, message: Messages.FAILED };
+            return { status: StatusCode.CONFLICT, success: false, message: "category already exist" };
           }
         } catch (err: any) {
           throw err;
@@ -105,7 +105,7 @@ export class AdminUseCase {
           if (category) {
             return { status: StatusCode.OK, success: true, message: Messages.UPDATED, category };
           } else {
-            return { status: StatusCode.CONFLICT, success: false, message: Messages.FAILED };
+            return { status: StatusCode.CONFLICT, success: false, message:"category already exist" };
           }
         } catch (err: any) {
           throw err;

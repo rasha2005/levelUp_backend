@@ -8,7 +8,7 @@ interface  Instructor {
     name:string , 
     email:string,
     mobile:string,
-    password:string,
+    password?:string,
     description?: string | null;  
     category?: string | null;    
     experience?: string | null;  
