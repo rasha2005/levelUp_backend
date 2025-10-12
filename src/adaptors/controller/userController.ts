@@ -285,8 +285,16 @@ export class UserController {
             const name  = req.body.name as string
             const img  = req.body.img as string
             const response = await this._useCase.googleCallback(email , name , img);
-            
-            
+            if(response.refreshToken){
+                const REFRESH_MAXAGE = parseInt(process.env.REFRESH_MAXAGE!);
+                res.cookie("refreshToken", response.refreshToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+                    domain: ".levelup.icu",
+                    maxAge: REFRESH_MAXAGE
+                  });
+            }
             return res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);

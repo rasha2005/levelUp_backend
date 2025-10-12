@@ -434,14 +434,17 @@ export class UserUseCase {
           const user = await this._iuserRepository.createUserByGoogle(email , name , img);
           if(user) {
             const token = await this._jwtToken.authToken(user.id , user.email , "User");
-            if(token) {
-              return {status: StatusCode.OK, success:true , message: Messages.AUTH_SUCCESS , user , authToken:token};
+            const refreshToken = this._jwtToken.refreshToken(
+              user.id,
+              user.email,
+              "User"
+            );
+              return {status: StatusCode.OK, success:true , message: Messages.AUTH_SUCCESS , user , authToken:token , refreshToken};
             } else {
               return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
             }
-          }
-          return {status: StatusCode.BAD_REQUEST, success:false , message: Messages.FAILED};
-        } catch(err:any) {
+
+            } catch(err:any) {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
         }
       }
