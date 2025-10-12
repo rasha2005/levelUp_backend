@@ -149,7 +149,11 @@ export class AdminController {
             const search = (req.query.search as string) || ""; 
             const page = parseInt(req.query.page as string) || 1; 
             const limit = parseInt(req.query.limit as string) || 10;
-            const response = await this._useCase.getTransaction(search , page , limit);
+            const start = (req.query.start as string) || ""; 
+            const end = (req.query.end as string) || ""; 
+
+
+            const response = await this._useCase.getTransaction(search , page , limit , start , end);
             res.status(StatusCode.OK).json({response});
         }catch(err) {
             next(err);

@@ -244,58 +244,79 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
         return admin
     }
 
-    async getTransactionDetails(search:string|"" , page:number , limit:number): Promise<TransactionSummaryResponse> {
+    async getTransactionDetails(search:string|"" , page:number , limit:number,start:string  | "" , end:string|""): Promise<TransactionSummaryResponse> {
         const skip = (page - 1) * limit;
+        
+        const transactionDateFilter: any = {};
+        if (start && !isNaN(new Date(start).getTime())) {
+          transactionDateFilter.gte = new Date(start);
+        }
+        if (end && !isNaN(new Date(end).getTime())) {
+          const endDate = new Date(end);
+          if (end.length === 10) {
+            endDate.setHours(23, 59, 59, 999);
+          }
+          transactionDateFilter.lte = endDate;
+        }
 
-       
-        const instructors = await prisma.instructor.findMany({
-            where: search
-              ? { name: { contains: search, mode: "insensitive" } }
-              : {},
-            skip,
-            take: limit,
-            select: {
-              id: true,
-              name: true,
-              email:true,
-              wallet: {
-                select: {
-                  transactions: {
-                    select: { amount: true },
-                  },
-                },
-              },
-            },
-          });
+const instructorWhereBase: any = search
+  ? {
+      OR: [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ],
+    }
+  : {};
+
+if (Object.keys(transactionDateFilter).length > 0) {
+  instructorWhereBase.wallet = {
+    transactions: {
+      some: {
+        createdAt: transactionDateFilter,
+      },
+    },
+  };
+}
+
+const instructors = await prisma.instructor.findMany({
+  where: instructorWhereBase,
+  skip,
+  take: limit,
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    wallet: {
+      select: {
+        transactions: {
+          where: Object.keys(transactionDateFilter).length ? { createdAt: transactionDateFilter } : {},
+          select: { amount: true, createdAt: true },
+        },
+      },
+    },
+  },
+});
+
         
-          // Compute totals in memory
-          const data = instructors.map((instructor) => {
-            const totalEarnings = instructor.wallet?.transactions.reduce(
-              (sum, t) => sum + t.amount,
-              0
-            ) || 0;
-    
-            const adminEarnings = totalEarnings * 0.15;
-        
-            return {
-              instructorId: instructor.id,
-              instructorEmail:instructor.email,
-              instructorName: instructor.name,
-              totalEarnings,
-              adminEarnings,
-            };
-          });
-        
-          const total = await prisma.instructor.count({
-            where: search
-            ? {
-                OR: [
-                  { name: { contains: search, mode: "insensitive" } },
-                  { email: { contains: search, mode: "insensitive" } },
-                ],
-              }
-            : {},
-          });
+const data = instructors.map((instructor) => {
+  const totalEarnings =
+    instructor.wallet?.transactions.reduce((sum, t) => sum + t.amount, 0) || 0;
+
+  const adminEarnings = totalEarnings * 0.15;
+
+  return {
+    instructorId: instructor.id,
+    instructorEmail: instructor.email,
+    instructorName: instructor.name,
+    totalEarnings,
+    adminEarnings,
+  };
+});
+
+
+const total = await prisma.instructor.count({
+  where: instructorWhereBase,
+});
         
           return { total, data };
     }
@@ -321,6 +342,7 @@ export class AdminRepository extends GenericRepository<Admin> implements IadminR
             select: {
               amount: true,
               createdAt: true,
+
             },
           });
         

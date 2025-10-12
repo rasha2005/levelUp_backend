@@ -222,9 +222,9 @@ export class AdminUseCase {
         }
       }
       
-      async getTransaction(search:string|"" , page:number , limit:number) {
+      async getTransaction(search:string|"" , page:number , limit:number , start:string  | "" , end:string|"") {
         try {
-          const transaction = await this._adminRepository.getTransactionDetails(search, page , limit);
+          const transaction = await this._adminRepository.getTransactionDetails(search, page , limit , start , end);
           if (transaction) {
             return { status: StatusCode.OK, success: true, message: Messages.FETCHED, data:transaction.data , total:transaction.total };
           } else {

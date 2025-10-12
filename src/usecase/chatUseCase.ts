@@ -48,7 +48,6 @@ export class ChatUseCase {
               decode.id,
               decode.role
             );
-      
             if (chats) {
               return {
                 status: StatusCode.OK,

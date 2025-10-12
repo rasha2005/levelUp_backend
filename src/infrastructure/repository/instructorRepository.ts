@@ -13,6 +13,8 @@ import QuestionBundle from "../../entity/Bundle";
 import Question from "../../entity/Question";
 import CourseBundle from "../../entity/CourseBundle";
 import ICourseBundle from "../../interface/entity/ICourseBundle";
+import { RRule } from "rrule";
+
 
 const prisma = new PrismaClient();
 
@@ -185,49 +187,97 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         return null;
     }
 
-    async scheduleSession(id: string, title: string, start: string, end: string, price: string): Promise<Session | null> {
+    async scheduleSession(id: string, title: string, start: string, end: string, price: string , isRecurring:boolean , recurrenceRule:string |null): Promise<Session | null> {
         const existingSession = await prisma.scheduledSession.findUnique({
-            where:{
-                instructorId:id
-            }
-        })
-      
-        if(existingSession) {
-            const updatedSession = await prisma.scheduledSession.update({
+            where: { instructorId: id },
+          });
+        
+          // Helper to calculate event duration
+          const duration = new Date(end).getTime() - new Date(start).getTime();
+        
+          // Function to create event objects
+          const createEventData = (dates: Date[]) =>
+            dates.map((date) => ({
+              title,
+              start: date.toISOString(),
+              end: new Date(date.getTime() + duration).toISOString(),
+              price,
+            }));
+        
+          if (isRecurring && recurrenceRule) {
+            const dtStart = new Date(start)
+            .toISOString()
+            .replace(/[-:]/g, "")
+            .split(".")[0] + "Z";
+        
+          const ruleString = `DTSTART:${dtStart}\n${recurrenceRule}`;
+          const rule = RRule.fromString(ruleString);
+          const occurrences = rule.all();
+            if (existingSession) {
+              const updatedSession = await prisma.scheduledSession.update({
                 where: { id: existingSession.id },
-                data:{
-                    events:{
-                        create:{
-                            title:title,
-                            start:start,
-                            end:end,
-                            price:price
-                        }
-                    }
+                data: {
+                  events: {
+                    createMany: {
+                      data: createEventData(occurrences),
+                    },
+                  },
                 },
                 include: { events: true },
-            })
-            return updatedSession as Session;
-
-        }else{
-            const createdSession = await prisma.scheduledSession.create({
-                data:{
-                    instructorId:id,
-                    events: {
-                        create: {
-                            title:title,
-                            start:start,
-                            end:end,
-                            price:price
-                        }
-                    }
+              });
+              return updatedSession as Session;
+            } else {
+              const createdSession = await prisma.scheduledSession.create({
+                data: {
+                  instructorId: id,
+                  events: {
+                    createMany: {
+                      data: createEventData(occurrences),
+                    },
+                  },
                 },
                 include: { events: true },
-            })
-            return createdSession as Session;
-        }
-
-        return null
+              });
+              return createdSession as Session;
+            }
+          } else {
+            // Single event (non-recurring)
+            if (existingSession) {
+              const updatedSession = await prisma.scheduledSession.update({
+                where: { id: existingSession.id },
+                data: {
+                  events: {
+                    create: {
+                      title,
+                      start,
+                      end,
+                      price,
+                    },
+                  },
+                },
+                include: { events: true },
+              });
+              return updatedSession as Session;
+            } else {
+              const createdSession = await prisma.scheduledSession.create({
+                data: {
+                  instructorId: id,
+                  events: {
+                    create: {
+                      title,
+                      start,
+                      end,
+                      price,
+                    },
+                  },
+                },
+                include: { events: true },
+              });
+              return createdSession as Session;
+            }
+          }
+        
+          return null;
     }
 
     async getEventsById(id: string): Promise<Session | null> {
@@ -638,6 +688,19 @@ export class InstructorRepository extends GenericRepository<Instructor> implemen
         },
       });
       return true;
+    }
+
+    async updateQuestionByEmail(questionId: string, ansOptions: string[], answer: string, text: string): Promise<boolean> {
+        const updated = await prisma.question.update({
+            where: { id: questionId },
+            data: {
+              options: ansOptions,
+              answer,
+              text,
+            },
+          });
+      
+          return !!updated;
     }
 }
 

@@ -41,7 +41,13 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
                 where:{
                     userId:token
                 },
-                include:{instructor:true}
+                include:{
+                    instructor:true,
+                    latestMessage: true,
+                },
+                orderBy:{
+                    latestMessageAt:'desc'
+                }
             }) 
             return userChats;
         }else if(role === "Instructor"){
@@ -49,7 +55,14 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
                 where:{
                     instructorId:token
                 },
-                include:{user:true}
+                include:{
+                    user:true,
+                    latestMessage: true,
+
+                },
+                orderBy:{
+                    latestMessageAt:'desc'
+                }
             })
             return instructorChat
         }
@@ -72,6 +85,7 @@ export class ChatRepository extends GenericRepository<Chat> implements IchatRepo
               where: { id: chatId },
               data: {
                 latestMessageId: message.id,
+                latestMessageAt:message.createdAt
               },
             });
         

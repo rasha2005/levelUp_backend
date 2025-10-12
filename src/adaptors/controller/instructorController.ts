@@ -140,8 +140,8 @@ export class InstructorController {
     try{
         const events = req.body.event;
         const token =req.app.locals.decodedToken;
-        const {title , start , end , price} = events;
-        const response = await this.useCase.scheduleSessionById(title , start , end , price , token);
+        const {title , start , end , price , isRecurring , recurrenceRule} = events;
+        const response = await this.useCase.scheduleSessionById(title , start , end , price , token , isRecurring , recurrenceRule);
         return res.status(StatusCode.OK).json({response});
 
 
@@ -468,5 +468,15 @@ async resetPassword(req:Request , res:Response , next:NextFunction){
         next(err);
     }
    }
+
+   async editQuestion(req:Request , res:Response , next:NextFunction) {
+    try{
+        const {questionId,ansOptions,answer,text} = req.body
+        const response = await this.useCase.editQuestionById(questionId,ansOptions,answer,text);
+        return res.status(StatusCode.OK).json({response});
+    }catch(err){
+        next(err)
+    }
+}
  
 }

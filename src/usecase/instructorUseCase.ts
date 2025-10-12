@@ -252,12 +252,12 @@ async resendOtpByEmail(token:string) {
     }
 }
 
-    async scheduleSessionById(title:string , start:string , end:string , price: string , token:DecodedToken) {
+    async scheduleSessionById(title:string , start:string , end:string , price: string , token:DecodedToken ,isRecurring:boolean , recurrenceRule:string |null) {
         try{
    
-    
+    console.log("recurrenceRule",recurrenceRule)
     if(token) {
-        const session = await this._instructorRespository.scheduleSession(token.id , title , start , end , price);
+        const session = await this._instructorRespository.scheduleSession(token.id , title , start , end , price , isRecurring , recurrenceRule);
         
         if(session) {
             return {success:true , message:Messages.UPDATED , session};
@@ -280,6 +280,7 @@ async resendOtpByEmail(token:string) {
         const instructorDto = InstructorDTO.fromEntity(instructor!)
         if(token) {
             const events = await this._instructorRespository.getEventsById(token.id);
+            console.log("ins",events);
             return {success:true , message:Messages.FOUND , events , instructor:instructorDto };
         }else{
             return {success:false , message:Messages.FAILED};
@@ -453,10 +454,10 @@ async resendOtpByEmail(token:string) {
     async deleteQuestionById(id:string) {
         try{
           const res = await this._instructorRespository.deleteQuestion(id)
-          return {status: StatusCode.OK, success:true };
+          return {status: StatusCode.OK, success:true ,message:Messages.DELETED};
 
         }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false ,message:Messages.FAILED};
         }
       }
 
@@ -693,5 +694,21 @@ async resendOtpByEmail(token:string) {
           return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
         }
       }
+
+      async editQuestionById(questionId:string,ansOptions:string[],answer:string,text:string ) {
+        try{
+
+            const res = await this._instructorRespository.updateQuestionByEmail(questionId,ansOptions,answer,text);
+            if(res) {
+                return {success:true , message:Messages.UPDATED ,}
+            }else{
+                return {success:false , message:Messages.FAILED};
+            }
+
+    
+        }catch(err:any){
+            throw(err);
+        }
+}
 }
 

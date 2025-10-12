@@ -24,7 +24,7 @@ interface IadminRepository {
     getUserId(id:string):Promise<User | null>
     findSlotsByDate(date:Date):Promise<any>
     findWallet(): Promise<Admin | null>
-    getTransactionDetails(search:string|"" , page:number , limit:number): Promise<TransactionSummaryResponse>
+    getTransactionDetails(search:string|"" , page:number , limit:number,start:string  | "" , end:string|""): Promise<TransactionSummaryResponse>
     approveInstrcutors(): Promise<Instructor[]>
     getMonthlyRevenue(): Promise<{ month: string; amount: number }[]>
     getAllTickets(search:string|"" , page:number , limit:number): Promise<{ tickets: Ticket[]; totalCount: number } | null>

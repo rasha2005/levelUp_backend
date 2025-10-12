@@ -84,6 +84,9 @@ router.get('/passwordOtp' , (req , res, next) => {instructorController.passwordO
 
 router.put('/resetPassword' , (req , res, next) => {instructorController.resetPassword(req ,res , next)});
 
+router.put('/editQuestion' , (req , res, next) => {instructorController.editQuestion(req ,res , next)});
+
+
 
 
 

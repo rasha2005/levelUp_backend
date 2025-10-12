@@ -21,7 +21,7 @@ interface IinstructorRepository {
     updateProfileByEmail(email:string , img:string):Promise<Instructor | null>
     updateOtpByEmail(email:string , otp:string): Promise<Otp | null>
     changePassword(email:string , password:string): Promise<Instructor | null>
-    scheduleSession(id:string , title:string , start:string , end:string , price: string ): Promise<Session | null>
+    scheduleSession(id:string , title:string , start:string , end:string , price: string,isRecurring:boolean , recurrenceRule:string |null ): Promise<Session | null>
     getEventsById(id:string): Promise<Session | null>
     deleteEventById(id:string , instructorId:string): Promise<boolean>
     getSlotList(id:string): Promise<Slot[] | null>
@@ -46,6 +46,7 @@ interface IinstructorRepository {
     deleteCourseSlot(slotId:string): Promise<boolean>
     deleteCourse(courseId:string): Promise<boolean>
     updateCourse(bundleName:string , description:string , price:number,participantLimit:number , thumbnail:string|null ,courseId:string): Promise<boolean>
+    updateQuestionByEmail(questionId:string,ansOptions:string[],answer:string,text:string): Promise<boolean>
 
 
 
