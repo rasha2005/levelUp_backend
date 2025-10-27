@@ -33,12 +33,17 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 4000
 app.use(
-  cors({ 
-    origin: '*', 
+  cors({
+    origin: (origin, callback) => {
+      callback(null, origin || '*'); 
+    },
     credentials: true,
-    
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
   })
 );
+
+app.options('*', cors());
 
 
 
