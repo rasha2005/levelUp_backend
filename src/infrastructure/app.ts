@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 4000
 app.use(
   cors({ 
-    origin: process.env.FRONT_URL, 
+    origin: '*', 
     credentials: true,
     
   })
