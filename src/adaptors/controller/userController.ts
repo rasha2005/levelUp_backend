@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import dotenv from 'dotenv';
 import Stripe from "stripe";
 import { v4 as uuidv4 } from "uuid";
-import {UserUseCase} from "../../usecase/userUseCase";
+import { IUserUseCase } from "../../interface/useCase/IuserUsecase"
 import { StatusCode } from "../../enums/statuscode";
 import { Messages } from "../../enums/message";
 dotenv.config();
@@ -14,7 +14,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "")
 
 @injectable()
 export class UserController {
-    constructor(@inject("UserUseCase") private _useCase:UserUseCase){}
+    constructor(@inject("IuserUsecase") private _useCase: IUserUseCase) {}
 
     async createUser(req: Request, res: Response, next: NextFunction) {
         try {
@@ -39,6 +39,8 @@ export class UserController {
         try {
 
             const {userOtp , token} = req.body;
+            console.log("user",userOtp)
+            console.log("user",token)
 
             const response = await this._useCase.saveUser(userOtp , token);
             if(response) {

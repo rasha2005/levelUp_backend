@@ -7,9 +7,10 @@ import { StatusCode } from "../enums/statuscode";
 import { Messages } from "../enums/message";
 import { UserDTO } from "./dtos/UserDTO";
 import { InstructorDTO } from "./dtos/InstructorDTO";
+import { IAdminUseCase } from "../interface/useCase/IadminUsecase";
 
 @injectable()
-export class AdminUseCase {
+export class AdminUseCase implements IAdminUseCase{
     constructor(
         @inject("IadminRepository") private _adminRepository:IadminRepository,
         @inject("IhashPassword") private _hashPassword:IhashPassword,
@@ -19,7 +20,7 @@ export class AdminUseCase {
 
     async insertAdmin(email: string, password: string) {
         const hashedPassword = await this._hashPassword.hash(password);
-        const admin = this._adminRepository.insert(email, hashedPassword);
+        const admin = await this._adminRepository.insert(email, hashedPassword);
         return { status: StatusCode.CREATED, success: true, message: Messages.CREATED, admin };
       }
       
@@ -295,11 +296,18 @@ export class AdminUseCase {
       async getAllInstructorData() {
         try {
           const data = await this._adminRepository.getAllInstructor();
-          if (data) {
-            const instructorDto = data.map(i => InstructorDTO.fromEntity(i));
-            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, instructorData:instructorDto };          }
+      
+          const instructorDto = data ? data.map(i => InstructorDTO.fromEntity(i)) : [];
+      
+          return {
+            status: StatusCode.OK,
+            success: !!data,
+            message: data ? Messages.FETCHED : Messages.FAILED,
+            instructorData: instructorDto
+          };
         } catch (err: any) {
           throw err;
         }
       }
+      
     }      

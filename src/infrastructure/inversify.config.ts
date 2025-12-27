@@ -33,10 +33,10 @@ container.bind("IhashPassword").to(hashPassword);
 container.bind("Istripe").to(stripe);
 
 // Bind UseCases
-container.bind("UserUseCase").to(UserUseCase);
-container.bind("InstructorUseCase").to(InstructorUseCase)
-container.bind("ChatUseCase").to(ChatUseCase)
-container.bind("AdminUseCase").to(AdminUseCase)
+container.bind("IuserUsecase").to(UserUseCase);
+container.bind("IinstructorUsecase").to(InstructorUseCase)
+container.bind("IchatUsecase").to(ChatUseCase)
+container.bind("IadminUsecase").to(AdminUseCase)
 
 
 // Bind Controllers

@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import {ChatUseCase} from "../../usecase/chatUseCase";
 import { inject, injectable } from "inversify";
 import { StatusCode } from "../../enums/statuscode";
+import { IChatUseCase } from "../../interface/useCase/IchatUsecase";
 
 @injectable()
-export class ChatController {
-    constructor(@inject("ChatUseCase") private _useCase:ChatUseCase ){}
+export class ChatController  {
+    constructor(@inject("IchatUsecase") private _useCase:IChatUseCase ){}
 
     async createChatRoom(req:Request , res:Response , next:NextFunction) {
         try{

@@ -12,10 +12,11 @@ import { Messages } from "../enums/message";
 import { UserDTO } from "./dtos/UserDTO";
 import ICourseBundle from "../interface/entity/ICourseBundle";
 import { v4 as uuidv4 } from "uuid";
+import { IInstructorUseCase } from "../interface/useCase/IinstructorUsecase";
 
 
 @injectable()
-export class InstructorUseCase {
+export class InstructorUseCase implements IInstructorUseCase {
     constructor(
        @inject("IinstructorRepository") private _instructorRespository:IinstructorRepository,
        @inject("IgenerateOtp") private _generateOtp: IgenerateOtp,
@@ -129,73 +130,139 @@ export class InstructorUseCase {
 
     async updateInstructor(token:DecodedToken ,description:string , experienceCategory:string ,experienceCertificate:string , resume:string , specialization:string[]) {
         try{
-        if(token){
-            
-            const res = await this._instructorRespository.updateInstructorDetials(token.email ,description , experienceCategory ,experienceCertificate , resume , specialization);
-            if(res) {
-                return {success:true , message:Messages.UPDATED , res}
-            }else{
-                return {success:false , message:Messages.FAILED};
+            if (!token) {
+                return {
+                  success: false,
+                  message: Messages.FAILED,
+                };
+              }
+          
+              const res = await this._instructorRespository.updateInstructorDetials(
+                token.email,
+                description,
+                experienceCategory,
+                experienceCertificate,
+                resume,
+                specialization
+              );
+          
+              if (res) {
+                return {
+                  success: true,
+                  message: Messages.UPDATED,
+                  res,
+                };
+              }
+          
+              return {
+                success: false,
+                message: Messages.FAILED,
+              };
+          
+            } catch (err: any) {
+              throw err;
             }
+    }
+
+    async getInstructorDetails(token: DecodedToken) {
+        try {
+          if (!token) {
+            return {
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const res = await this._instructorRespository.getInstructorByEmail(token.email);
+      
+          if (res) {
+            const instructorDto = InstructorDTO.fromEntity(res);
+            return {
+              success: true,
+              message: Messages.FETCHED,
+              res: instructorDto,
+            };
+          }
+      
+          return {
+            success: false,
+            message: Messages.FAILED,
+          };
+      
+        } catch (err: any) {
+          throw err;
         }
-    }catch(err:any){
-        throw(err)
-    }
-    }
+      }
+      
 
-    async getInstructorDetails(token:DecodedToken) {
-        try{
-        
-
-            if(token){
-                const res = await this._instructorRespository.getInstructorByEmail(token.email );
-                if(res) {
-                    const instructorDto = InstructorDTO.fromEntity(res)
-                    return {success:true , message:Messages.FETCHED , res:instructorDto}
-                }else{
-                    return {success:false ,message:Messages.FAILED};
-                }
-            }
-        }catch(err:any){
-            throw(err)
+      async editInstructorDetails(token: DecodedToken, name: string, mobile: string) {
+        try {
+          if (!token) {
+            return {
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const res = await this._instructorRespository.editInstructorByEmail(
+            token.email,
+            name,
+            mobile
+          );
+      
+          if (res) {
+            const instructorDto = InstructorDTO.fromEntity(res);
+            return {
+              success: true,
+              message: Messages.UPDATED,
+              res: instructorDto,
+            };
+          }
+      
+          return {
+            success: false,
+            message: Messages.FAILED,
+          };
+      
+        } catch (err: any) {
+          throw err;
         }
-    }
+      }
+      
 
-    async editInstructorDetails(token:DecodedToken , name:string , mobile:string) {
-        try{
-
-        if(token){
-            const res = await this._instructorRespository.editInstructorByEmail(token.email ,name , mobile);
-            if(res) {
-                const instructorDto = InstructorDTO.fromEntity(res)
-                return {success:true , message:Messages.UPDATED , res:instructorDto}
-            }else{
-                return {success:false , message:Messages.FAILED};
-            }
-
-    }
-}catch(err:any){
-        throw(err)
-    }
-}
-
-    async updateImg(token:DecodedToken , img:string ) {
-        try{
-
-        if(token){
-            const res = await this._instructorRespository.updateProfileByEmail(token.email ,img);
-            if(res) {
-                const instructorDto = InstructorDTO.fromEntity(res)
-                return {success:true , message:Messages.UPDATED , res:instructorDto}
-            }else{
-                return {success:false , message:Messages.FAILED};
-            }
-
-    }
-        }catch(err:any){
-            throw(err);
+      async updateImg(token: DecodedToken, img: string) {
+        try {
+          if (!token) {
+            return {
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const res = await this._instructorRespository.updateProfileByEmail(
+            token.email,
+            img
+          );
+      
+          if (res) {
+            const instructorDto = InstructorDTO.fromEntity(res);
+            return {
+              success: true,
+              message: Messages.UPDATED,
+              res: instructorDto,
+            };
+          }
+      
+          return {
+            success: false,
+            message: Messages.FAILED,
+          };
+      
+        } catch (err: any) {
+          throw err;
         }
-}
+      }
+      
 
 async resendOtpByEmail(token:string) {
     try{
@@ -224,38 +291,59 @@ async resendOtpByEmail(token:string) {
 }
 
 
-  async changeInstructorPassword(token:DecodedToken , current:string , confirm:string) {
-    try{
-    
-    if(token) {
-        const instructor = await this._instructorRespository.findByEmail(token.email);
-        if(instructor && instructor.password) {
-            const isPasswordMatched = await this._hashPassword.compare(current , instructor?.password);
-            if(isPasswordMatched) {
-                const hashedPassword = await this._hashPassword.hash(confirm);
-                const updatedInstructor = await this._instructorRespository.changePassword(token.email , hashedPassword); 
-                if(updatedInstructor) {
-                    const instructorDto = InstructorDTO.fromEntity(updatedInstructor)
-                    return {success:true , message:'password updated successfully' , updatedInstructor:instructorDto};
-                }else{
-                    return{success:false , message:Messages.FAILED}
-                }
-            }else{
-                return {success:false , message:'Incorrect password'}
-            }
-        }else{
-            return {success:false , message:Messages.FAILED};
-        }
+async changeInstructorPassword(token: DecodedToken, current: string, confirm: string) {
+    try {
+      if (!token) {
+        return {
+          success: false,
+          message: Messages.FAILED,
+        };
+      }
+  
+      const instructor = await this._instructorRespository.findByEmail(token.email);
+  
+      if (!instructor || !instructor.password) {
+        return {
+          success: false,
+          message: Messages.FAILED,
+        };
+      }
+  
+      const isPasswordMatched = await this._hashPassword.compare(current, instructor.password);
+  
+      if (!isPasswordMatched) {
+        return {
+          success: false,
+          message: 'Incorrect password',
+        };
+      }
+  
+      const hashedPassword = await this._hashPassword.hash(confirm);
+      const updatedInstructor = await this._instructorRespository.changePassword(token.email, hashedPassword);
+  
+      if (!updatedInstructor) {
+        return {
+          success: false,
+          message: Messages.FAILED,
+        };
+      }
+  
+      const instructorDto = InstructorDTO.fromEntity(updatedInstructor);
+  
+      return {
+        success: true,
+        message: 'Password updated successfully',
+        updatedInstructor: instructorDto,
+      };
+    } catch (err: any) {
+      throw err;
     }
-    }catch(err:any){
-        throw(err)
-    }
-}
+  }
+  
 
     async scheduleSessionById(title:string , start:string , end:string , price: string , token:DecodedToken ,isRecurring:boolean , recurrenceRule:string |null) {
         try{
    
-    console.log("recurrenceRule",recurrenceRule)
     if(token) {
         const session = await this._instructorRespository.scheduleSession(token.id , title , start , end , price , isRecurring , recurrenceRule);
         
@@ -605,96 +693,130 @@ async resendOtpByEmail(token:string) {
         }
     }
 
-    async sendForgotPasswordOTP(email:string) {
-        try{
+    async sendForgotPasswordOTP(email: string) {
+        try {
           const instructor = await this._instructorRespository.findByEmail(email);
-          if(instructor) {
-            const otp = this._generateOtp.createOtp();
-    
-            await this._sendEmailOtp.sendEmail(instructor.email, otp)
-
-            const instructorOtp = await this._instructorRespository.findOtpByEmail(instructor.email);
-            if(instructorOtp){
-            await this._instructorRespository.updateOtpByEmail(instructor.email , otp);
-            }else{
-            await this._instructorRespository.saveOtp(instructor.email , otp);
-            }
-            const instructorDTO = InstructorDTO.fromEntity(instructor);
-            console.log("haha",instructorDTO)
-            const token = this._jwt.otpToken(instructorDTO);
+      
+          if (!instructor) {
             return {
-              status: StatusCode.OK,           
-              success: true,
-              message: `OTP ${Messages.CREATED}`,
-              instructorOtp,
-              token,
+              status: StatusCode.OK,
+              success: false,
+              message: `Email not found`,
             };
           }
+      
+          const otp = this._generateOtp.createOtp();
+          await this._sendEmailOtp.sendEmail(instructor.email, otp);
+      
+          const instructorOtp = await this._instructorRespository.findOtpByEmail(instructor.email);
+          if (instructorOtp) {
+            await this._instructorRespository.updateOtpByEmail(instructor.email, otp);
+          } else {
+            await this._instructorRespository.saveOtp(instructor.email, otp);
+          }
+      
+          const instructorDTO = InstructorDTO.fromEntity(instructor);
+          const token = this._jwt.otpToken(instructorDTO);
+      
           return {
             status: StatusCode.OK,
-            success: false,
-            message: `Email not found`,
+            success: true,
+            message: `OTP ${Messages.CREATED}`,
+            instructorOtp,
+            token,
           };
-        
-        }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        } catch (err) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
       }
+      
 
-    async verifyPasswordOtp(userOtp:string , token:string) {
-        try{
+      async verifyPasswordOtp(userOtp: string, token: string) {
+        try {
           const decodedToken = this._jwt.verifyToken(token);
-    
           const otp = await this._instructorRespository.findOtpByEmail(decodedToken?.info.email);
-          if(userOtp == otp?.otp) {
+      
+          if (userOtp === otp?.otp) {
             return {
               status: StatusCode.OK,
               success: true,
-              message: 'otp matched',
+              message: 'OTP matched',
             };
           }
+      
           return {
             status: StatusCode.OK,
             success: false,
-            message: `Invalid Otp`,
+            message: 'Invalid OTP',
           };
-        
-        }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+        } catch (err) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
       }
+      
 
-      async changeInstructor_Password(token:string , confirm:string) {
+      async changeInstructor_Password(token: string, confirm: string) {
         try {
           const decodedToken = this._jwt.verifyToken(token);
-          if(decodedToken) {
-            const instructor = await this._instructorRespository.findByEmail(decodedToken.info.email);
-     
-            if(instructor && instructor.password) {
-                const hashedPassword = await this._hashPassword.hash(confirm);
-                const updatedUser = await this._instructorRespository.changePassword(instructor.email ,hashedPassword);
-                if(updatedUser) {
-                  const userDTO = InstructorDTO.fromEntity(instructor);
-                  const authToken = this._jwt.authToken(instructor.id, instructor.email, "Instructor");
-                  const refreshToken = this._jwt.refreshToken(
-                    instructor.id,
-                    instructor.email,
-                    "Instructor"
-                  );
-                  return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedUser:userDTO,authToken , refreshToken};
-                } else {
-                  return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
-                }
-             
-            } else {
-              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
-            }
+      
+          if (!decodedToken) {
+            return {
+              status: 401, 
+              success: false,
+              message: 'Invalid token',
+            };
           }
-        } catch(err:any) {
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+      
+          const instructor = await this._instructorRespository.findByEmail(decodedToken.info.email);
+      
+          if (!instructor || !instructor.password) {
+            return {
+              status: 404,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const hashedPassword = await this._hashPassword.hash(confirm);
+          const updatedUser = await this._instructorRespository.changePassword(instructor.email, hashedPassword);
+      
+          if (!updatedUser) {
+            return {
+              status: 500,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const userDTO = InstructorDTO.fromEntity(instructor);
+          const authToken = this._jwt.authToken(instructor.id, instructor.email, "Instructor");
+          const refreshToken = this._jwt.refreshToken(instructor.id, instructor.email, "Instructor");
+      
+          return {
+            status: 200,
+            success: true,
+            message: Messages.UPDATED,
+            updatedUser: userDTO,
+            authToken,
+            refreshToken,
+          };
+        } catch (err: any) {
+          return {
+            status: 500,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
       }
-
+      
       async editQuestionById(questionId:string,ansOptions:string[],answer:string,text:string ) {
         try{
 

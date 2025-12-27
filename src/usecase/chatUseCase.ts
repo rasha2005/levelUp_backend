@@ -3,70 +3,98 @@ import IchatRepository from "../interface/repository/IchatRepository";
 import Ijwt from "../interface/services/Ijwt";
 import { StatusCode } from "../enums/statuscode";
 import { Messages } from "../enums/message";
+import { IChatUseCase } from "../interface/useCase/IchatUsecase";
 
 @injectable()
-export class ChatUseCase {
+export class ChatUseCase implements IChatUseCase {
     constructor(
         @inject("IchatRepository") private _ichatRepository: IchatRepository,
         @inject("Ijwt") private _ichatJwt: Ijwt
     ){}
 
     async accessChatRoom(id: string, token: string) {
-        try {
-          const decode = await this._ichatJwt.verifyToken(token);
-      
-          if (decode) {
+      try {
+        const decode = await this._ichatJwt.verifyToken(token);
+
+        if (decode) {
             const tokenId = decode.id;
             const chat = await this._ichatRepository.accessChat(id, tokenId);
-      
+
             if (chat) {
-              return {
-                status: StatusCode.OK,
-                success: true,
-                message: Messages.FETCHED,
-                chat,
-              };
+                return {
+                    status: 200,
+                    success: true,
+                    message: "Fetched successfully",
+                    chat,
+                };
             } else {
-              return {
-                status: StatusCode.NOT_FOUND,
-                success: false,
-                message: Messages.FAILED,
-              };
+                return {
+                    status: 404,
+                    success: false,
+                    message: "Chat not found",
+                };
             }
-          }
-        } catch (err: any) {
-          throw err;
         }
+
+        // Return a default failure if token is invalid
+        return {
+            status: 401,
+            success: false,
+            message: "Invalid token",
+        };
+
+    } catch (err: any) {
+       
+        return {
+            status: 500,
+            success: false,
+            message: "Internal server error",
+        };
+    }
       }
       
       async fetchChatRooms(token: string) {
         try {
           const decode = await this._ichatJwt.verifyToken(token);
-      
+  
           if (decode) {
-            const chats = await this._ichatRepository.findChatsById(
-              decode.id,
-              decode.role
-            );
-            if (chats) {
-              return {
-                status: StatusCode.OK,
-                success: true,
-                message: Messages.FETCHED,
-                chats,
-                user: decode.id,
-              };
-            } else {
-              return {
-                status: StatusCode.NOT_FOUND,
-                success: false,
-                message: Messages.FAILED,
-              };
-            }
+              const chats = await this._ichatRepository.findChatsById(
+                  decode.id,
+                  decode.role
+              );
+  
+              if (chats) {
+                  return {
+                      status: 200,
+                      success: true,
+                      message: "Fetched successfully",
+                      chats,
+                      user: decode.id,
+                  };
+              } else {
+                  return {
+                      status: 404,
+                      success: false,
+                      message: "No chats found",
+                  };
+              }
           }
-        } catch (err: any) {
-          throw err;
-        }
+  
+          // Default return if token is invalid
+          return {
+              status: 401,
+              success: false,
+              message: "Invalid token",
+          };
+  
+      } catch (err: any) {
+         
+          return {
+              status: 500,
+              success: false,
+              message: "Internal server error",
+          };
+      }
       }
       
       async createNewMessage(content: string, chatId: string, token: string) {
@@ -83,21 +111,33 @@ export class ChatUseCase {
       
             if (res) {
               return {
-                status: StatusCode.CREATED,
+                status: 201,
                 success: true,
-                message: Messages.CREATED,
+                message: "Message created successfully",
                 res,
               };
             } else {
               return {
-                status: StatusCode.BAD_REQUEST,
+                status: 400,
                 success: false,
-                message: Messages.FAILED,
+                message: "Failed to create message",
               };
             }
           }
+      
+         
+          return {
+            status: 401,
+            success: false,
+            message: "Invalid token",
+          };
         } catch (err: any) {
-          throw err;
+         
+          return {
+            status: 500,
+            success: false,
+            message: "Internal server error",
+          };
         }
       }
       

@@ -12,9 +12,10 @@ import { InstructorDTO } from "./dtos/InstructorDTO";
 import { UserDTO } from "./dtos/UserDTO";
 import { Messages } from "../enums/message";
 import { StatusCode } from "../enums/statuscode";
+import { IUserUseCase } from "../interface/useCase/IuserUsecase";
 
 @injectable()
-export class UserUseCase {
+export class UserUseCase implements IUserUseCase {
     constructor(
         @inject("IuserRepository") private _iuserRepository: IuserRepository,
         @inject("IgenerateOtp") private _generateOtp: IgenerateOtp,
@@ -39,8 +40,7 @@ export class UserUseCase {
     
             await this._sendEmailOtp.sendEmail(user.email, otp);
             const userOtp = await this._iuserRepository.saveOtp(user.email, otp);
-            const userDTO = UserDTO.fromEntity(user);
-            const token = this._jwtToken.otpToken(userDTO);
+            const token = this._jwtToken.otpToken(user);
     
             return {
               status: StatusCode.OK,
@@ -62,12 +62,10 @@ export class UserUseCase {
       async saveUser(userOtp: string, token: string) {
         try {
           const decodedToken = this._jwtToken.verifyToken(token);
-    
           const otp = await this._iuserRepository.findOtp(decodedToken?.info.email);
     
           const password = decodedToken?.info.password;
           const hashedPassword = await this._hashPassword.hash(password);
-    
           if (userOtp == otp?.otp) {
             const res = await this._iuserRepository.insertUser(
               decodedToken?.info,
@@ -279,29 +277,65 @@ export class UserUseCase {
       
       async changeUserPassword(token:DecodedToken , current:string , confirm:string) {
         try {
-          if(token) {
-            const user = await this._iuserRepository.findByEmail(token.email);
-            if(user && user.password) {
-              const isPasswordMatched = await this._hashPassword.compare(current , user?.password);
-              if(isPasswordMatched) {
-                const hashedPassword = await this._hashPassword.hash(confirm);
-                const updatedUser = await this._iuserRepository.changePassword(user.email ,hashedPassword);
-                if(updatedUser) {
-                  const userDTO = UserDTO.fromEntity(user);
-                  return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedUser:userDTO};
-                } else {
-                  return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
-                }
-              } else {
-                return {status: StatusCode.UNAUTHORIZED, success:false , message:"Invalid Password"};
-              }
-            } else {
-              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
-            }
+          if (!token) {
+            return {
+              status: StatusCode.UNAUTHORIZED,
+              success: false,
+              message: Messages.FAILED,
+            };
           }
-        } catch(err:any) {
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+      
+          const user = await this._iuserRepository.findByEmail(token.email);
+      
+          if (!user || !user.password) {
+            return {
+              status: StatusCode.NOT_FOUND,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const isPasswordMatched = await this._hashPassword.compare(
+            current,
+            user.password
+          );
+      
+          if (!isPasswordMatched) {
+            return {
+              status: StatusCode.UNAUTHORIZED,
+              success: false,
+              message: "Invalid Password",
+            };
+          }
+      
+          const hashedPassword = await this._hashPassword.hash(confirm);
+          const updatedUser = await this._iuserRepository.changePassword(
+            user.email,
+            hashedPassword
+          );
+      
+          if (!updatedUser) {
+            return {
+              status: StatusCode.INTERNAL_SERVER_ERROR,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          return {
+            status: StatusCode.OK,
+            success: true,
+            message: Messages.UPDATED,
+            updatedUser: UserDTO.fromEntity(updatedUser),
+          };
+        } catch (err) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
+      
       }
       
       async getInstructorDetail(id:string, token:DecodedToken) {
@@ -379,16 +413,19 @@ export class UserUseCase {
       
       async getUserImg(token:DecodedToken ) {
         try {
-          if(token) {
-            const image = await this._iuserRepository.getImgById(token?.id);
-            if(image) {
-              return {status: StatusCode.OK, success:true , message: Messages.FETCHED , image};
-            } else {
-              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
-            }
+          if (!token) {
+            return { status: StatusCode.UNAUTHORIZED, success: false, message: Messages.FAILED };
           }
-        } catch(err:any) {
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+      
+          const image = await this._iuserRepository.getImgById(token.id);
+      
+          if (image) {
+            return { status: StatusCode.OK, success: true, message: Messages.FETCHED, image };
+          } else {
+            return { status: StatusCode.NOT_FOUND, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          return { status: StatusCode.INTERNAL_SERVER_ERROR, success: false, message: Messages.FAILED };
         }
       } 
       
@@ -451,16 +488,19 @@ export class UserUseCase {
       
       async addInstructorReview(instructorId:string , value:string , token:DecodedToken){
         try {
-          if(token) {
-            const res = await this._iuserRepository.addReview(instructorId , value , token.id);
-            if(res) {
-              return {status: StatusCode.CREATED, success:true , message: Messages.CREATED};
-            } else {
-              return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
-            }
+          if (!token) {
+            return { status: StatusCode.UNAUTHORIZED, success: false, message: Messages.FAILED };
           }
-        } catch(err:any) {
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+      
+          const res = await this._iuserRepository.addReview(instructorId, value, token.id);
+      
+          if (res) {
+            return { status: StatusCode.CREATED, success: true, message: Messages.CREATED };
+          } else {
+            return { status: StatusCode.INTERNAL_SERVER_ERROR, success: false, message: Messages.FAILED };
+          }
+        } catch (err: any) {
+          return { status: StatusCode.INTERNAL_SERVER_ERROR, success: false, message: Messages.FAILED };
         }
       }
       
@@ -637,17 +677,35 @@ export class UserUseCase {
       }
 
       async reportCourseIssue(attachments:string | null , description:string ,courseId:string, instructorId:string , userId:string) {
-        try{
-          const data = await this._iuserRepository.createCourseTicket(attachments , description ,courseId, instructorId,userId);
-          if(data) {
-            return {success:true , message:Messages.CREATED}
-          }else{
-            return {success:false , message:Messages.FAILED} ;
-                      }
+          try {
+            const data = await this._iuserRepository.createCourseTicket(
+              attachments,
+              description,
+              courseId,
+              instructorId,
+              userId
+            );
         
-        }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
-        }
+            if (data) {
+              return {
+                success: true,
+                message: Messages.CREATED,
+                status: StatusCode.CREATED,
+              };
+            } else {
+              return {
+                success: false,
+                message: Messages.FAILED,
+                status: StatusCode.INTERNAL_SERVER_ERROR,
+              };
+            }
+          } catch (err) {
+            return {
+              success: false,
+              message: Messages.FAILED,
+              status: StatusCode.INTERNAL_SERVER_ERROR,
+            };
+          }
       }
 
       async createQnaData(message:string , parentId :string | null, courseId:string, userId:string) {
@@ -681,91 +739,119 @@ export class UserUseCase {
       }
 
       async sendForgotPasswordOTP(email:string) {
-        try{
+        try {
           const user = await this._iuserRepository.findByEmail(email);
-          if(user) {
-            const otp = this._generateOtp.createOtp();
-    
-            await this._sendEmailOtp.sendEmail(user.email, otp);
-            const userOtp = await this._iuserRepository.findOtp(user.email);
-            if(userOtp){
-            await this._iuserRepository.updateOtpByEmail(user.email , otp);
-            }else{
-            await this._iuserRepository.saveOtp(user.email , otp);
-            }
-            const userDTO = UserDTO.fromEntity(user);
-            const token = this._jwtToken.otpToken(userDTO);
+      
+          if (!user) {
             return {
-              status: StatusCode.OK,
-              success: true,
-              message: `OTP ${Messages.CREATED}`,
-              userOtp,
-              token,
+              status: StatusCode.NOT_FOUND,
+              success: false,
+              message: `Email not found`,
             };
           }
+      
+          const otp = this._generateOtp.createOtp();
+          await this._sendEmailOtp.sendEmail(user.email, otp);
+      
+          const existingOtp = await this._iuserRepository.findOtp(user.email);
+          if (existingOtp) {
+            await this._iuserRepository.updateOtpByEmail(user.email, otp);
+          } else {
+            await this._iuserRepository.saveOtp(user.email, otp);
+          }
+      
+          const userDTO = UserDTO.fromEntity(user);
+          const token = this._jwtToken.otpToken(userDTO);
+      
           return {
             status: StatusCode.OK,
-            success: false,
-            message: `Email not found`,
+            success: true,
+            message: `OTP ${Messages.CREATED}`,
+            userOtp: existingOtp ?? null,
+            token,
           };
-        
-        }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+      
+        } catch (err) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
       }
 
       async verifyPasswordOtp(userOtp:string , token:string) {
-        try{
+        try {
           const decodedToken = this._jwtToken.verifyToken(token);
-          console.log('de',decodedToken);
-          const otp = await this._iuserRepository.findOtp(decodedToken?.info.email);
-          console.log("otcp",otp);
-          if(userOtp == otp?.otp) {
-            return {
-              status: StatusCode.OK,
-              success: true,
-              message: 'otp matched',
-            };
+      
+          if (!decodedToken || !decodedToken.info?.email) {
+            return { status: StatusCode.BAD_REQUEST, success: false, message: 'Invalid token' };
           }
-          return {
-            status: StatusCode.OK,
-            success: false,
-            message: `Invalid Otp`,
-          };
-        
-        }catch(err){
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false};
+      
+          const otpData = await this._iuserRepository.findOtp(decodedToken.info.email);
+      
+          if (userOtp === otpData?.otp) {
+            return { status: StatusCode.OK, success: true, message: 'OTP matched' };
+          } else {
+            return { status: StatusCode.OK, success: false, message: 'Invalid OTP' };
+          }
+        } catch (err) {
+          return { status: StatusCode.INTERNAL_SERVER_ERROR, success: false, message: Messages.FAILED };
         }
       }
 
       async changeUser_Password(token:string , confirm:string) {
         try {
           const decodedToken = this._jwtToken.verifyToken(token);
-          if(decodedToken) {
-            const user = await this._iuserRepository.findByEmail(decodedToken.info.email);
-            if(user && user.password) {
-                const hashedPassword = await this._hashPassword.hash(confirm);
-                const updatedUser = await this._iuserRepository.changePassword(user.email ,hashedPassword);
-                if(updatedUser) {
-                  const userDTO = UserDTO.fromEntity(user);
-                  const authToken = this._jwtToken.authToken(user.id, user.email, "User");
-                  const refreshToken = this._jwtToken.refreshToken(
-                    user.id,
-                    user.email,
-                    "User"
-                  );
-                  return {status: StatusCode.OK, success:true , message: Messages.UPDATED , updatedUser:userDTO,authToken , refreshToken};
-                } else {
-                  return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
-                }
-           
-            } else {
-              return {status: StatusCode.NOT_FOUND, success:false , message: Messages.FAILED};
-            }
+      
+          if (!decodedToken || !decodedToken.info?.email) {
+            return {
+              status: StatusCode.BAD_REQUEST,
+              success: false,
+              message: 'Invalid token',
+            };
           }
-        } catch(err:any) {
-          return {status: StatusCode.INTERNAL_SERVER_ERROR, success:false , message: Messages.FAILED};
+      
+          const user = await this._iuserRepository.findByEmail(decodedToken.info.email);
+      
+          if (!user || !user.password) {
+            return {
+              status: StatusCode.NOT_FOUND,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const hashedPassword = await this._hashPassword.hash(confirm);
+          const updatedUser = await this._iuserRepository.changePassword(user.email, hashedPassword);
+      
+          if (!updatedUser) {
+            return {
+              status: StatusCode.INTERNAL_SERVER_ERROR,
+              success: false,
+              message: Messages.FAILED,
+            };
+          }
+      
+          const userDTO = UserDTO.fromEntity(user);
+          const authToken = this._jwtToken.authToken(user.id, user.email, 'User');
+          const refreshToken = this._jwtToken.refreshToken(user.id, user.email, 'User');
+      
+          return {
+            status: StatusCode.OK,
+            success: true,
+            message: Messages.UPDATED,
+            updatedUser: userDTO,
+            authToken,
+            refreshToken,
+          };
+        } catch (err) {
+          return {
+            status: StatusCode.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: Messages.FAILED,
+          };
         }
-      }
         
-    }      
+    }    
+  }

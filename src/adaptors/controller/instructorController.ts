@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import {InstructorUseCase} from "../../usecase/instructorUseCase";
 import { inject, injectable } from "inversify";
 import { StatusCode } from "../../enums/statuscode";
+import { IInstructorUseCase } from "../../interface/useCase/IinstructorUsecase";
 
 @injectable()
 export class InstructorController {
-    constructor(@inject("InstructorUseCase") private useCase:InstructorUseCase){}
+    constructor(@inject("IinstructorUsecase") private useCase:IInstructorUseCase){}
 
     async createInstructor(req:Request , res:Response , next:NextFunction) {
         try {

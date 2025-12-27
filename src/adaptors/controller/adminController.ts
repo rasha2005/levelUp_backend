@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import {AdminUseCase} from "../../usecase/adminUseCase";
 import { inject, injectable } from "inversify";
 import { StatusCode } from "../../enums/statuscode";
+import { IAdminUseCase } from "../../interface/useCase/IadminUsecase";
 
 
 @injectable()
 export class AdminController {
-    constructor(@inject("AdminUseCase")private _useCase : AdminUseCase){}
+    constructor(@inject("IadminUsecase")private _useCase : IAdminUseCase){}
 
     async admin(req:Request ,res:Response ,next:NextFunction)  {
         const {email , password} = req.body;
